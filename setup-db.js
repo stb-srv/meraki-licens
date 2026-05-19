@@ -4,6 +4,8 @@
  */
 import mysql from 'mysql2/promise';
 import dotenv from 'dotenv';
+import readline from 'readline';
+import bcrypt from 'bcryptjs';
 dotenv.config();
 
 const connection = await mysql.createConnection({
@@ -141,29 +143,44 @@ CREATE TABLE IF NOT EXISTS menu (
 `);
 
 console.log('✅ Schema erfolgreich erstellt.');
-import crypto from 'crypto';
+
 let initPassword = process.env.ADMIN_INIT_PASSWORD;
-let wasGenerated = false;
-if (!initPassword) {
-    initPassword = crypto.randomBytes(12).toString('base64').replace(/[+/=]/g, '').slice(0, 16);
-    if (initPassword.length < 16) {
-        initPassword = crypto.randomBytes(16).toString('hex').slice(0, 16);
+
+if (initPassword) {
+    if (initPassword.length < 8) {
+        console.error('Passwort aus ADMIN_INIT_PASSWORD muss mindestens 8 Zeichen haben.');
+        process.exit(1);
     }
-    wasGenerated = true;
-}
-
-if (wasGenerated) {
-    console.log(`👤 Erstelle Standard-Superadmin (admin / ${initPassword}) – BITTE DIESES PASSWORT SICHER AUFBEWAHREN!`);
+    console.log('👤 Erstelle Standard-Superadmin (admin / [aus ADMIN_INIT_PASSWORD])');
+    const hash = await bcrypt.hash(initPassword, 12);
+    await connection.query(
+        `INSERT IGNORE INTO admins (username, password_hash, role) VALUES (?, ?, 'superadmin')`,
+        ['admin', hash]
+    );
+    console.log('✅ Setup abgeschlossen. Starte den Server mit: npm start');
+    await connection.end();
 } else {
-    console.log(`👤 Erstelle Standard-Superadmin (admin / [aus ADMIN_INIT_PASSWORD])`);
+    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+    rl.question('Admin-Passwort setzen: ', async (password) => {
+        if (!password || password.length < 8) {
+            console.error('Passwort muss mindestens 8 Zeichen haben.');
+            process.exit(1);
+        }
+        rl.close();
+
+        try {
+            const hash = await bcrypt.hash(password, 12);
+            await connection.query(
+                `INSERT IGNORE INTO admins (username, password_hash, role) VALUES (?, ?, 'superadmin')`,
+                ['admin', hash]
+            );
+            console.log('👤 Standard-Superadmin (admin / [aus manueller Eingabe]) erstellt.');
+            console.log('✅ Setup abgeschlossen. Starte den Server mit: npm start');
+        } catch (err) {
+            console.error('Fehler beim Erstellen des Admins:', err.message);
+        } finally {
+            await connection.end();
+        }
+    });
 }
 
-import bcrypt from 'bcryptjs';
-const hash = await bcrypt.hash(initPassword, 12);
-await connection.query(
-    `INSERT IGNORE INTO admins (username, password_hash, role) VALUES (?, ?, 'superadmin')`,
-    ['admin', hash]
-);
-
-console.log('✅ Setup abgeschlossen. Starte den Server mit: npm start');
-await connection.end();
