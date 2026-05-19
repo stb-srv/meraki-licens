@@ -15,11 +15,12 @@ export const MIN_PASSWORD_LENGTH = 12;
 export const requireIpWhitelist = (req, res, next) => {
     if (ADMIN_IP_WHITELIST.length === 0) return next();
     
-    const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-    // Simple check (could be improved with CIDR support)
+    const forwarded = req.headers['x-forwarded-for'];
+    const clientIp = forwarded ? forwarded.split(',')[0].trim() : req.socket.remoteAddress;
+    const normalizedIp = clientIp.replace(/^::ffff:/, '');
     const isWhitelisted = ADMIN_IP_WHITELIST.some(ip => {
         if (ip === '*') return true;
-        return clientIp.includes(ip);
+        return normalizedIp === ip || clientIp === ip;
     });
 
     if (!isWhitelisted) {
@@ -63,17 +64,16 @@ export const requireAuth = async (req, res, next) => {
                 [tokenHash]
             );
             if (!rows[0]) {
-                // Kein Eintrag — Session-INSERT beim Login fehlgeschlagen.
-                // Warnung loggen aber Token-Signatur reicht als Fallback.
-                console.warn(`⚠️  [requireAuth] Kein admin_sessions-Eintrag für token_hash=${tokenHash.slice(0,12)}… (Fallback: JWT-Signatur wird akzeptiert)`);
+                return res.status(401).json({ success: false, message: 'Session abgelaufen oder widerrufen.' });
             }
         } catch (dbErr) {
             if (dbErr.code === 'ER_NO_SUCH_TABLE') {
-                console.warn('⚠️  admin_sessions-Tabelle fehlt — bitte node migrate-schema.js ausführen!');
+                // Tabelle fehlt noch (Migration ausstehend) — JWT-Signatur als Fallback akzeptieren
+                console.warn('⚠️  admin_sessions-Tabelle fehlt — JWT-Signatur wird als Fallback akzeptiert.');
             } else {
                 console.error('[requireAuth] DB-Fehler:', dbErr.message);
+                return res.status(500).json({ success: false, message: 'Interner Fehler bei Session-Prüfung.' });
             }
-            // Bei DB-Fehler: JWT-Signatur als Fallback akzeptieren
         }
 
         req.admin          = payload;

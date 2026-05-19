@@ -13,16 +13,29 @@ export const generateKey = (type) => {
     return `${prefix}-${rand}-${new Date().getFullYear()}`;
 };
 
+/**
+ * Normalisiert eine Domain auf ihren Kern-Hostnamen.
+ * Entfernt: Protokoll (http/https), www.-Prefix, Port, Pfad.
+ * Beispiel: "https://www.restau01.de:443/menu" → "restau01.de"
+ */
+export const normalizeDomain = (raw) => {
+    if (!raw) return null;
+    return raw
+        .trim().toLowerCase()
+        .replace(/^https?:\/\//, '')
+        .replace(/:\d+$/, '')
+        .split('/')[0]
+        .replace(/^www\./, '');
+};
+
 export const domainMatches = (pattern, domain) => {
     if (!pattern || pattern === '*') return true;
     if (!domain) return true;
-    const cleanDomain = domain
-        .replace(/^https?:\/\//, '')
-        .replace(/:\d+$/, '')
-        .split('/')[0];
-    if (pattern === cleanDomain) return true;
+    const cleanDomain = normalizeDomain(domain);
+    const cleanPattern = normalizeDomain(pattern);
+    if (cleanPattern === cleanDomain) return true;
     if (pattern.startsWith('*.')) {
-        const suffix = pattern.slice(2);
+        const suffix = normalizeDomain(pattern.slice(2));
         return cleanDomain === suffix || cleanDomain.endsWith('.' + suffix);
     }
     return false;

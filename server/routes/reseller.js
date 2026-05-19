@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import db from '../db.js';
-import { asyncHandler, addAuditLog } from '../helpers.js';
+import { asyncHandler, addAuditLog, normalizeDomain } from '../helpers.js';
 import { fireWebhook } from '../webhook.js';
 import { sendTemplateMail } from '../mailer/index.js';
 import { PLAN_DEFINITIONS } from '../plans.js';
@@ -26,8 +26,9 @@ async function requireResellerKey(req, res, next) {
 
 // ── Reseller: Trial für Kunden ausstellen ──────────────────────────────────────
 router.post('/trial', requireResellerKey, asyncHandler(async (req, res) => {
-    const { domain, restaurant_name, contact_email } = req.body;
-    if (!domain) return res.status(400).json({ success: false, message: 'domain fehlt.' });
+    const { domain: rawDomain, restaurant_name, contact_email } = req.body;
+    if (!rawDomain) return res.status(400).json({ success: false, message: 'domain fehlt.' });
+    const domain = normalizeDomain(rawDomain) || rawDomain;
 
     // Duplikat-Check (angepasst an associated_domain)
     const [existing] = await db.query(

@@ -4,7 +4,7 @@ import db from '../db.js';
 import { PLAN_DEFINITIONS } from '../plans.js';
 import { sendTemplateMail } from '../mailer/index.js';
 import { fireWebhook } from '../webhook.js';
-import { generateKey, addAuditLog } from '../helpers.js';
+import { generateKey, addAuditLog, normalizeDomain } from '../helpers.js';
 import { requireAuth, asyncHandler, bulkLimiter } from '../middleware.js';
 
 const router = Router();
@@ -103,7 +103,7 @@ router.post('/licenses', requireAuth, asyncHandler(async (req, res) => {
         associated_domain=VALUES(associated_domain), expires_at=VALUES(expires_at),
         allowed_modules=VALUES(allowed_modules), limits=VALUES(limits), max_devices=VALUES(max_devices)`,
       [key, raw.type || 'FREE', raw.customer_id || null, raw.customer_name || null,
-       raw.associated_domain || '*', expiresAt, JSON.stringify(modules), JSON.stringify(limits),
+       raw.associated_domain ? normalizeDomain(raw.associated_domain) || '*' : '*', expiresAt, JSON.stringify(modules), JSON.stringify(limits),
        raw.max_devices ? parseInt(raw.max_devices) : 0, JSON.stringify(raw.tags || [])]
     );
 
@@ -397,7 +397,7 @@ router.post('/licenses/:key/transfer', requireAuth, asyncHandler(async (req, res
 
     await db.query(
         'UPDATE licenses SET associated_domain = ? WHERE license_key = ?',
-        [new_domain, key]
+        [normalizeDomain(new_domain) || new_domain, key]
     );
 
     await addAuditLog('license_transferred', {

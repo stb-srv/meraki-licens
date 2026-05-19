@@ -4,7 +4,7 @@ import crypto from 'crypto';
 import db from '../db.js';
 import { PLAN_DEFINITIONS } from '../plans.js';
 import { RSA_PUBLIC_KEY, createSignedLicenseToken, signResponse, isHmacActive, HMAC_SECRET } from '../crypto.js';
-import { domainMatches, getClientIp, addAuditLog, parseJsonField } from '../helpers.js';
+import { domainMatches, getClientIp, addAuditLog, parseJsonField, normalizeDomain } from '../helpers.js';
 import { fireWebhook } from '../webhook.js';
 import { sendTemplateMail } from '../mailer/index.js';
 import { validateLimiter, setupLimiter, trialLimiter, offlineTokenLimiter, MIN_PASSWORD_LENGTH, asyncHandler } from '../middleware.js';
@@ -48,9 +48,10 @@ router.post('/setup', setupLimiter, asyncHandler(async (req, res) => {
 
 // ── Trial Self-Registration ────────────────────────────────────────────────────
 router.post('/trial/register', trialLimiter, asyncHandler(async (req, res) => {
-    const { domain, contact_email, restaurant_name, instance_id } = req.body;
-    if (!domain) return res.status(400).json({ success: false, message: 'Domain ist Pflichtfeld.' });
+    const { domain: rawDomain, contact_email, restaurant_name, instance_id } = req.body;
+    if (!rawDomain) return res.status(400).json({ success: false, message: 'Domain ist Pflichtfeld.' });
 
+    const domain = normalizeDomain(rawDomain) || rawDomain;
     const clientIp = getClientIp(req);
 
     // Prüfen ob für diese Domain bereits ein Trial existiert (license_key ist PK, kein id)

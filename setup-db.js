@@ -44,10 +44,10 @@ CREATE TABLE IF NOT EXISTS customers (
 
 CREATE TABLE IF NOT EXISTS licenses (
     license_key VARCHAR(64) NOT NULL PRIMARY KEY,
-    type ENUM('FREE','STARTER','PRO','PRO_PLUS','ENTERPRISE') NOT NULL DEFAULT 'FREE',
+    type ENUM('TRIAL','FREE','STARTER','PRO','PRO_PLUS','ENTERPRISE') NOT NULL DEFAULT 'FREE',
     customer_id CHAR(36),
     customer_name VARCHAR(255),
-    status ENUM('active','suspended','revoked','expired') NOT NULL DEFAULT 'active',
+    status ENUM('active','suspended','revoked','expired','pending_payment','cancelled') NOT NULL DEFAULT 'active',
     associated_domain VARCHAR(255) DEFAULT '*',
     expires_at DATETIME NOT NULL,
     allowed_modules JSON,

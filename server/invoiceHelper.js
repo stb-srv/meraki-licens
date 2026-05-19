@@ -165,9 +165,11 @@ export async function getInvoiceWithItems(db, invoiceId) {
                c.email AS customer_email, 
                c.phone AS customer_phone,
                c.company AS customer_company,
-               c.billing_address AS customer_billing_address,
-               c.tax_id AS customer_tax_id,
-               c.country AS customer_country
+               c.billing_street AS customer_billing_street,
+               c.billing_city AS customer_billing_city,
+               c.billing_zip AS customer_billing_zip,
+               c.billing_country AS customer_billing_country,
+               c.tax_id AS customer_tax_id
         FROM invoices i
         JOIN customers c ON i.customer_id = c.id
         WHERE i.id = ?

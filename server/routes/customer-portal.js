@@ -16,7 +16,7 @@ import rateLimit from 'express-rate-limit';
 import { getInvoiceWithItems, createInvoice } from '../invoiceHelper.js';
 import { getInvoicePDFBuffer } from '../pdfGenerator.js';
 import { PLAN_DEFINITIONS } from '../plans.js';
-import { generateKey, addAuditLog, asyncHandler } from '../helpers.js';
+import { generateKey, addAuditLog, asyncHandler, normalizeDomain } from '../helpers.js';
 
 const router = Router();
 const PORTAL_SECRET = process.env.PORTAL_SECRET || '';
@@ -328,7 +328,7 @@ router.patch('/licenses/:key/domain', requirePortalAuth, async (req, res) => {
         return res.status(400).json({ success: false, message: 'Domain ist ein Pflichtfeld.' });
 
     // Domain-Validierung: nur gültige Hostnamen (kein Protokoll, kein Pfad)
-    const clean = domain.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+    const clean = normalizeDomain(domain);
     
     // Maximale Länge begrenzen (verhindert ReDoS durch lange Strings)
     if (clean.length > 253)
@@ -687,8 +687,8 @@ router.post('/licenses/book', requirePortalAuth, asyncHandler(async (req, res) =
 
     let domainClean = null;
     if (domain) {
-        domainClean = domain.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/.*$/, '');
-        if (domainClean.length > 253) {
+        domainClean = normalizeDomain(domain);
+        if (!domainClean || domainClean.length > 253) {
             return res.status(400).json({ success: false, message: 'Domain zu lang.' });
         }
         const labels = domainClean.replace(/^\*\./, '').split('.');
@@ -705,18 +705,20 @@ router.post('/licenses/book', requirePortalAuth, asyncHandler(async (req, res) =
     const plan = PLAN_DEFINITIONS[plan_id];
     const modules = plan.modules;
     const limits = { max_dishes: plan.menu_items, max_tables: plan.max_tables };
+    const expiresAt = new Date(Date.now() + plan.expires_days * 86400000);
 
     await db.query(`
         INSERT INTO licenses
           (license_key, type, customer_id, customer_name, status, associated_domain,
            expires_at, allowed_modules, limits, max_devices, analytics_daily, analytics_features, validated_domains, tags)
-        VALUES (?, ?, ?, ?, 'pending_payment', ?, NULL, ?, ?, 0, '{}', '{}', '[]', '[]')
+        VALUES (?, ?, ?, ?, 'pending_payment', ?, ?, ?, ?, 0, '{}', '{}', '[]', '[]')
     `, [
         key,
         plan_id,
         req.customer.id,
         req.customer.name,
         domainClean,
+        expiresAt,
         JSON.stringify(modules),
         JSON.stringify(limits)
     ]);

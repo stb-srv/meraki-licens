@@ -21,3 +21,6 @@ storage/
 
 # Debug/Security-Files
 debug-admin.js
+
+# Test Coverage
+coverage/

@@ -107,8 +107,13 @@ async function getDynamicAllowedOrigins() {
         );
         const dynamic = [];
         for (const { associated_domain } of rows) {
-            const clean = associated_domain.replace(/^https?:\/\//, '').replace(/\/.*$/, '').replace(/^\*\./, '');
-            if (clean) { dynamic.push(`https://${clean}`); dynamic.push(`http://${clean}`); }
+            const clean = associated_domain.replace(/^https?:\/\//, '').replace(/\/.*$/, '').replace(/^\*\./, '').replace(/^www\./, '');
+            if (clean) {
+                dynamic.push(`https://${clean}`);
+                dynamic.push(`http://${clean}`);
+                dynamic.push(`https://www.${clean}`);
+                dynamic.push(`http://www.${clean}`);
+            }
         }
         return dynamic;
     } catch { return []; }
