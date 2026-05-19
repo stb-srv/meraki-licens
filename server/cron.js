@@ -2,6 +2,7 @@ import db from './db.js';
 import { sendTemplateMail } from './mailer/index.js';
 import { addAuditLog } from './helpers.js';
 import { fireWebhook } from './webhook.js';
+import { createInvoiceFromLicense } from './invoiceHelper.js';
 
 export async function runExpiryCron() {
     try {
@@ -237,3 +238,40 @@ export function startCron() {
     setInterval(runAutoInvoiceCron, 24 * 60 * 60 * 1000);
     runAutoInvoiceCron();
 }
+
+/**
+ * Creates a draft invoice when a new license is created.
+ * @param {string} licenseId - License key/id to invoice
+ * @returns {Promise<string>} Created invoice ID
+ */
+export async function createInvoiceForLicense(licenseId) {
+    try {
+        const invoiceId = await createInvoiceFromLicense(db, licenseId, 'system');
+        await addAuditLog('invoice_auto_generated', { license_key: licenseId, invoice_id: invoiceId });
+        console.log(`🧾 Auto-Rechnung (Draft) erstellt für Lizenz bei Erstellung: ${licenseId}`);
+        return invoiceId;
+    } catch (err) {
+        console.error(`Fehler bei Auto-Rechnung für Lizenz ${licenseId}:`, err.message);
+        throw err;
+    }
+}
+
+/**
+ * Creates a draft invoice with type 'renewal' when a license is renewed.
+ * @param {string} licenseId - License key/id to invoice
+ * @returns {Promise<string>} Created invoice ID
+ */
+export async function createInvoiceForRenewal(licenseId) {
+    try {
+        const invoiceId = await createInvoiceFromLicense(db, licenseId, 'system');
+        // Update type to renewal
+        await db.query("UPDATE invoices SET type = 'renewal' WHERE id = ?", [invoiceId]);
+        await addAuditLog('invoice_auto_generated', { license_key: licenseId, invoice_id: invoiceId, type: 'renewal' });
+        console.log(`🧾 Auto-Rechnung (Renewal) erstellt für Lizenz bei Verlängerung: ${licenseId}`);
+        return invoiceId;
+    } catch (err) {
+        console.error(`Fehler bei Auto-Rechnung (Renewal) für Lizenz ${licenseId}:`, err.message);
+        throw err;
+    }
+}
+
