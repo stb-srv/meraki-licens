@@ -375,6 +375,31 @@ const TEMPLATES = {
           </p>
         `),
         text: `Deine OPA! Santorini Lizenz läuft am ${d.expires_at ? new Date(d.expires_at).toLocaleDateString('de-DE') : 'unbekannt'} (in 7 Tagen) ab.\n\nBitte verlängere deine Lizenz umgehend im Portal, um Ausfälle in deinem Restaurant zu vermeiden.\n\nLizenzschlüssel: ${d.license_key}`
+    }),
+
+    emailVerification: (d) => ({
+        subject: 'E-Mail-Adresse bestätigen - OPA Santorini',
+        html: layout('E-Mail-Adresse bestätigen', `
+          <h2 style="margin:0 0 8px;font-size:18px;color:#222">Hallo ${d.name || 'Kunde'},</h2>
+          <p style="margin:0 0 20px;color:#555;line-height:1.7">
+            vielen Dank für deine Registrierung beim <strong>OPA! Santorini Lizenzserver</strong>.
+            Bitte klicke auf den folgenden Button, um deine E-Mail-Adresse zu bestätigen und deinen Account zu aktivieren.
+            Der Link ist <strong>24 Stunden gültig</strong>.
+          </p>
+          <div style="text-align:center;margin:28px 0">
+            <a href="${d.verify_url}" style="display:inline-block;background:#6c63ff;color:#fff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:700;font-size:15px">
+              ✉️ E-Mail-Adresse bestätigen
+            </a>
+          </div>
+          ${infoBox([
+            ['E-Mail-Adresse', d.email],
+            ['Gültigkeit des Links', '24 Stunden']
+          ])}
+          <p style="margin:20px 0 0;color:#aaa;font-size:13px">
+            Falls du diese Registrierung nicht vorgenommen hast, kannst du diese E-Mail einfach ignorieren.
+          </p>
+        `),
+        text: `E-Mail-Adresse bestätigen\n\nHallo ${d.name || 'Kunde'},\n\nbitte bestätige deine E-Mail-Adresse, indem du auf folgenden Link klickst:\n${d.verify_url}\n\nDer Link ist 24 Stunden gültig.`
     })
 };
 

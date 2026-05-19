@@ -184,3 +184,5 @@ export async function getInvoiceWithItems(db, invoiceId) {
     invoice.items = items;
     return invoice;
 }
+
+export { createInvoiceFromLicense as createInvoice };

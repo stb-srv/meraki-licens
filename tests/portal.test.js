@@ -3,6 +3,8 @@ import { app } from '../server.js';
 import db from '../server/db.js';
 import { jest } from '@jest/globals';
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
+import nodemailer from 'nodemailer';
 
 const PORTAL_SECRET = 'portal-secure-test-secret';
 // Inject secret for test
@@ -116,5 +118,143 @@ describe('Customer Portal API', () => {
         expect(res.body.customer.tax_id).toBe('DE123456789');
 
         mockDb.mockRestore();
+    });
+
+    test('POST /api/portal/login should reject unverified customer', async () => {
+        const mockDb = jest.spyOn(db, 'query').mockImplementation((sql, params) => {
+            if (sql.includes('FROM customers')) {
+                return Promise.resolve([[{ id: 'cust1', name: 'Max', email: 'max@test.de', password_hash: 'hashed', verified: 0 }], []]);
+            }
+            return Promise.resolve([[], []]);
+        });
+        const mockCompare = jest.spyOn(bcrypt, 'compare').mockResolvedValue(true);
+
+        const res = await request(app)
+            .post('/api/portal/login')
+            .send({ email: 'max@test.de', password: 'password123' });
+
+        expect(res.statusCode).toBe(403);
+        expect(res.body.email_not_verified).toBe(true);
+
+        mockDb.mockRestore();
+        mockCompare.mockRestore();
+    });
+
+    test('POST /api/portal/register should validate and register user', async () => {
+        const mockDb = jest.spyOn(db, 'query').mockImplementation((sql, params) => {
+            if (sql.includes('SELECT id FROM customers WHERE email = ?')) {
+                return Promise.resolve([[], []]); // email not taken
+            }
+            if (sql.includes('SELECT COUNT(*) AS n FROM customers WHERE portal_username = ?')) {
+                return Promise.resolve([[{ n: 0 }], []]);
+            }
+            if (sql.includes('FROM smtp_config')) {
+                return Promise.resolve([[{
+                    id: 1,
+                    host: 'localhost',
+                    port: 587,
+                    smtp_user: 'test',
+                    smtp_pass: 'test',
+                    smtp_from: 'test@test.de'
+                }], []]);
+            }
+            return Promise.resolve([[], []]);
+        });
+        const mockCreateTransport = jest.spyOn(nodemailer, 'createTransport').mockReturnValue({
+            sendMail: jest.fn().mockResolvedValue({ messageId: 'mock-id' }),
+            verify: jest.fn().mockResolvedValue(true)
+        });
+
+        const res = await request(app)
+            .post('/api/portal/register')
+            .send({
+                name: 'Test Customer',
+                email: 'newcust@test.de',
+                password: 'supersecretpassword10',
+                company: 'My Company',
+                billing_street: 'Test Road 10',
+                billing_city: 'Munich',
+                billing_zip: '80331',
+                billing_country: 'DE'
+            });
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.success).toBe(true);
+        expect(res.body.message).toContain('Registrierung erfolgreich');
+
+        mockDb.mockRestore();
+        mockCreateTransport.mockRestore();
+    });
+
+    test('POST /api/portal/verify-email should verify token', async () => {
+        const mockDb = jest.spyOn(db, 'query').mockImplementation((sql, params) => {
+            if (sql.includes('SELECT id FROM customers WHERE email_verify_token = ?')) {
+                return Promise.resolve([[{ id: 'cust1' }], []]);
+            }
+            return Promise.resolve([[], []]);
+        });
+
+        const res = await request(app)
+            .post('/api/portal/verify-email')
+            .send({ token: 'sometoken' });
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.success).toBe(true);
+
+        mockDb.mockRestore();
+    });
+
+    test('GET /api/portal/plans should return active plans', async () => {
+        const res = await request(app).get('/api/portal/plans');
+        expect(res.statusCode).toBe(200);
+        expect(res.body.success).toBe(true);
+        expect(Array.isArray(res.body.plans)).toBe(true);
+        expect(res.body.plans.length).toBeGreaterThan(0);
+        expect(res.body.plans[0]).toHaveProperty('id');
+        expect(res.body.plans[0]).toHaveProperty('price');
+    });
+
+    test('POST /api/portal/licenses/book should book license and create invoice', async () => {
+        const mockDb = jest.spyOn(db, 'query').mockImplementation((sql, params) => {
+            if (sql.includes('FROM customer_sessions')) return Promise.resolve([[{ id: 's1' }], []]);
+            if (sql.includes('FROM customers WHERE id = ?')) {
+                return Promise.resolve([[{ id: 'cust1', name: 'Max', email: 'max@test.de', verified: 1 }], []]);
+            }
+            return Promise.resolve([[], []]);
+        });
+
+        // Mock db.getConnection for transaction in createInvoiceFromLicense
+        const mockConn = {
+            beginTransaction: jest.fn().mockResolvedValue(true),
+            commit: jest.fn().mockResolvedValue(true),
+            rollback: jest.fn().mockResolvedValue(true),
+            release: jest.fn().mockResolvedValue(true),
+            query: jest.fn().mockImplementation((sql, params) => {
+                if (sql.includes('SELECT invoice_prefix, next_number FROM invoice_settings')) {
+                    return Promise.resolve([[{ invoice_prefix: 'INV', next_number: 1 }], []]);
+                }
+                if (sql.includes('SELECT * FROM licenses WHERE license_key = ?')) {
+                    return Promise.resolve([[{ license_key: 'OPA-PRO-1234-2026', customer_id: 'cust1', type: 'PRO' }], []]);
+                }
+                if (sql.includes('SELECT name, currency FROM customers WHERE id = ?')) {
+                    return Promise.resolve([[{ name: 'Max', currency: 'EUR' }], []]);
+                }
+                return Promise.resolve([[], []]);
+            })
+        };
+        const mockGetConnection = jest.spyOn(db, 'getConnection').mockResolvedValue(mockConn);
+
+        const res = await request(app)
+            .post('/api/portal/licenses/book')
+            .set('Authorization', `Bearer ${portalToken}`)
+            .send({ plan_id: 'PRO', domain: 'myrestaurant.de' });
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.success).toBe(true);
+        expect(res.body.license_key).toBeDefined();
+        expect(res.body.invoice_id).toBeDefined();
+
+        mockDb.mockRestore();
+        mockGetConnection.mockRestore();
     });
 });

@@ -13,8 +13,10 @@ import path from 'path';
 import db from '../db.js';
 import { sendTemplateMail } from '../mailer/index.js';
 import rateLimit from 'express-rate-limit';
-import { getInvoiceWithItems } from '../invoiceHelper.js';
+import { getInvoiceWithItems, createInvoice } from '../invoiceHelper.js';
 import { getInvoicePDFBuffer } from '../pdfGenerator.js';
+import { PLAN_DEFINITIONS } from '../plans.js';
+import { generateKey, addAuditLog, asyncHandler } from '../helpers.js';
 
 const router = Router();
 const PORTAL_SECRET = process.env.PORTAL_SECRET || '';
@@ -31,6 +33,63 @@ const inviteLimiter = rateLimit({
     max: 5,
     message: { success: false, message: 'Zu viele Anfragen. Bitte 1 Stunde warten.' }
 });
+
+const registerLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000,
+    max: 5,
+    message: { success: false, message: 'Zu viele Registrierungs-Versuche. Bitte 1 Stunde warten.' }
+});
+
+const verifyLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000,
+    max: 5,
+    message: { success: false, message: 'Zu viele Verifizierungs-Versuche. Bitte 1 Stunde warten.' }
+});
+
+function normalizeSlug(str) {
+  return str
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/ß/gi, 'ss')
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '');
+}
+
+function buildPortalUsername(name, company = null) {
+  const parts = (name || '').trim().split(/\s+/).filter(Boolean);
+  let slug;
+  if (parts.length >= 2) {
+    slug = `${normalizeSlug(parts[0])}.${normalizeSlug(parts[parts.length - 1])}`;
+  } else if (parts.length === 1) {
+    slug = normalizeSlug(parts[0]);
+  } else {
+    slug = 'kunde';
+  }
+  if (company) {
+    const firmSlug = normalizeSlug(company)
+      .replace(/gmbhcokg|gmbhco|gmbh|gbr|ohg|ug|ag|kg|ev|inc|ltd/g, '')
+      .replace(/^\d+/, '')
+      .slice(0, 12);
+    if (firmSlug) slug = `${slug}.${firmSlug}`;
+  }
+  return slug || 'kunde';
+}
+
+async function uniquePortalUsername(name, company = null) {
+  const base = buildPortalUsername(name, company);
+  try {
+    for (let i = 0; i < 100; i++) {
+      const attempt = i === 0 ? base : `${base}${i}`;
+      const [[{ n }]] = await db.query(
+        'SELECT COUNT(*) AS n FROM customers WHERE portal_username = ?', [attempt]
+      );
+      if (n === 0) return attempt;
+    }
+    return `${base}${Date.now()}`;
+  } catch {
+    return base;
+  }
+}
 
 // ── Auth Middleware ────────────────────────────────────────────────────────────
 async function requirePortalAuth(req, res, next) {
@@ -94,6 +153,14 @@ router.post('/login', portalLoginLimiter, async (req, res) => {
         const valid = await bcrypt.compare(password, customer.password_hash);
         if (!valid)
             return res.status(401).json({ success: false, message: 'Benutzername/E-Mail oder Passwort falsch.' });
+
+        if (customer.verified === 0) {
+            return res.status(403).json({
+                success: false,
+                message: 'Bitte bestätige zuerst deine E-Mail-Adresse.',
+                email_not_verified: true
+            });
+        }
 
         // JWT erstellen (24h)
         const token = jwt.sign(
@@ -469,5 +536,201 @@ router.get('/invoices/:id/pdf', requirePortalAuth, async (req, res) => {
         res.status(500).json({ success: false, message: 'Fehler beim Abrufen des PDF-Dokuments.' });
     }
 });
+
+// ── POST /register ────────────────────────────────────────────────────────────
+router.post('/register', registerLimiter, asyncHandler(async (req, res) => {
+    const { name, email, password, company, billing_street, billing_city, billing_zip, billing_country, tax_id } = req.body;
+
+    if (!name || typeof name !== 'string' || name.trim().length < 2) {
+        return res.status(400).json({ success: false, message: 'Name muss mindestens 2 Zeichen lang sein.' });
+    }
+    if (!email || typeof email !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return res.status(400).json({ success: false, message: 'Ungültige E-Mail-Adresse.' });
+    }
+    if (!password || typeof password !== 'string' || password.length < 10) {
+        return res.status(400).json({ success: false, message: 'Passwort muss mindestens 10 Zeichen lang sein.' });
+    }
+
+    if (billing_zip !== undefined && billing_zip !== null) {
+        const zipStr = String(billing_zip).trim();
+        if (zipStr.length > 10 || (zipStr.length > 0 && !/^[a-zA-Z0-9]+$/.test(zipStr))) {
+            return res.status(400).json({ success: false, message: 'Postleitzahl ist ungültig (max. 10 Zeichen, nur Zahlen/Buchstaben).' });
+        }
+    }
+
+    if (billing_country !== undefined && billing_country !== null) {
+        const countryStr = String(billing_country).trim();
+        if (!/^[a-zA-Z]{2}$/.test(countryStr)) {
+            return res.status(400).json({ success: false, message: 'Ungültiges Land (2-stelliger ISO-Code erforderlich, z.B. DE).' });
+        }
+    }
+
+    const emailClean = email.toLowerCase().trim();
+    const [existing] = await db.query('SELECT id FROM customers WHERE email = ?', [emailClean]);
+    if (existing[0]) {
+        return res.status(409).json({ success: false, message: 'Diese E-Mail-Adresse wird bereits verwendet.' });
+    }
+
+    const hash = await bcrypt.hash(password, 12);
+    const customerId = crypto.randomUUID();
+    const username = await uniquePortalUsername(name, company);
+    const token = crypto.randomBytes(32).toString('hex');
+    const tokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+    await db.query(`
+        INSERT INTO customers (
+            id, name, email, portal_username, password_hash, must_change_password,
+            verified, email_verify_token, email_verify_expires,
+            company, billing_street, billing_city, billing_zip, billing_country, tax_id,
+            payment_status
+        ) VALUES (?, ?, ?, ?, ?, 0, 0, ?, ?, ?, ?, ?, ?, ?, ?, 'unknown')
+    `, [
+        customerId,
+        name.trim(),
+        emailClean,
+        username,
+        hash,
+        token,
+        tokenExpires,
+        company ? company.trim() : null,
+        billing_street ? billing_street.trim() : null,
+        billing_city ? billing_city.trim() : null,
+        billing_zip ? String(billing_zip).trim() : null,
+        billing_country ? String(billing_country).trim().toUpperCase() : null,
+        tax_id ? tax_id.trim() : null
+    ]);
+
+    const portalUrl = (process.env.PORTAL_URL || 'https://licens-prod.stb-srv.de').replace(/\/$/, '');
+    const verifyUrl = `${portalUrl}/portal.html#verify?token=${token}`;
+
+    await sendTemplateMail('emailVerification', emailClean, {
+        name: name.trim(),
+        verify_url: verifyUrl,
+        email: emailClean
+    });
+
+    res.json({ success: true, message: 'Registrierung erfolgreich. Bitte prüfe deine E-Mails.' });
+}));
+
+// ── POST /verify-email ────────────────────────────────────────────────────────
+router.post('/verify-email', verifyLimiter, asyncHandler(async (req, res) => {
+    const { token } = req.body;
+    if (!token) {
+        return res.status(400).json({ success: false, message: 'Token ist erforderlich.' });
+    }
+
+    const [rows] = await db.query(
+        'SELECT id FROM customers WHERE email_verify_token = ? AND email_verify_expires > NOW()',
+        [token]
+    );
+    const customer = rows[0];
+    if (!customer) {
+        return res.status(400).json({ success: false, message: 'Ungültiger oder abgelaufener Link.' });
+    }
+
+    await db.query(
+        'UPDATE customers SET verified = 1, email_verify_token = NULL, email_verify_expires = NULL WHERE id = ?',
+        [customer.id]
+    );
+
+    res.json({ success: true, message: 'E-Mail bestätigt. Du kannst dich jetzt einloggen.' });
+}));
+
+// ── GET /plans ────────────────────────────────────────────────────────────────
+router.get('/plans', asyncHandler(async (req, res) => {
+    const plans = [];
+    const descriptions = {
+        TRIAL: 'Kostenlose Testlizenz für 30 Tage',
+        FREE: 'Kostenlose Basislizenz',
+        STARTER: 'Ideal für kleinere Gastronomiebetriebe',
+        PRO: 'Voller Funktionsumfang für wachsende Restaurants',
+        PRO_PLUS: 'Erweiterte Kapazitäten und Analytics',
+        ENTERPRISE: 'Unbegrenzte Tische und maximaler Leistungsumfang'
+    };
+    const prices = {
+        TRIAL: 0.00,
+        FREE: 0.00,
+        STARTER: 29.00,
+        PRO: 59.00,
+        PRO_PLUS: 89.00,
+        ENTERPRISE: 199.00
+    };
+
+    for (const [id, plan] of Object.entries(PLAN_DEFINITIONS)) {
+        if (plan.active !== undefined && !plan.active) {
+            continue;
+        }
+
+        plans.push({
+            id,
+            name: plan.label || id,
+            description: plan.description || descriptions[id] || '',
+            price: plan.price !== undefined ? plan.price : (prices[id] !== undefined ? prices[id] : 0.00),
+            currency: plan.currency || 'EUR',
+            interval: plan.interval || (id === 'TRIAL' ? 'monthly' : 'yearly')
+        });
+    }
+
+    res.json({ success: true, plans });
+}));
+
+// ── POST /licenses/book ───────────────────────────────────────────────────────
+router.post('/licenses/book', requirePortalAuth, asyncHandler(async (req, res) => {
+    const { plan_id, domain } = req.body;
+
+    if (req.customer.verified !== 1) {
+        return res.status(403).json({ success: false, message: 'Bitte bestätige zuerst deine E-Mail-Adresse.' });
+    }
+    if (!plan_id || !PLAN_DEFINITIONS[plan_id]) {
+        return res.status(400).json({ success: false, message: 'Ungültiger oder fehlender Lizenzplan.' });
+    }
+
+    let domainClean = null;
+    if (domain) {
+        domainClean = domain.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+        if (domainClean.length > 253) {
+            return res.status(400).json({ success: false, message: 'Domain zu lang.' });
+        }
+        const labels = domainClean.replace(/^\*\./, '').split('.');
+        const labelRegex = /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$/;
+        const valid = labels.length >= 2 
+            && labels.every(l => labelRegex.test(l))
+            && /^[a-z]{2,}$/.test(labels[labels.length - 1]);
+        if (!valid) {
+            return res.status(400).json({ success: false, message: 'Ungültige Domain. Bitte nur Hostnamen eingeben (z.B. meinrestaurant.de).' });
+        }
+    }
+
+    const key = generateKey(plan_id);
+    const plan = PLAN_DEFINITIONS[plan_id];
+    const modules = plan.modules;
+    const limits = { max_dishes: plan.menu_items, max_tables: plan.max_tables };
+
+    await db.query(`
+        INSERT INTO licenses
+          (license_key, type, customer_id, customer_name, status, associated_domain,
+           expires_at, allowed_modules, limits, max_devices, analytics_daily, analytics_features, validated_domains, tags)
+        VALUES (?, ?, ?, ?, 'pending_payment', ?, NULL, ?, ?, 0, '{}', '{}', '[]', '[]')
+    `, [
+        key,
+        plan_id,
+        req.customer.id,
+        req.customer.name,
+        domainClean,
+        JSON.stringify(modules),
+        JSON.stringify(limits)
+    ]);
+
+    const invoiceId = await createInvoice(db, key, 'customer');
+
+    await addAuditLog('license_booked_by_customer', { license_key: key, plan_id, customer_id: req.customer.id }, req.customer.name);
+
+    res.json({
+        success: true,
+        license_key: key,
+        invoice_id: invoiceId,
+        message: 'Lizenz reserviert. Nach Zahlungseingang wird sie aktiviert.'
+    });
+}));
 
 export default router;
