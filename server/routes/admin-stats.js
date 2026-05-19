@@ -111,6 +111,86 @@ router.get('/stats', requireAuth, asyncHandler(async (req, res) => {
     });
 }));
 
+// ── GET /admin/stats/invoices ────────────────────────────────────────────────
+router.get('/stats/invoices', requireAuth, asyncHandler(async (req, res) => {
+    // 1. Fetch sums and counts
+    const [[kpis]] = await db.query(`
+        SELECT
+            COALESCE(ROUND(SUM(CASE WHEN status != 'cancelled' THEN amount_gross ELSE 0 END), 2), 0) AS total_invoiced,
+            COALESCE(ROUND(SUM(CASE WHEN status = 'paid' THEN amount_gross ELSE 0 END), 2), 0) AS total_paid,
+            COALESCE(ROUND(SUM(CASE WHEN status = 'sent' THEN amount_gross ELSE 0 END), 2), 0) AS total_open,
+            COALESCE(ROUND(SUM(CASE WHEN status = 'overdue' THEN amount_gross ELSE 0 END), 2), 0) AS total_overdue,
+            COALESCE(SUM(CASE WHEN status = 'draft' THEN 1 ELSE 0 END), 0) AS count_draft,
+            COALESCE(SUM(CASE WHEN status = 'sent' THEN 1 ELSE 0 END), 0) AS count_sent,
+            COALESCE(SUM(CASE WHEN status = 'overdue' THEN 1 ELSE 0 END), 0) AS count_overdue,
+            COALESCE(SUM(CASE WHEN status = 'paid' THEN 1 ELSE 0 END), 0) AS count_paid
+        FROM invoices
+    `);
+
+    // 2. Fetch MRR (paid in current month)
+    const [[mrrRow]] = await db.query(`
+        SELECT COALESCE(ROUND(SUM(amount_gross), 2), 0) AS mrr
+        FROM invoices
+        WHERE status = 'paid'
+          AND paid_at >= DATE_FORMAT(NOW(), '%Y-%m-01 00:00:00')
+    `);
+
+    // 3. Fetch overdue invoices (max. 10)
+    const [overdueInvoices] = await db.query(`
+        SELECT 
+            i.invoice_number, 
+            c.name AS customer_name, 
+            i.amount_gross, 
+            i.due_date, 
+            DATEDIFF(NOW(), i.due_date) AS days_overdue
+        FROM invoices i
+        LEFT JOIN customers c ON i.customer_id = c.id
+        WHERE i.status = 'overdue'
+        ORDER BY days_overdue DESC, i.due_date ASC
+        LIMIT 10
+    `);
+
+    // 4. Fetch recent paid (last 5)
+    const [recentPaid] = await db.query(`
+        SELECT 
+            i.invoice_number, 
+            c.name AS customer_name, 
+            i.amount_gross, 
+            i.paid_at
+        FROM invoices i
+        LEFT JOIN customers c ON i.customer_id = c.id
+        WHERE i.status = 'paid'
+        ORDER BY i.paid_at DESC, i.updated_at DESC
+        LIMIT 5
+    `);
+
+    res.json({
+        success: true,
+        total_invoiced:    Number(kpis.total_invoiced),
+        total_paid:        Number(kpis.total_paid),
+        total_open:        Number(kpis.total_open),
+        total_overdue:     Number(kpis.total_overdue),
+        count_draft:       Number(kpis.count_draft),
+        count_sent:        Number(kpis.count_sent),
+        count_overdue:     Number(kpis.count_overdue),
+        count_paid:        Number(kpis.count_paid),
+        mrr:               Number(mrrRow.mrr),
+        overdue_invoices:  overdueInvoices.map(inv => ({
+            invoice_number: inv.invoice_number,
+            customer_name:  inv.customer_name || 'Unbekannt',
+            amount_gross:   Number(inv.amount_gross),
+            due_date:       inv.due_date,
+            days_overdue:   Number(inv.days_overdue)
+        })),
+        recent_paid:       recentPaid.map(inv => ({
+            invoice_number: inv.invoice_number,
+            customer_name:  inv.customer_name || 'Unbekannt',
+            amount_gross:   Number(inv.amount_gross),
+            paid_at:        inv.paid_at
+        }))
+    });
+}));
+
 // ── Audit Log ────────────────────────────────────────────────────────────────
 router.get('/audit-log', requireAuth, asyncHandler(async (req, res) => {
   const rawLimit = parseInt(req.query.limit) || 100;

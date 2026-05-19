@@ -88,4 +88,48 @@ describe('Admin API', () => {
 
         mockDb.mockRestore();
     });
+
+    test('GET /api/admin/stats/invoices should return correct KPIs', async () => {
+        const mockDb = jest.spyOn(db, 'query').mockImplementation((sql, params) => {
+            if (sql.includes('FROM admin_sessions')) {
+                return Promise.resolve([[{ id: 'sess1' }], []]);
+            }
+            if (sql.includes('total_invoiced')) {
+                return Promise.resolve([[{ 
+                    total_invoiced: 250.00,
+                    total_paid: 150.00,
+                    total_open: 50.00,
+                    total_overdue: 50.00,
+                    count_draft: 1,
+                    count_sent: 1,
+                    count_overdue: 1,
+                    count_paid: 1
+                }], []]);
+            }
+            if (sql.includes('mrr')) {
+                return Promise.resolve([[{ mrr: 150.00 }], []]);
+            }
+            if (sql.includes('days_overdue')) {
+                return Promise.resolve([[{ invoice_number: 'INV-2026-0001', customer_name: 'Max', amount_gross: 50.00, due_date: '2026-05-01', days_overdue: 18 }], []]);
+            }
+            if (sql.includes('paid_at')) {
+                return Promise.resolve([[{ invoice_number: 'INV-2026-0002', customer_name: 'Max', amount_gross: 150.00, paid_at: '2026-05-18' }], []]);
+            }
+            return Promise.resolve([[], []]);
+        });
+
+        const res = await request(app)
+            .get('/api/admin/stats/invoices')
+            .set('Authorization', `Bearer ${adminToken}`);
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.success).toBe(true);
+        expect(res.body.total_invoiced).toBe(250);
+        expect(res.body.total_paid).toBe(150);
+        expect(res.body.mrr).toBe(150);
+        expect(res.body.overdue_invoices[0].invoice_number).toBe('INV-2026-0001');
+        expect(res.body.recent_paid[0].invoice_number).toBe('INV-2026-0002');
+
+        mockDb.mockRestore();
+    });
 });
