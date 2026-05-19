@@ -8,7 +8,7 @@ import { requireAuth, requireSuperAdmin, asyncHandler } from '../middleware.js';
 
 const router = Router();
 
-const CUSTOMER_SAFE_FIELDS = 'id, name, email, phone, contact_person, company, payment_status, notes, archived, portal_username, must_change_password, created_at, updated_at';
+const CUSTOMER_SAFE_FIELDS = 'id, name, email, phone, contact_person, company, payment_status, notes, archived, portal_username, must_change_password, created_at, updated_at, billing_street, billing_city, billing_zip, billing_country, tax_id';
 
 function generateTempPassword() {
   const upper  = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
@@ -102,7 +102,8 @@ router.get('/customers', requireAuth, asyncHandler(async (req, res) => {
 }));
 
 router.post('/customers', requireAuth, asyncHandler(async (req, res) => {
-  const { name, email, phone, contact_person, company, payment_status, notes } = req.body;
+  const { name, email, phone, contact_person, company, payment_status, notes,
+          billing_street, billing_city, billing_zip, billing_country, tax_id } = req.body;
   if (!name) return res.status(400).json({ success: false, message: 'Name required' });
   if (!email) return res.status(400).json({ success: false, message: 'E-Mail ist ein Pflichtfeld' });
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
@@ -119,10 +120,11 @@ router.post('/customers', requireAuth, asyncHandler(async (req, res) => {
     await conn.query(
       `INSERT INTO customers
          (id, name, email, phone, contact_person, company, payment_status, notes,
-          password_hash, must_change_password)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)`,
+          password_hash, must_change_password, billing_street, billing_city, billing_zip, billing_country, tax_id)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?)`,
       [id, name, email, phone || null, contact_person || null,
-       company || null, payment_status || 'unknown', notes || '', passwordHash]
+       company || null, payment_status || 'unknown', notes || '', passwordHash,
+       billing_street || null, billing_city || null, billing_zip || null, billing_country || 'DE', tax_id || null]
     );
     try {
       await conn.query('UPDATE customers SET portal_username = ? WHERE id = ?', [portalUsername, id]);
@@ -159,7 +161,8 @@ router.post('/customers', requireAuth, asyncHandler(async (req, res) => {
 router.patch('/customers/:id', requireAuth, asyncHandler(async (req, res) => {
   const [rows] = await db.query(`SELECT ${CUSTOMER_SAFE_FIELDS} FROM customers WHERE id = ?`, [req.params.id]);
   if (!rows[0]) return res.status(404).json({ success: false, message: 'Customer not found' });
-  const { name, email, phone, contact_person, company, payment_status, notes, archived } = req.body;
+  const { name, email, phone, contact_person, company, payment_status, notes, archived,
+          billing_street, billing_city, billing_zip, billing_country, tax_id } = req.body;
   if (email !== undefined) {
     if (!email) return res.status(400).json({ success: false, message: 'E-Mail ist ein Pflichtfeld' });
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
@@ -170,14 +173,21 @@ router.patch('/customers/:id', requireAuth, asyncHandler(async (req, res) => {
     `UPDATE customers SET
       name=COALESCE(?,name), email=COALESCE(?,email), phone=?, contact_person=?,
       company=COALESCE(?,company), payment_status=COALESCE(?,payment_status), notes=COALESCE(?,notes),
-      archived=COALESCE(?,archived)
+      archived=COALESCE(?,archived),
+      billing_street=?, billing_city=?, billing_zip=?, billing_country=?, tax_id=?
      WHERE id=?`,
     [name || null, email || null,
      phone !== undefined ? phone : rows[0].phone,
      contact_person !== undefined ? contact_person : rows[0].contact_person,
      company || null, payment_status || null,
      notes !== undefined ? notes : rows[0].notes,
-     archivedVal, req.params.id]
+     archivedVal,
+     billing_street !== undefined ? billing_street : rows[0].billing_street,
+     billing_city !== undefined ? billing_city : rows[0].billing_city,
+     billing_zip !== undefined ? billing_zip : rows[0].billing_zip,
+     billing_country !== undefined ? billing_country : rows[0].billing_country,
+     tax_id !== undefined ? tax_id : rows[0].tax_id,
+     req.params.id]
   );
   if (archived !== undefined) {
     await addAuditLog(

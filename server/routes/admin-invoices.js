@@ -283,6 +283,90 @@ router.post('/admin/invoices/:id/send', requireAuth, asyncHandler(async (req, re
     res.json({ success: true, message: 'Rechnung als gesendet markiert und E-Mail verschickt.', pdf_path: pdfPath });
 }));
 
+// ── POST /admin/invoices/:id/resend ───────────────────────────────────────────
+router.post('/admin/invoices/:id/resend', requireAuth, asyncHandler(async (req, res) => {
+    const invoiceId = req.params.id;
+
+    // 1. Get detailed invoice data
+    const invoice = await getInvoiceWithItems(db, invoiceId);
+    if (!invoice) {
+        return res.status(404).json({ success: false, message: 'Rechnung nicht gefunden.' });
+    }
+
+    // 2. Validate status: must be sent, overdue, or paid
+    if (!['sent', 'overdue', 'paid'].includes(invoice.status)) {
+        return res.status(400).json({ success: false, message: 'Rechnung kann in diesem Status nicht erneut gesendet werden.' });
+    }
+
+    // 3. Regeneate or use existing PDF
+    let pdfPath = invoice.pdf_path;
+    const filename = `Rechnung-${invoice.invoice_number}.pdf`;
+    const storageDir = process.env.STORAGE_PATH || './storage/invoices';
+
+    if (!pdfPath || !fs.existsSync(pdfPath)) {
+        pdfPath = path.join(storageDir, filename);
+        const [[settings]] = await db.query('SELECT * FROM invoice_settings WHERE id = 1');
+        if (!settings) {
+            return res.status(500).json({ success: false, message: 'Rechnungs-Einstellungen fehlen.' });
+        }
+        const mergedData = { ...settings, ...invoice };
+        await generateInvoicePDF(mergedData, pdfPath);
+    }
+
+    // 4. Send email to customer
+    if (invoice.customer_email) {
+        try {
+            const portalUrl = (process.env.APP_URL || `http://localhost:${process.env.PORT || 4000}`).replace(/\/$/, '');
+            const invoiceUrl = `${portalUrl}/portal.html?tab=invoices`;
+
+            const { renderTemplate } = await import('../mailer/templates.js');
+            const { sendMail } = await import('../mailer/index.js');
+
+            const tplData = {
+                customer_name: invoice.customer_name,
+                invoice_number: invoice.invoice_number,
+                amount_gross: invoice.amount_gross,
+                due_date: invoice.due_date,
+                invoice_url: invoiceUrl,
+                pdf_download_link: invoiceUrl
+            };
+
+            const { subject, html, text } = renderTemplate('invoiceSent', tplData);
+            
+            await sendMail({
+                to: invoice.customer_email,
+                subject,
+                html,
+                text,
+                attachments: [{
+                    filename,
+                    path: pdfPath,
+                    contentType: 'application/pdf'
+                }]
+            });
+        } catch (mailErr) {
+            console.error('[admin/invoices/resend] Email failed:', mailErr.message);
+        }
+    }
+
+    // 5. Update resent_at, resent_count, and pdf_path in DB
+    await db.query(
+        "UPDATE invoices SET resent_at = NOW(), resent_count = COALESCE(resent_count, 0) + 1, pdf_path = ? WHERE id = ?",
+        [pdfPath, invoiceId]
+    );
+
+    // 6. Write Audit Log
+    const newResentCount = (invoice.resent_count || 0) + 1;
+    await addAuditLog('invoice_resent', {
+        invoice_id: invoiceId,
+        invoice_number: invoice.invoice_number,
+        customer_id: invoice.customer_id,
+        resent_count: newResentCount
+    }, req.admin.username);
+
+    res.json({ success: true, message: 'Rechnung erfolgreich erneut gesendet.', resent_count: newResentCount });
+}));
+
 // ── POST /admin/invoices/:id/mark-paid ─────────────────────────────────────────
 router.post('/admin/invoices/:id/mark-paid', requireAuth, asyncHandler(async (req, res) => {
     const invoiceId = req.params.id;
