@@ -330,6 +330,7 @@ router.post('/refresh', validateLimiter, asyncHandler(async (req, res) => {
         const signedToken = createSignedLicenseToken({
             license_key, type: l.type, plan_label: plan.label, expires_at: l.expires_at,
             allowed_modules: allowedModules, limits, domain: domain || l.associated_domain,
+            customer_name: l.customer_name || null,
             issued_at: Math.floor(Date.now() / 1000)
         }, '73h');
 

@@ -138,8 +138,6 @@ app.use(cors({
     credentials: true
 }));
 
-app.use(express.json());
-
 // ── CORS-Ausnahme: Trial-Register (Henne-Ei – Domain noch nicht in DB) ──────
 app.options('/api/v1/trial/register', (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
@@ -153,6 +151,30 @@ app.use('/api/v1/trial/register', (req, res, next) => {
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     next();
 });
+
+// ── CORS-Ausnahme: Public-Key & Heartbeat (immer öffentlich erreichbar) ──────
+app.options('/api/v1/public-key', (req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.status(204).end();
+});
+app.use('/api/v1/public-key', (req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
+    next();
+});
+app.options('/api/v1/heartbeat', (req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-license-key');
+    res.status(204).end();
+});
+app.use('/api/v1/heartbeat', (req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
+    next();
+});
+
+app.use(express.json());
 
 // ── Ensure Invoice Storage Exists ───────────────────────────────────────────
 const storageDir = process.env.STORAGE_PATH || './storage/invoices';
