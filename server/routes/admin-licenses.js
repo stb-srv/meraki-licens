@@ -4,10 +4,23 @@ import db from '../db.js';
 import { PLAN_DEFINITIONS } from '../plans.js';
 import { sendTemplateMail } from '../mailer/index.js';
 import { fireWebhook } from '../webhook.js';
-import { generateKey, addAuditLog, normalizeDomain } from '../helpers.js';
+import { generateKey, addAuditLog, normalizeDomain, parseJsonField } from '../helpers.js';
 import { requireAuth, asyncHandler, bulkLimiter } from '../middleware.js';
 
 const router = Router();
+
+function normalizeLicense(l) {
+  if (!l) return l;
+  return {
+    ...l,
+    tags:              parseJsonField(l.tags, []),
+    allowed_modules:   parseJsonField(l.allowed_modules, []),
+    limits:            parseJsonField(l.limits, {}),
+    analytics_daily:   parseJsonField(l.analytics_daily, {}),
+    analytics_features:parseJsonField(l.analytics_features, {}),
+    validated_domains: parseJsonField(l.validated_domains, []),
+  };
+}
 
 // ── Licenses CRUD ────────────────────────────────────────────────────────────
 router.get('/licenses', requireAuth, asyncHandler(async (req, res) => {
@@ -51,7 +64,7 @@ router.get('/licenses', requireAuth, asyncHandler(async (req, res) => {
   `);
 
   res.json({
-    licenses,
+    licenses: licenses.map(normalizeLicense),
     stats: {
       total: statsRow.total_all,
       active: statsRow.active || 0,
@@ -80,7 +93,7 @@ router.get('/licenses/inactive', requireAuth, asyncHandler(async (req, res) => {
 router.get('/licenses/:key', requireAuth, asyncHandler(async (req, res) => {
   const [rows] = await db.query('SELECT * FROM licenses WHERE license_key = ?', [req.params.key]);
   if (!rows[0]) return res.status(404).json({ success: false, message: 'Not found' });
-  res.json({ success: true, license: rows[0] });
+  res.json({ success: true, license: normalizeLicense(rows[0]) });
 }));
 
 router.post('/licenses', requireAuth, asyncHandler(async (req, res) => {
@@ -132,7 +145,7 @@ router.post('/licenses', requireAuth, asyncHandler(async (req, res) => {
       { license_key: key, type: raw.type, customer_name: raw.customer_name, by: req.admin.username },
       req.admin.username);
     const [newRows] = await db.query('SELECT * FROM licenses WHERE license_key = ?', [key]);
-    res.json({ success: true, license: newRows[0] });
+    res.json({ success: true, license: normalizeLicense(newRows[0]) });
   } catch (e) {
     console.error(e);
     res.status(500).json({ success: false, message: 'Internal server error' });
@@ -152,6 +165,11 @@ router.patch('/licenses/:key/status', requireAuth, asyncHandler(async (req, res)
   const l = rows[0];
   await db.query('UPDATE licenses SET status = ? WHERE license_key = ?', [req.body.status, req.params.key]);
   
+  if (req.body.tags !== undefined) {
+    await db.query('UPDATE licenses SET tags = ? WHERE license_key = ?', 
+      [JSON.stringify(req.body.tags || []), req.params.key]);
+  }
+
   if (['revoked', 'cancelled', 'suspended'].includes(req.body.status) && l.customer_id) {
     await db.query('DELETE FROM customer_sessions WHERE customer_id = ?', [l.customer_id]);
     await addAuditLog('portal_sessions_revoked', { license_key: req.params.key, customer_id: l.customer_id }, req.admin.username);
@@ -201,7 +219,7 @@ router.patch('/licenses/:key', requireAuth, asyncHandler(async (req, res) => {
     { license_key: req.params.key, changes: Object.keys(req.body), by: req.admin.username },
     req.admin.username);
   const [updated] = await db.query('SELECT * FROM licenses WHERE license_key = ?', [req.params.key]);
-  res.json({ success: true, license: updated[0] });
+  res.json({ success: true, license: normalizeLicense(updated[0]) });
 }));
 
 router.post('/licenses/:key/renew', requireAuth, asyncHandler(async (req, res) => {
@@ -498,7 +516,7 @@ router.get('/export/licenses', requireAuth, asyncHandler(async (req, res) => {
   if (format === 'json') {
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Content-Disposition', 'attachment; filename=licenses_export.json');
-    return res.send(JSON.stringify(rows, null, 2));
+    return res.send(JSON.stringify(rows.map(normalizeLicense), null, 2));
   }
 
   const headers = ['license_key', 'type', 'customer_name', 'status', 'associated_domain', 'expires_at', 'usage_count', 'created_at'];

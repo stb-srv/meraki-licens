@@ -1683,6 +1683,10 @@
 <!-- MODALS -->
 <div class="modal-overlay" id="modal-new-license"><div class="modal">
   <h3>Neue Lizenz erstellen</h3>
+  <div class="form-group" id="nl-customer-info" style="display:none">
+    <label>Kunde</label>
+    <input type="text" id="nl-customer-display" readonly style="background:var(--bg-offset,#f3f0ec);color:var(--text-muted,#7a7974)">
+  </div>
   <div class="form-group"><label>Lizenztyp</label>
     <select id="nl-type"><option value="FREE">FREE</option><option value="BASIC">BASIC</option><option value="PRO" selected>PRO</option><option value="ENTERPRISE">ENTERPRISE</option></select>
   </div>
@@ -2508,6 +2512,11 @@ function daysLeft(d){return Math.ceil((new Date(d)-Date.now())/86400000);}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function fmtEur(v){return v!=null?parseFloat(v).toFixed(2)+' \u20AC':'\u2014';}
 
+function safeParse(val, fallback){
+  if (Array.isArray(val)) return val;
+  try { return JSON.parse(val || JSON.stringify(fallback)); } catch(e) { return fallback; }
+}
+
 function showAlert(elId,msg,type){
   type=type||'error';
   var el=document.getElementById(elId);
@@ -2682,10 +2691,25 @@ function switchSubTab(name){
 }
 function reloadActiveLogs(){switchSubTab(activeSubTab);}
 
+function resetNewLicenseModal() {
+  document.getElementById('nl-customer-id').value = '';
+  document.getElementById('nl-name').value = '';
+  document.getElementById('nl-domain').value = '';
+  document.getElementById('nl-tags').value = '';
+  document.getElementById('nl-devices').value = '0';
+  document.getElementById('nl-expires').value = '';
+  var infoEl = document.getElementById('nl-customer-info');
+  if (infoEl) infoEl.style.display = 'none';
+}
+
 function openModal(id){var m=document.getElementById(id);if(m)m.classList.add('open');}
-function closeModal(id){var m=document.getElementById(id);if(m)m.classList.remove('open');}
+function closeModal(id){
+  var m=document.getElementById(id);
+  if(m)m.classList.remove('open');
+  if(id==='modal-new-license') resetNewLicenseModal();
+}
 document.querySelectorAll('.modal-overlay').forEach(function(m){
-  m.addEventListener('click',function(e){if(e.target===m)m.classList.remove('open');});
+  m.addEventListener('click',function(e){if(e.target===m)closeModal(m.id);});
 });
 
 function typeBadge(t){
@@ -2696,7 +2720,7 @@ function statusBadge(s){return '<span class="badge badge-'+esc(s)+'">'+ esc(s)+'
 function tagsBadges(tags){
   if(!tags)return'';
   try {
-    var arr=Array.isArray(tags)?tags:JSON.parse(tags);
+    var arr=safeParse(tags, []);
     return arr.map(function(t){return '<span class="tag-pill">'+esc(t)+'</span>';}).join('');
   } catch(e){return'';}
 }
@@ -2787,7 +2811,7 @@ function viewLicense(key){
       '<div class="form-group"><label>Domain</label><input readonly value="'+esc(l.associated_domain||'')+'"></div>'+
       '<div class="form-group"><label>Ablaufdatum</label><input readonly value="'+esc(fmtDate(l.expires_at))+'"></div>'+
       '<div class="form-group"><label>Validierungen</label><input readonly value="'+esc(l.usage_count||0)+'"></div>'+
-      '<div class="form-group"><label>Tags (kommagetrennt)</label><input id="edit-tags" value="'+esc((l.tags?JSON.parse(l.tags):[]).join(', '))+'"></div>'+
+      '<div class="form-group"><label>Tags (kommagetrennt)</label><input id="edit-tags" value="'+esc(safeParse(l.tags, []).join(', '))+'"></div>'+
       '<div class="form-group"><label>Letzter Check</label><input readonly value="'+esc(fmtDate(l.last_validated))+'"></div>'+
       '<div class="form-group"><label>Status ändern</label>'+
         '<select id="edit-status-sel">'+statuses.map(function(s){return'<option value="'+s+'"'+(s===l.status?' selected':'')+'>'+s+'</option>';}).join('')+'</select>'+
@@ -2856,6 +2880,7 @@ function loadCustomers(page){
           '<td>'+fmtDate(c.created_at)+'</td>'+
           '<td style="white-space:nowrap">'+
             '<button class="btn btn-ghost btn-xs" onclick="openEditCustomer('+idx+')">Bearbeiten</button> '+
+            '<button class="btn btn-primary btn-xs" onclick="openCreateLicenseForCustomer(\'' + esc(c.id) + '\')" >+ Lizenz</button> '+
             '<button class="btn btn-ghost btn-xs" onclick="filterPurchaseByCustomer(\''+esc(c.id)+'\')" >Käufe</button> '+
             (isArchived
               ? '<button class="btn btn-success btn-xs" onclick="toggleArchiveCustomer(\''+esc(c.id)+'\',false)" >Reaktivieren</button>'
@@ -2890,6 +2915,30 @@ function openEditCustomer(idx){
   if(payEl)payEl.value=c.payment_status||'unknown';
   document.getElementById('ec-alert').innerHTML='';
   openModal('modal-edit-customer');
+}
+
+function openCreateLicenseForCustomer(customerId) {
+  var c = CUSTS.find(function(x){ return x.id === customerId; });
+  if (!c) return;
+  
+  document.getElementById('nl-customer-id').value = c.id;
+  document.getElementById('nl-name').value = c.name || '';
+  document.getElementById('nl-domain').value = '';
+  document.getElementById('nl-tags').value = '';
+  document.getElementById('nl-devices').value = '0';
+  document.getElementById('nl-expires').value = '';
+  
+  var typeEl = document.getElementById('nl-type');
+  if (typeEl) typeEl.value = 'FREE';
+
+  var infoEl = document.getElementById('nl-customer-info');
+  var displayEl = document.getElementById('nl-customer-display');
+  if (infoEl && displayEl) {
+    infoEl.style.display = '';
+    displayEl.value = c.name + (c.company ? ' (' + c.company + ')' : '');
+  }
+
+  openModal('modal-new-license');
 }
 
 function saveCustomer(){
