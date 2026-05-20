@@ -14,8 +14,8 @@ import path from 'path';
 
 const router = express.Router();
 
-// ── GET /admin/invoices ───────────────────────────────────────────────────────
-router.get('/admin/invoices', requireAuth, asyncHandler(async (req, res) => {
+// ── GET /invoices ────────────────────────────────────────────────────────────
+router.get('/invoices', requireAuth, asyncHandler(async (req, res) => {
     const page = Math.max(1, parseInt(req.query.page) || 1);
     const limit = Math.min(500, Math.max(1, parseInt(req.query.limit) || 25));
     const offset = (page - 1) * limit;
@@ -61,8 +61,8 @@ router.get('/admin/invoices', requireAuth, asyncHandler(async (req, res) => {
     });
 }));
 
-// ── GET /admin/invoices/:id ──────────────────────────────────────────────────
-router.get('/admin/invoices/:id', requireAuth, asyncHandler(async (req, res) => {
+// ── GET /invoices/:id ────────────────────────────────────────────────────────
+router.get('/invoices/:id', requireAuth, asyncHandler(async (req, res) => {
     const invoice = await getInvoiceWithItems(db, req.params.id);
     if (!invoice) {
         return res.status(404).json({ success: false, message: 'Rechnung nicht gefunden.' });
@@ -70,8 +70,8 @@ router.get('/admin/invoices/:id', requireAuth, asyncHandler(async (req, res) => 
     res.json(invoice);
 }));
 
-// ── POST /admin/invoices ─────────────────────────────────────────────────────
-router.post('/admin/invoices', requireAuth, asyncHandler(async (req, res) => {
+// ── POST /invoices ───────────────────────────────────────────────────────────
+router.post('/invoices', requireAuth, asyncHandler(async (req, res) => {
     const { customer_id, license_key, items, tax_rate, due_date, notes, type } = req.body;
     if (!customer_id) {
         return res.status(400).json({ success: false, message: 'customer_id ist erforderlich.' });
@@ -143,8 +143,8 @@ router.post('/admin/invoices', requireAuth, asyncHandler(async (req, res) => {
     }
 }));
 
-// ── PUT /admin/invoices/:id ──────────────────────────────────────────────────
-router.put('/admin/invoices/:id', requireAuth, asyncHandler(async (req, res) => {
+// ── PUT /invoices/:id ────────────────────────────────────────────────────────
+router.put('/invoices/:id', requireAuth, asyncHandler(async (req, res) => {
     const invoiceId = req.params.id;
     const { items, tax_rate, due_date, notes, type } = req.body;
 
@@ -213,8 +213,8 @@ router.put('/admin/invoices/:id', requireAuth, asyncHandler(async (req, res) => 
     }
 }));
 
-// ── POST /admin/invoices/:id/send ─────────────────────────────────────────────
-router.post('/admin/invoices/:id/send', requireAuth, asyncHandler(async (req, res) => {
+// ── POST /invoices/:id/send ──────────────────────────────────────────────────
+router.post('/invoices/:id/send', requireAuth, asyncHandler(async (req, res) => {
     const invoiceId = req.params.id;
 
     // 1. Get detailed invoice data
@@ -283,8 +283,8 @@ router.post('/admin/invoices/:id/send', requireAuth, asyncHandler(async (req, re
     res.json({ success: true, message: 'Rechnung als gesendet markiert und E-Mail verschickt.', pdf_path: pdfPath });
 }));
 
-// ── POST /admin/invoices/:id/resend ───────────────────────────────────────────
-router.post('/admin/invoices/:id/resend', requireAuth, asyncHandler(async (req, res) => {
+// ── POST /invoices/:id/resend ────────────────────────────────────────────────
+router.post('/invoices/:id/resend', requireAuth, asyncHandler(async (req, res) => {
     const invoiceId = req.params.id;
 
     // 1. Get detailed invoice data
@@ -367,8 +367,8 @@ router.post('/admin/invoices/:id/resend', requireAuth, asyncHandler(async (req, 
     res.json({ success: true, message: 'Rechnung erfolgreich erneut gesendet.', resent_count: newResentCount });
 }));
 
-// ── POST /admin/invoices/:id/mark-paid ─────────────────────────────────────────
-router.post('/admin/invoices/:id/mark-paid', requireAuth, asyncHandler(async (req, res) => {
+// ── POST /invoices/:id/mark-paid ─────────────────────────────────────────────
+router.post('/invoices/:id/mark-paid', requireAuth, asyncHandler(async (req, res) => {
     const invoiceId = req.params.id;
     const { paid_at } = req.body;
     const paidDate = paid_at ? new Date(paid_at) : new Date();
@@ -408,8 +408,8 @@ router.post('/admin/invoices/:id/mark-paid', requireAuth, asyncHandler(async (re
     }
 }));
 
-// ── GET /admin/invoices/:id/pdf ──────────────────────────────────────────────
-router.get('/admin/invoices/:id/pdf', requireAuth, asyncHandler(async (req, res) => {
+// ── GET /invoices/:id/pdf ────────────────────────────────────────────────────
+router.get('/invoices/:id/pdf', requireAuth, asyncHandler(async (req, res) => {
     const invoiceId = req.params.id;
 
     const invoice = await getInvoiceWithItems(db, invoiceId);
@@ -432,8 +432,8 @@ router.get('/admin/invoices/:id/pdf', requireAuth, asyncHandler(async (req, res)
     }
 }));
 
-// ── DELETE /admin/invoices/:id ───────────────────────────────────────────────
-router.delete('/admin/invoices/:id', requireAuth, asyncHandler(async (req, res) => {
+// ── DELETE /invoices/:id ─────────────────────────────────────────────────────
+router.delete('/invoices/:id', requireAuth, asyncHandler(async (req, res) => {
     const invoiceId = req.params.id;
 
     const [[invoice]] = await db.query('SELECT status, invoice_number, pdf_path FROM invoices WHERE id = ?', [invoiceId]);
@@ -459,8 +459,8 @@ router.delete('/admin/invoices/:id', requireAuth, asyncHandler(async (req, res) 
     res.json({ success: true, message: 'Rechnung erfolgreich gelöscht.' });
 }));
 
-// ── GET /admin/invoice-settings ──────────────────────────────────────────────
-router.get('/admin/invoice-settings', requireAuth, asyncHandler(async (req, res) => {
+// ── GET /invoice-settings ────────────────────────────────────────────────────
+router.get('/invoice-settings', requireAuth, asyncHandler(async (req, res) => {
     const [[settings]] = await db.query('SELECT * FROM invoice_settings WHERE id = 1');
     if (!settings) {
         return res.status(404).json({ success: false, message: 'Rechnungs-Einstellungen nicht gefunden.' });
@@ -468,8 +468,8 @@ router.get('/admin/invoice-settings', requireAuth, asyncHandler(async (req, res)
     res.json(settings);
 }));
 
-// ── PUT /admin/invoice-settings ──────────────────────────────────────────────
-router.put('/admin/invoice-settings', requireAuth, asyncHandler(async (req, res) => {
+// ── PUT /invoice-settings ────────────────────────────────────────────────────
+router.put('/invoice-settings', requireAuth, asyncHandler(async (req, res) => {
     const { company_name, company_address, company_tax_id, company_iban, company_bic, invoice_prefix, logo_path, footer_text } = req.body;
     
     if (!company_name || !company_address) {
