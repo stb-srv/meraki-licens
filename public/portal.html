@@ -4,42 +4,46 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>OPA! Santorini &ndash; Kunden-Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&f[]=cabinet-grotesk@700,800&display=swap" rel="stylesheet">
   <style>
-    :root,[data-theme="dark"]{--bg:#0a0a0f;--bg2:#12121a;--bg3:#1a1a26;--border:#2a2a3a;--text:#e8e8f0;--text2:#9090b0;--accent:#6c63ff;--accent2:#ff6b6b;--accent3:#51cf66;--gold:#fcc419;--card:#16161f;--radius:12px;--shadow:0 4px 24px rgba(0,0,0,.4);}
-    [data-theme="light"]{--bg:#f4f4f8;--bg2:#fff;--bg3:#e8e8f0;--border:#d0d0e0;--text:#1a1a2e;--text2:#5a5a7a;--accent:#5a52e0;--accent2:#e03030;--accent3:#2eaa50;--gold:#d4a017;--card:#fff;--radius:12px;--shadow:0 4px 24px rgba(0,0,0,.1);}
+    :root,[data-theme="dark"]{--bg:#171614;--bg2:#1c1b19;--bg3:#22211f;--border:rgba(255,255,255,0.07);--text:#cdccca;--text2:#797876;--text3:#5a5957;--accent:#4f98a3;--accent-hover:#227f8b;--accent2:#dd6974;--accent3:#6daa45;--gold:#e8af34;--card:#1c1b19;--radius:10px;--shadow:0 4px 24px rgba(0,0,0,.4);--nav-bg:rgba(23,22,20,0.92);--font-body:'Satoshi','Segoe UI',system-ui,sans-serif;--font-display:'Cabinet Grotesk','Outfit',sans-serif;}
+    [data-theme="light"]{--bg:#f7f6f2;--bg2:#f9f8f5;--bg3:#f3f0ec;--border:rgba(0,0,0,0.08);--text:#28251d;--text2:#7a7974;--text3:#bab9b4;--accent:#01696f;--accent-hover:#0c4e54;--accent2:#a12c7b;--accent3:#437a22;--gold:#d19900;--card:#fff;--radius:10px;--shadow:0 4px 24px rgba(0,0,0,.08);--nav-bg:rgba(247,246,242,0.92);}
     *{box-sizing:border-box;margin:0;padding:0;}
-    body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;line-height:1.6;min-height:100vh;}
-    nav{position:sticky;top:0;z-index:100;background:rgba(10,10,15,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:60px;}
-    .nav-logo{font-size:1.05rem;font-weight:700;color:var(--accent);}
+    body{background:var(--bg);color:var(--text);font-family:var(--font-body);line-height:1.6;min-height:100vh;transition:background .3s, color .3s;}
+    h1,h2,h3,h4{font-family:var(--font-display);letter-spacing:-0.02em;}
+    nav{position:sticky;top:0;z-index:100;background:var(--nav-bg);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:60px;}
+    .nav-logo{font-size:1.15rem;font-weight:800;color:var(--accent);font-family:var(--font-display);}
     .nav-right{display:flex;gap:.8rem;align-items:center;}
-    .btn{display:inline-flex;align-items:center;gap:.4rem;padding:.45rem 1.1rem;border-radius:8px;border:none;cursor:pointer;font-size:.88rem;font-weight:600;transition:all .2s;text-decoration:none;}
-    .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{opacity:.88;}
+    .btn{display:inline-flex;align-items:center;gap:.4rem;padding:.45rem 1.1rem;border-radius:8px;border:none;cursor:pointer;font-size:.88rem;font-weight:600;transition:all 180ms cubic-bezier(0.16,1,0.3,1);text-decoration:none;font-family:var(--font-body);}
+    .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:var(--accent-hover);}
     .btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border);}.btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
     .btn-danger{background:var(--accent2);color:#fff;}.btn-danger:hover{opacity:.85;}
     .btn-sm{padding:.3rem .7rem;font-size:.8rem;}
     .btn-success{background:var(--accent3);color:#fff;}.btn-success:hover{opacity:.85;}
     .page{display:none;}.page.active{display:block;}
     /* Login & Setup */
-    .center-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem;background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(108,99,255,.15),transparent);}
+    .center-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem;background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(79,152,163,.1),transparent);}
     .auth-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:2.5rem 2rem;width:100%;max-width:400px;box-shadow:var(--shadow);}
     .auth-card h2{text-align:center;margin-bottom:.4rem;font-size:1.3rem;}
     .auth-card .sub{text-align:center;color:var(--text2);font-size:.85rem;margin-bottom:1.5rem;}
     .form-group{margin-bottom:1rem;}
     .form-group label{display:block;font-size:.85rem;color:var(--text2);margin-bottom:.4rem;}
-    .form-group input{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:.6rem .9rem;color:var(--text);font-size:.9rem;outline:none;transition:border-color .2s;}
+    .form-group input{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:.6rem .9rem;color:var(--text);font-size:.9rem;outline:none;transition:border-color .2s;font-family:var(--font-body);}
     .form-group input:focus{border-color:var(--accent);}
     .alert{padding:.7rem 1rem;border-radius:8px;font-size:.88rem;margin-bottom:1rem;}
-    .alert-error{background:rgba(255,107,107,.1);border:1px solid rgba(255,107,107,.3);color:var(--accent2);}
-    .alert-success{background:rgba(81,207,102,.1);border:1px solid rgba(81,207,102,.3);color:var(--accent3);}
-    .alert-info{background:rgba(108,99,255,.1);border:1px solid rgba(108,99,255,.3);color:var(--accent);}
+    .alert-error{background:rgba(221,105,116,.1);border:1px solid rgba(221,105,116,.25);color:var(--accent2);}
+    .alert-success{background:rgba(109,170,69,.1);border:1px solid rgba(109,170,69,.25);color:var(--accent3);}
+    .alert-info{background:rgba(79,152,163,.1);border:1px solid rgba(79,152,163,.25);color:var(--accent);}
     /* Dashboard */
     .dashboard{display:flex;min-height:calc(100vh - 60px);}
     .sidebar{width:210px;background:var(--bg2);border-right:1px solid var(--border);padding:1rem 0;flex-shrink:0;}
-    .sidebar-brand{padding:.8rem 1.2rem 1rem;font-size:.9rem;font-weight:700;color:var(--accent);border-bottom:1px solid var(--border);margin-bottom:.5rem;}
+    .sidebar-brand{padding:.8rem 1.2rem 1rem;font-size:.9rem;font-weight:700;color:var(--accent);border-bottom:1px solid var(--border);margin-bottom:.5rem;font-family:var(--font-display);}
     .sidebar-user{padding:.4rem 1.2rem .8rem;font-size:.78rem;color:var(--text2);}
     .sidebar-menu{list-style:none;}
     .sidebar-menu li a{display:flex;align-items:center;gap:.6rem;padding:.6rem 1.2rem;color:var(--text2);text-decoration:none;font-size:.88rem;cursor:pointer;transition:all .15s;}
-    .sidebar-menu li a:hover,.sidebar-menu li a.active{background:rgba(108,99,255,.12);color:var(--text);}
+    .sidebar-menu li a:hover,.sidebar-menu li a.active{background:rgba(79,152,163,.12);color:var(--text);}
     .sidebar-menu li a.active{border-left:3px solid var(--accent);}
     .main-area{flex:1;overflow-y:auto;padding:1.8rem 2rem;}
     .tab-panel{display:none;}.tab-panel.active{display:block;}
@@ -58,7 +62,7 @@
     .lic-meta-item .lmi-label{font-size:.75rem;color:var(--text2);}
     .lic-meta-item .lmi-value{font-size:.92rem;font-weight:600;}
     .domain-form{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;margin-top:.8rem;padding-top:.8rem;border-top:1px solid var(--border);}
-    .domain-form input{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:.45rem .8rem;color:var(--text);font-size:.88rem;outline:none;flex:1;min-width:180px;}
+    .domain-form input{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:.45rem .8rem;color:var(--text);font-size:.88rem;outline:none;flex:1;min-width:180px;font-family:var(--font-body);}
     .domain-form input:focus{border-color:var(--accent);}
     .domain-msg{font-size:.8rem;margin-top:.4rem;}
     /* Table */
@@ -69,20 +73,21 @@
     table.data-table tr:last-child td{border:none;}
     table.data-table tr:hover td{background:var(--bg3);}
     .badge{display:inline-block;padding:.15rem .55rem;border-radius:999px;font-size:.72rem;font-weight:700;}
-    .badge-active{background:rgba(81,207,102,.15);color:var(--accent3);}
-    .badge-revoked,.badge-cancelled,.badge-suspended,.badge-expired{background:rgba(255,107,107,.15);color:var(--accent2);}
-    .badge-FREE{background:rgba(144,144,176,.15);color:var(--text2);}
-    .badge-BASIC,.badge-STARTER{background:rgba(81,207,102,.2);color:var(--accent3);}
-    .badge-PRO,.badge-PRO_PLUS{background:rgba(108,99,255,.2);color:var(--accent);}
-    .badge-ENTERPRISE{background:rgba(252,196,25,.15);color:var(--gold);}
-    .badge-purchase{background:rgba(81,207,102,.15);color:var(--accent3);}
-    .badge-renewal{background:rgba(108,99,255,.15);color:var(--accent);}
-    .badge-upgrade{background:rgba(252,196,25,.15);color:var(--gold);}
-    .badge-downgrade,.badge-cancellation{background:rgba(255,107,107,.15);color:var(--accent2);}
+    .badge-active{background:rgba(109,170,69,.15);color:var(--accent3);}
+    .badge-revoked,.badge-cancelled,.badge-suspended,.badge-expired{background:rgba(221,105,116,.15);color:var(--accent2);}
+    .badge-FREE{background:rgba(121,120,118,.15);color:var(--text2);}
+    .badge-BASIC,.badge-STARTER{background:rgba(109,170,69,.2);color:var(--accent3);}
+    .badge-PRO,.badge-PRO_PLUS{background:rgba(79,152,163,.2);color:var(--accent);}
+    .badge-ENTERPRISE{background:rgba(232,175,52,.15);color:var(--gold);}
+    .badge-purchase{background:rgba(109,170,69,.15);color:var(--accent3);}
+    .badge-renewal{background:rgba(79,152,163,.15);color:var(--accent);}
+    .badge-upgrade{background:rgba(232,175,52,.15);color:var(--gold);}
+    .badge-downgrade,.badge-cancellation{background:rgba(221,105,116,.15);color:var(--accent2);}
     .loading{text-align:center;padding:3rem;color:var(--text2);}
     .spinner{display:inline-block;width:24px;height:24px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;}
     @keyframes spin{to{transform:rotate(360deg);}}
-    .theme-toggle{background:transparent;border:1px solid var(--border);color:var(--text2);border-radius:8px;padding:.3rem .6rem;font-size:.95rem;cursor:pointer;}
+    .theme-toggle{background:transparent;border:1px solid var(--border);color:var(--text2);border-radius:8px;padding:.3rem .6rem;font-size:.95rem;cursor:pointer;transition:all .2s;}
+    .theme-toggle:hover{border-color:var(--accent);color:var(--accent);}
     @media(max-width:650px){.sidebar{width:46px;}.sidebar-brand,.sidebar-user,.sidebar-menu li a span{display:none;}.sidebar-menu li a{justify-content:center;padding:.7rem;}.main-area{padding:1rem;}}
   </style>
 </head>
@@ -97,24 +102,13 @@
   </div>
 </nav>
 
-<!-- LOGIN PAGE -->
+<!-- LOGIN PAGE (redirect to login.html) -->
 <div id="page-login" class="page active">
-  <div style="position:absolute;top:1.5rem;left:2rem;z-index:100"><a href="login.html" style="color:var(--text2);text-decoration:none;font-size:.9rem;font-weight:600">&larr; Zurück zum Login</a></div>
   <div class="center-wrap">
-    <div class="auth-card">
-      <h2>&#128272; Kunden-Portal</h2>
-      <p class="sub">OPA! Santorini Lizenzverwaltung</p>
-      <div id="login-alert"></div>
-      <div class="form-group"><label>E-Mail-Adresse</label><input type="email" id="login-email" placeholder="deine@email.de" autocomplete="email"></div>
-      <div class="form-group"><label>Passwort</label><input type="password" id="login-pass" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" autocomplete="current-password"></div>
-      <button class="btn btn-primary" style="width:100%" onclick="doLogin()">Einloggen</button>
-      <div style="text-align:center;margin-top:1rem;font-size:.85rem;color:var(--text2)">
-        Noch kein Account? 
-        <a href="login.html#register" style="color:var(--accent)">Jetzt registrieren</a>
-      </div>
-      <div style="text-align:center;margin-top:.5rem;font-size:.82rem">
-        <a href="login.html#forgot" style="color:var(--text2)">Passwort vergessen?</a>
-      </div>
+    <div class="auth-card" style="text-align:center">
+      <div class="spinner" style="margin:0 auto 1.5rem"></div>
+      <p style="color:var(--text2);font-size:.9rem">Du wirst zum Login weitergeleitet&hellip;</p>
+      <p style="margin-top:1rem"><a href="login.html" style="color:var(--accent);font-weight:600">Zur Login-Seite &rarr;</a></p>
     </div>
   </div>
 </div>
@@ -166,7 +160,7 @@
 
 <script>
 (function(){
-  var t=localStorage.getItem('portal_theme')||'dark';
+  var t=localStorage.getItem('theme')||'dark';
   document.documentElement.setAttribute('data-theme',t);
   var btn=document.getElementById('theme-btn');
   if(btn)btn.textContent=t==='dark'?'\u2600\uFE0F':'\uD83C\uDF19';
@@ -175,7 +169,7 @@ function toggleTheme(){
   var cur=document.documentElement.getAttribute('data-theme')||'dark';
   var next=cur==='dark'?'light':'dark';
   document.documentElement.setAttribute('data-theme',next);
-  localStorage.setItem('portal_theme',next);
+  localStorage.setItem('theme',next);
   var btn=document.getElementById('theme-btn');
   if(btn)btn.textContent=next==='dark'?'\u2600\uFE0F':'\uD83C\uDF19';
 }
@@ -246,9 +240,16 @@ function init(){
     }).catch(function(){
       TOKEN='';
       localStorage.removeItem('portal_token');
-      showPage('login');
+      window.location.href='login.html';
     });
   } else {
+    // No token: redirect to central login page
+    // But allow setup page (invite token) to stay
+    var params=new URLSearchParams(window.location.search);
+    if(!params.get('token')){
+      window.location.href='login.html';
+      return;
+    }
     showPage('login');
   }
 }
@@ -261,24 +262,7 @@ function showDashboard(){
   loadLicenses();
 }
 
-// ── Login ─────────────────────────────────────────────────────────────────────
-function doLogin(){
-  var email=document.getElementById('login-email').value.trim();
-  var pass=document.getElementById('login-pass').value;
-  if(!email||!pass){showAlert('login-alert','E-Mail und Passwort eingeben.','error');return;}
-  API('/login',{method:'POST',body:JSON.stringify({email:email,password:pass})})
-    .then(function(d){
-      TOKEN=d.token;
-      CUSTOMER=d.customer;
-      localStorage.setItem('portal_token',TOKEN);
-      document.getElementById('login-pass').value='';
-      showDashboard();
-    })
-    .catch(function(e){showAlert('login-alert',esc(e.message||'Login fehlgeschlagen.'),'error');});
-}
-document.addEventListener('keydown',function(e){
-  if(e.key==='Enter'&&document.getElementById('page-login').classList.contains('active'))doLogin();
-});
+// ── Login (removed — handled by login.html) ──────────────────────────────────
 
 // ── Setup Password ────────────────────────────────────────────────────────────
 function doSetupPassword(){
