@@ -37,8 +37,8 @@ router.get('/licenses', requireAuth, asyncHandler(async (req, res) => {
   let where = '1=1';
   const params = [];
   if (search) {
-    where += ' AND (license_key LIKE ? OR customer_name LIKE ?)';
-    params.push(search, search);
+    where += ' AND (license_key LIKE ? OR customer_name LIKE ? OR associated_domain LIKE ?)';
+    params.push(search, search, search);
   }
   if (expiring) {
     where += ' AND expires_at BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 30 DAY) AND status = "active"';

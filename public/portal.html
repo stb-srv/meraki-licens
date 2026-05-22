@@ -99,6 +99,7 @@
 
 <!-- LOGIN PAGE -->
 <div id="page-login" class="page active">
+  <div style="position:absolute;top:1.5rem;left:2rem;z-index:100"><a href="login.html" style="color:var(--text2);text-decoration:none;font-size:.9rem;font-weight:600">&larr; Zurück zum Login</a></div>
   <div class="center-wrap">
     <div class="auth-card">
       <h2>&#128272; Kunden-Portal</h2>
@@ -107,6 +108,13 @@
       <div class="form-group"><label>E-Mail-Adresse</label><input type="email" id="login-email" placeholder="deine@email.de" autocomplete="email"></div>
       <div class="form-group"><label>Passwort</label><input type="password" id="login-pass" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" autocomplete="current-password"></div>
       <button class="btn btn-primary" style="width:100%" onclick="doLogin()">Einloggen</button>
+      <div style="text-align:center;margin-top:1rem;font-size:.85rem;color:var(--text2)">
+        Noch kein Account? 
+        <a href="login.html#register" style="color:var(--accent)">Jetzt registrieren</a>
+      </div>
+      <div style="text-align:center;margin-top:.5rem;font-size:.82rem">
+        <a href="login.html#forgot" style="color:var(--text2)">Passwort vergessen?</a>
+      </div>
     </div>
   </div>
 </div>
@@ -326,14 +334,18 @@ function loadLicenses(){
       var daysColor=days<0?'color:var(--accent2)':days<30?'color:var(--gold)':'';
       var statusBadge='<span class="badge badge-'+esc(l.status)+'">'+esc(l.status)+'</span>';
       var typeBadge='<span class="badge badge-'+esc(l.type)+'">'+esc(l.type)+'</span>';
+      var warnHtml = (days > 0 && days <= 30)
+        ? '<div style="background:rgba(218,113,1,.12);color:#da7101;border-radius:6px;padding:.4rem .7rem;font-size:.8rem;margin-bottom:1rem">&#9888;&#65039; Läuft in '+days+' Tagen ab</div>'
+        : (days <= 0 ? '<div style="background:rgba(161,44,123,.1);color:#a12c7b;border-radius:6px;padding:.4rem .7rem;font-size:.8rem;margin-bottom:1rem">&#10060; Abgelaufen</div>' : '');
       return '<div class="lic-card">'+
-        '<div class="lic-header">'+
+        '<div class="lic-header" style="margin-bottom:'+(warnHtml?'.5rem':'1rem')+'">'+
           '<div>'+
             '<div style="font-size:.75rem;color:var(--text2);margin-bottom:.2rem">Lizenzschlüssel (klicken zum Kopieren)</div>'+
             '<div class="lic-key" onclick="copyKey(this,\''+esc(l.license_key)+'\')" title="Klicken zum Kopieren">'+esc(l.license_key)+'</div>'+
           '</div>'+
           '<div style="display:flex;gap:.5rem;align-items:center">'+typeBadge+statusBadge+'</div>'+
         '</div>'+
+        warnHtml +
         '<div class="lic-meta">'+
           '<div class="lic-meta-item"><div class="lmi-label">Ablaufdatum</div><div class="lmi-value" style="'+daysColor+'">'+fmtDateShort(l.expires_at)+'</div></div>'+
           '<div class="lic-meta-item"><div class="lmi-label">Verbleibend</div><div class="lmi-value" style="'+daysColor+'">'+(days>=0?days+' Tage':'Abgelaufen')+'</div></div>'+

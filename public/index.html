@@ -1456,6 +1456,9 @@
           <input type="password" id="login-pass" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" autocomplete="current-password">
         </div>
         <button class="btn btn-primary" style="width:100%" onclick="doLogin()">Einloggen</button>
+        <div style="text-align:center;margin-top:1.5rem;font-size:.85rem;color:var(--text2)">
+          <a href="login.html" style="color:var(--text2);text-decoration:none;">&larr; Zur Login-Seite</a>
+        </div>
       </div>
       <div id="2fa-form-step" style="display:none">
         <div class="form-group">
@@ -1551,7 +1554,7 @@
           </div>
         </div>
         <div class="toolbar">
-          <input type="text" id="lic-search" placeholder="Suche nach Key, Name oder Tag&hellip;" oninput="debounceSearch()">
+          <input type="text" id="lic-search" placeholder="Key, Kundenname, Domain suchen&hellip;" oninput="debounceSearch()">
           <button class="btn btn-ghost btn-sm" onclick="loadLicenses()">Neu laden</button>
         </div>
         <div class="table-wrap" id="lic-table"><div class="loading"><div class="spinner"></div></div></div>
@@ -1689,6 +1692,7 @@
   </div>
   <div class="form-group"><label>Lizenztyp</label>
     <select id="nl-type"><option value="FREE">FREE</option><option value="BASIC">BASIC</option><option value="PRO" selected>PRO</option><option value="ENTERPRISE">ENTERPRISE</option></select>
+    <div id="nl-plan-info" style="font-size:.78rem;color:var(--text2);margin-top:.3rem"></div>
   </div>
   <div class="form-group"><label>Kundenname</label><input type="text" id="nl-name" placeholder="Max Mustermann GmbH"></div>
   <div class="form-group"><label>Domain (z.B. meinrestaurant.de oder *)</label><input type="text" id="nl-domain" placeholder="meinrestaurant.de"></div>
@@ -1739,8 +1743,10 @@
     </select>
   </div>
   <div class="form-group"><label>Notizen</label><textarea id="ec-notes"></textarea></div>
+  <div id="ec-licenses-block" style="margin-top:1.5rem; border-top:1px solid var(--border); padding-top:1rem;"></div>
   <div class="modal-footer">
     <button class="btn btn-ghost" onclick="closeModal('modal-edit-customer')">Abbrechen</button>
+    <button class="btn btn-ghost" onclick="openCreateLicenseForCustomerFromEdit()">+ Lizenz erstellen</button>
     <button class="btn btn-primary" onclick="saveCustomer()">Speichern</button>
   </div>
 </div></div>
@@ -2913,8 +2919,56 @@ function openEditCustomer(idx){
   var payEl=document.getElementById('ec-payment');
   if(payEl)payEl.value=c.payment_status||'unknown';
   document.getElementById('ec-alert').innerHTML='';
+  
+  var licBlock = document.getElementById('ec-licenses-block');
+  if (licBlock) {
+    licBlock.innerHTML = '<div class="spinner" style="width:20px;height:20px;margin-bottom:10px;display:inline-block;vertical-align:middle"></div> <span style="font-size:.85rem;color:var(--text2);vertical-align:middle;margin-left:8px">Lade Lizenzen...</span>';
+    API('/admin/licenses?search=' + encodeURIComponent(c.name)).then(function(d){
+      var html = '<div style="font-weight:600;margin-bottom:.5rem;font-size:.9rem">Lizenzen des Kunden</div>';
+      var customerLics = (d.licenses || []).filter(function(l) { return l.customer_id === c.id; });
+      if(customerLics.length === 0) {
+        html += '<div style="font-size:.85rem;color:var(--text2)">Keine Lizenzen gefunden.</div>';
+      } else {
+        html += '<table style="width:100%;font-size:.8rem;border-collapse:collapse;margin-bottom:.5rem"><tbody>';
+        customerLics.forEach(function(l){
+          html += '<tr style="border-bottom:1px solid var(--border)"><td style="padding:.4rem 0;font-family:monospace;color:var(--primary)">' + esc(l.license_key) + '</td><td style="padding:.4rem 0;text-align:right"><span class="badge badge-' + esc(l.status) + '">' + esc(l.status) + '</span></td></tr>';
+        });
+        html += '</tbody></table>';
+      }
+      licBlock.innerHTML = html;
+    }).catch(function(){
+      licBlock.innerHTML = '<div class="alert alert-error" style="padding:.4rem;font-size:.8rem">Fehler beim Laden der Lizenzen.</div>';
+    });
+  }
+  
   openModal('modal-edit-customer');
 }
+
+function openCreateLicenseForCustomerFromEdit() {
+  var id = document.getElementById('ec-id').value;
+  closeModal('modal-edit-customer');
+  setTimeout(function(){ openCreateLicenseForCustomer(id); }, 150);
+}
+
+var PLANS_CACHE = null;
+function loadPlanInfo(type) {
+  if (!type) return;
+  var el = document.getElementById('nl-plan-info');
+  if (!el) return;
+  function render(plans) {
+    var p = plans[type];
+    if (!p) { el.innerHTML = ''; return; }
+    el.innerHTML = '&#128230; ' + esc(p.label||type) + ' &mdash; ' + (p.menu_items||'?') + ' Gerichte, ' + (p.max_tables||'?') + ' Tische, ' + (p.expires_days||'?') + ' Tage Laufzeit';
+  }
+  if (PLANS_CACHE) { render(PLANS_CACHE); return; }
+  API('/admin/plans').then(function(d){ PLANS_CACHE = d; render(d); }).catch(function(){});
+}
+
+// Event listener safely attached (will be attached after DOM is ready)
+window.addEventListener('DOMContentLoaded', function() {
+  var typeEl = document.getElementById('nl-type');
+  if (typeEl) typeEl.addEventListener('change', function(){ loadPlanInfo(this.value); });
+});
 
 function openCreateLicenseForCustomer(customerId) {
   var c = CUSTS.find(function(x){ return x.id === customerId; });
@@ -2928,7 +2982,10 @@ function openCreateLicenseForCustomer(customerId) {
   document.getElementById('nl-expires').value = '';
   
   var typeEl = document.getElementById('nl-type');
-  if (typeEl) typeEl.value = 'FREE';
+  if (typeEl) {
+    typeEl.value = 'FREE';
+    loadPlanInfo(typeEl.value);
+  }
 
   var infoEl = document.getElementById('nl-customer-info');
   var displayEl = document.getElementById('nl-customer-display');

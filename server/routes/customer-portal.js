@@ -539,7 +539,7 @@ router.get('/invoices/:id/pdf', requirePortalAuth, async (req, res) => {
 
 // ── POST /register ────────────────────────────────────────────────────────────
 router.post('/register', registerLimiter, asyncHandler(async (req, res) => {
-    const { name, email, password, company, billing_street, billing_city, billing_zip, billing_country, tax_id } = req.body;
+    const { name, email, password, company, phone, billing_street, billing_city, billing_zip, billing_country, tax_id } = req.body;
 
     if (!name || typeof name !== 'string' || name.trim().length < 2) {
         return res.status(400).json({ success: false, message: 'Name muss mindestens 2 Zeichen lang sein.' });
@@ -581,9 +581,9 @@ router.post('/register', registerLimiter, asyncHandler(async (req, res) => {
         INSERT INTO customers (
             id, name, email, portal_username, password_hash, must_change_password,
             verified, email_verify_token, email_verify_expires,
-            company, billing_street, billing_city, billing_zip, billing_country, tax_id,
+            company, phone, billing_street, billing_city, billing_zip, billing_country, tax_id,
             payment_status
-        ) VALUES (?, ?, ?, ?, ?, 0, 0, ?, ?, ?, ?, ?, ?, ?, ?, 'unknown')
+        ) VALUES (?, ?, ?, ?, ?, 0, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'unknown')
     `, [
         customerId,
         name.trim(),
@@ -593,6 +593,7 @@ router.post('/register', registerLimiter, asyncHandler(async (req, res) => {
         token,
         tokenExpires,
         company ? company.trim() : null,
+        phone ? String(phone).trim() : null,
         billing_street ? billing_street.trim() : null,
         billing_city ? billing_city.trim() : null,
         billing_zip ? String(billing_zip).trim() : null,
@@ -608,6 +609,8 @@ router.post('/register', registerLimiter, asyncHandler(async (req, res) => {
         verify_url: verifyUrl,
         email: emailClean
     });
+
+    await addAuditLog('customer_self_registered', { email: emailClean, company: company ? company.trim() : null }, name.trim());
 
     res.json({ success: true, message: 'Registrierung erfolgreich. Bitte prüfe deine E-Mails.' });
 }));
@@ -634,6 +637,38 @@ router.post('/verify-email', verifyLimiter, asyncHandler(async (req, res) => {
     );
 
     res.json({ success: true, message: 'E-Mail bestätigt. Du kannst dich jetzt einloggen.' });
+}));
+
+// ── POST /forgot-password ──────────────────────────────────────────────────
+router.post('/forgot-password', registerLimiter, asyncHandler(async (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ success: false, message: 'E-Mail erforderlich.' });
+
+  // Immer gleiche Response — kein User-Enumeration
+  res.json({ success: true, message: 'Falls ein Account existiert, wurde eine Reset-Mail gesendet.' });
+
+  try {
+    const [[customer]] = await db.query(
+      'SELECT id, name, email FROM customers WHERE email = ? AND (archived IS NULL OR archived = 0)', 
+      [email.toLowerCase().trim()]
+    );
+    if (!customer) return; // Stille Fehlerbehandlung
+
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const expires = new Date(Date.now() + 60 * 60 * 1000); // 1 Stunde
+    await db.query(
+      'UPDATE customers SET portal_token = ?, portal_token_expires = ? WHERE id = ?',
+      [resetToken, expires, customer.id]
+    );
+
+    const portalUrl = (process.env.PORTAL_URL || '').replace(/\/$/, '');
+    await sendTemplateMail('passwordReset', customer.email, {
+      name: customer.name,
+      reset_url: `${portalUrl}/login.html?reset=${resetToken}`
+    });
+  } catch (e) {
+    console.error('[Portal/forgot-password]', e.message);
+  }
 }));
 
 // ── GET /plans ────────────────────────────────────────────────────────────────
