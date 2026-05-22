@@ -2822,8 +2822,7 @@ function viewLicense(key){
 }
 function saveStatus(key){
   var status=document.getElementById('edit-status-sel').value;
-  var tags=document.getElementById('edit-tags').value.split(',').map(function(t){return t.trim();}).filter(function(t){return t!=='';});
-  API('/admin/licenses/'+encodeURIComponent(key)+'/status',{method:'PATCH',body:JSON.stringify({status:status, tags:tags})})
+  API('/admin/licenses/'+encodeURIComponent(key)+'/status',{method:'PATCH',body:JSON.stringify({status:status})})
     .then(function(){closeModal('modal-edit-license');loadLicenses();})
     .catch(function(e){showError(e.message||String(e));});
 }

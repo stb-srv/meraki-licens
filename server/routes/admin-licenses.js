@@ -164,11 +164,6 @@ router.patch('/licenses/:key/status', requireAuth, asyncHandler(async (req, res)
   if (!rows[0]) return res.status(404).json({ success: false });
   const l = rows[0];
   await db.query('UPDATE licenses SET status = ? WHERE license_key = ?', [req.body.status, req.params.key]);
-  
-  if (req.body.tags !== undefined) {
-    await db.query('UPDATE licenses SET tags = ? WHERE license_key = ?', 
-      [JSON.stringify(req.body.tags || []), req.params.key]);
-  }
 
   if (['revoked', 'cancelled', 'suspended'].includes(req.body.status) && l.customer_id) {
     await db.query('DELETE FROM customer_sessions WHERE customer_id = ?', [l.customer_id]);
