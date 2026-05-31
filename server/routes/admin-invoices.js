@@ -169,6 +169,7 @@ router.post('/invoices/:id/send', requireAuth, asyncHandler(async (req, res) => 
     const pdfPath    = path.join(storageDir, filename);
     await generateInvoicePDF({ ...settings, ...invoice }, pdfPath);
 
+    let mailError = null;
     if (invoice.customer_email) {
         try {
             const portalUrl = (process.env.APP_URL || `http://localhost:${process.env.PORT || 4000}`).replace(/\/$/, '');
@@ -182,16 +183,27 @@ router.post('/invoices/:id/send', requireAuth, asyncHandler(async (req, res) => 
             await sendMail({ to: invoice.customer_email, subject, html, text,
                 attachments: [{ filename, path: pdfPath, contentType: 'application/pdf' }] });
         } catch (mailErr) {
+            mailError = mailErr.message;
             console.error('[admin/invoices/send] Email failed:', mailErr.message);
         }
+    } else {
+        mailError = 'Kunde hat keine E-Mail-Adresse hinterlegt.';
     }
 
     db.query(
         `UPDATE invoices SET status='sent', sent_at=datetime('now'), pdf_path=? WHERE id=?`,
         [pdfPath, invoiceId]
     );
-    await addAuditLog('invoice_sent', { invoice_id: invoiceId, invoice_number: invoice.invoice_number, customer_id: invoice.customer_id }, req.admin.username);
-    res.json({ success: true, message: 'Rechnung als gesendet markiert und E-Mail verschickt.', pdf_path: pdfPath });
+    await addAuditLog('invoice_sent', { invoice_id: invoiceId, invoice_number: invoice.invoice_number, customer_id: invoice.customer_id, mail_error: mailError }, req.admin.username);
+    res.json({
+        success: true,
+        pdf_path: pdfPath,
+        mail_sent: !mailError,
+        mail_error: mailError || undefined,
+        message: mailError
+            ? `Rechnung als gesendet markiert. ⚠ E-Mail konnte nicht gesendet werden: ${mailError}`
+            : 'Rechnung als gesendet markiert und E-Mail erfolgreich verschickt.'
+    });
 }));
 
 // ── POST /invoices/:id/resend ────────────────────────────────────────────────
@@ -199,19 +211,22 @@ router.post('/invoices/:id/resend', requireAuth, asyncHandler(async (req, res) =
     const invoiceId = req.params.id;
     const invoice = getInvoiceWithItems(invoiceId);
     if (!invoice) return res.status(404).json({ success: false, message: 'Rechnung nicht gefunden.' });
-    if (!['sent', 'overdue', 'paid'].includes(invoice.status))
-        return res.status(400).json({ success: false, message: 'Rechnung kann in diesem Status nicht erneut gesendet werden.' });
+    // Auch Entwürfe können gesendet werden (erster Versand)
+    if (!['draft', 'sent', 'overdue', 'paid'].includes(invoice.status))
+        return res.status(400).json({ success: false, message: 'Rechnung kann in diesem Status nicht gesendet werden.' });
+
+    const [[settings]] = db.query('SELECT * FROM invoice_settings WHERE id = 1');
+    if (!settings) return res.status(500).json({ success: false, message: 'Rechnungs-Einstellungen fehlen.' });
 
     let pdfPath  = invoice.pdf_path;
     const filename   = `Rechnung-${invoice.invoice_number}.pdf`;
     const storageDir = path.join(process.env.STORAGE_PATH || './storage', 'invoices');
     if (!pdfPath || !fs.existsSync(pdfPath)) {
         pdfPath = path.join(storageDir, filename);
-        const [[settings]] = db.query('SELECT * FROM invoice_settings WHERE id = 1');
-        if (!settings) return res.status(500).json({ success: false, message: 'Rechnungs-Einstellungen fehlen.' });
         await generateInvoicePDF({ ...settings, ...invoice }, pdfPath);
     }
 
+    let mailError = null;
     if (invoice.customer_email) {
         try {
             const portalUrl = (process.env.APP_URL || `http://localhost:${process.env.PORT || 4000}`).replace(/\/$/, '');
@@ -226,17 +241,30 @@ router.post('/invoices/:id/resend', requireAuth, asyncHandler(async (req, res) =
             await sendMail({ to: invoice.customer_email, subject, html, text,
                 attachments: [{ filename, path: pdfPath, contentType: 'application/pdf' }] });
         } catch (mailErr) {
+            mailError = mailErr.message;
             console.error('[admin/invoices/resend] Email failed:', mailErr.message);
         }
+    } else {
+        mailError = 'Kunde hat keine E-Mail-Adresse hinterlegt.';
     }
 
+    // Status auf 'sent' setzen (auch wenn vorher 'draft')
     db.query(
-        `UPDATE invoices SET resent_at=datetime('now'), resent_count=COALESCE(resent_count,0)+1, pdf_path=? WHERE id=?`,
+        `UPDATE invoices SET status='sent', sent_at=COALESCE(sent_at,datetime('now')),
+         resent_at=datetime('now'), resent_count=COALESCE(resent_count,0)+1, pdf_path=? WHERE id=?`,
         [pdfPath, invoiceId]
     );
     const newResentCount = (invoice.resent_count || 0) + 1;
-    await addAuditLog('invoice_resent', { invoice_id: invoiceId, invoice_number: invoice.invoice_number, customer_id: invoice.customer_id, resent_count: newResentCount }, req.admin.username);
-    res.json({ success: true, message: 'Rechnung erfolgreich erneut gesendet.', resent_count: newResentCount });
+    await addAuditLog('invoice_resent', { invoice_id: invoiceId, invoice_number: invoice.invoice_number, customer_id: invoice.customer_id, resent_count: newResentCount, mail_error: mailError }, req.admin.username);
+    res.json({
+        success: true,
+        resent_count: newResentCount,
+        mail_sent: !mailError,
+        mail_error: mailError || undefined,
+        message: mailError
+            ? `Rechnung als gesendet markiert. ⚠ E-Mail konnte nicht gesendet werden: ${mailError}`
+            : 'Rechnung erfolgreich gesendet.'
+    });
 }));
 
 // ── POST /invoices/:id/mark-paid ─────────────────────────────────────────────

@@ -2376,7 +2376,10 @@ function downloadInvoicePDF(id, invoiceNumber) {
 
 function sendInvoice(id) {
   API('/admin/invoices/' + id + '/send', { method: 'POST' })
-    .then(function() {
+    .then(function(d) {
+      if (d && d.mail_error) {
+        showError('Rechnung als gesendet markiert, aber E-Mail fehlgeschlagen:\n' + d.mail_error + '\n\nBitte SMTP-Einstellungen unter ⚙ prüfen.');
+      }
       loadInvoices();
     })
     .catch(function(e) {
@@ -2386,12 +2389,16 @@ function sendInvoice(id) {
 
 function resendInvoice(id) {
   API('/admin/invoices/' + id + '/resend', { method: 'POST' })
-    .then(function() {
-      alert('Rechnung erfolgreich erneut gesendet.');
+    .then(function(d) {
+      if (d && d.mail_error) {
+        showError('Rechnung als gesendet markiert, aber E-Mail fehlgeschlagen:\n' + d.mail_error + '\n\nBitte SMTP-Einstellungen unter ⚙ prüfen.');
+      } else {
+        alert('Rechnung erfolgreich gesendet.');
+      }
       loadInvoices();
     })
     .catch(function(e) {
-      showError('Fehler beim erneuten Senden der Rechnung: ' + (e.message || String(e)));
+      showError('Fehler beim Senden der Rechnung: ' + (e.message || String(e)));
     });
 }
 
