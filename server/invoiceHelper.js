@@ -106,7 +106,7 @@ export function createInvoiceFromLicense(licenseKey, createdBy = 'system') {
 }
 
 export function getInvoiceWithItems(invoiceId) {
-    const [invoice] = query(
+    const [[invoice]] = query(
         `SELECT i.*,
                 c.name AS customer_name,
                 c.email AS customer_email,
