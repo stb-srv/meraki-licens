@@ -1196,7 +1196,7 @@
     <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn" title="Theme wechseln">
       <svg id="theme-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
     </button>
-    <button class="btn btn-primary" onclick="openAdmin()">Admin Login</button>
+    <button class="btn btn-primary" onclick="window.location.href='login.html'">Login</button>
   </div>
 </nav>
 
@@ -1208,7 +1208,7 @@
       <h1>Sichere Lizenzverwaltung für OPA Santorini</h1>
       <p>Ein dedizierter REST-API-Lizenzserver für die OPA-Santorini-Gastronomiesoftware &mdash; mit JWT-basierter Validierung, Offline-Unterstützung und zentralem Admin-Panel.</p>
       <div class="hero-btns">
-        <button class="btn btn-primary" onclick="openAdmin()">Admin Login</button>
+        <button class="btn btn-primary" onclick="window.location.href='login.html'">Login</button>
         <button class="btn btn-ghost" onclick="showPublicPage('features')">Funktionen entdecken</button>
         <button class="btn btn-ghost" onclick="showPublicPage('api')">API-Dokumentation</button>
       </div>
@@ -3528,7 +3528,7 @@ function deleteWebhook(id){
   });
 }
 
-if(TOKEN&&window.location.hash==='#admin')openAdmin();
+if(TOKEN)openAdmin();
 
 function showError(msg, title) {
   document.getElementById('modal-error-title').textContent = title || 'Fehler';

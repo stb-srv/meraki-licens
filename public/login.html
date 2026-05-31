@@ -276,7 +276,12 @@ function doAdminLogin(){
     .then(function(r){return r.json().then(function(d){if(!r.ok)throw d;return d;});})
     .then(function(d){
       if(d.two_factor_required){_adminTempToken=d.temp_token;showPanel('admin','2fa');}
-      else{sessionStorage.setItem('admin_token',d.token);window.location.href='index.html#admin';}
+      else{
+        sessionStorage.setItem('admin_token', d.token);
+        sessionStorage.setItem('admin_role',  d.role     || '');
+        sessionStorage.setItem('admin_user',  d.username || '');
+        window.location.href='index.html';
+      }
     }).catch(function(e){showAlert('admin-login-alert',esc(e.message||'Login fehlgeschlagen.'));});
 }
 
@@ -286,7 +291,12 @@ function doAdmin2FA(){
   fetch('/api/admin/login/2fa',{method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({temp_token:_adminTempToken,code:code})})
     .then(function(r){return r.json().then(function(d){if(!r.ok)throw d;return d;});})
-    .then(function(d){sessionStorage.setItem('admin_token',d.token);window.location.href='index.html#admin';})
+    .then(function(d){
+    sessionStorage.setItem('admin_token', d.token);
+    sessionStorage.setItem('admin_role',  d.role     || '');
+    sessionStorage.setItem('admin_user',  d.username || '');
+    window.location.href='index.html';
+  })
     .catch(function(e){showAlert('admin-2fa-alert',esc(e.message||'Code ungültig.'));});
 }
 
