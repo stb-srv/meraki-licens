@@ -330,4 +330,19 @@ router.get('/health', (req, res) => {
     }
 });
 
+// ── GET /plans (öffentlich) ───────────────────────────────────────────────────
+router.get('/plans', asyncHandler(async (req, res) => {
+    const [rows] = db.query('SELECT * FROM plan_pricing WHERE active = 1 ORDER BY sort_order ASC');
+    res.json({ success: true, plans: rows.map(p => ({
+        ...p,
+        features: parseJsonField(p.features, [])
+    }))});
+}));
+
+// ── GET /faq (öffentlich) ─────────────────────────────────────────────────────
+router.get('/faq', asyncHandler(async (req, res) => {
+    const [rows] = db.query('SELECT * FROM faq WHERE active = 1 ORDER BY sort_order ASC');
+    res.json({ success: true, faq: rows });
+}));
+
 export default router;

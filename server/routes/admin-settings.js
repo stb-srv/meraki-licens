@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import db from '../db.js';
 import { buildTransporter, sendTemplateMail, getActiveSmtpConfig } from '../mailer/index.js';
 import { PLAN_DEFINITIONS } from '../plans.js';
@@ -191,5 +192,76 @@ router.get('/webhooks/signing-info', requireAuth, (req, res) => {
         description: 'Jeder Webhook-Request enthält den Header "X-OPA-Signature" (wenn ein Secret konfiguriert ist).'
     });
 });
+
+// ── Plan-Preise ───────────────────────────────────────────────────────────────
+router.get('/plan-pricing', requireAuth, asyncHandler(async (req, res) => {
+    const [rows] = db.query('SELECT * FROM plan_pricing ORDER BY sort_order ASC');
+    res.json({ plans: rows });
+}));
+
+router.put('/plan-pricing/:plan_id', requireAuth, requireSuperAdmin, asyncHandler(async (req, res) => {
+    const { label, description, price, currency, features, active, sort_order } = req.body;
+    const { plan_id } = req.params;
+    const [[existing]] = db.query('SELECT plan_id FROM plan_pricing WHERE plan_id = ?', [plan_id]);
+    const featuresJson = Array.isArray(features) ? JSON.stringify(features) : (features || '[]');
+    if (existing) {
+        db.query(
+            `UPDATE plan_pricing SET label=?, description=?, price=?, currency=?, features=?,
+             active=?, sort_order=?, updated_at=datetime('now') WHERE plan_id=?`,
+            [label, description || null, parseFloat(price) || 0, currency || 'EUR',
+             featuresJson, active ? 1 : 0, sort_order ?? 0, plan_id]
+        );
+    } else {
+        db.query(
+            `INSERT INTO plan_pricing (plan_id,label,description,price,currency,features,active,sort_order)
+             VALUES (?,?,?,?,?,?,?,?)`,
+            [plan_id, label, description || null, parseFloat(price) || 0, currency || 'EUR',
+             featuresJson, active ? 1 : 0, sort_order ?? 0]
+        );
+    }
+    await addAuditLog('plan_pricing_updated', { plan_id, by: req.admin.username }, req.admin.username);
+    const [[updated]] = db.query('SELECT * FROM plan_pricing WHERE plan_id = ?', [plan_id]);
+    res.json({ success: true, plan: updated });
+}));
+
+// ── FAQ ────────────────────────────────────────────────────────────────────────
+router.get('/faq', requireAuth, asyncHandler(async (req, res) => {
+    const [rows] = db.query('SELECT * FROM faq ORDER BY sort_order ASC, created_at ASC');
+    res.json({ faq: rows });
+}));
+
+router.post('/faq', requireAuth, asyncHandler(async (req, res) => {
+    const { question, answer, category, sort_order, active } = req.body;
+    if (!question || !answer) return res.status(400).json({ success: false, message: 'Frage und Antwort sind Pflichtfelder.' });
+    const id = crypto.randomUUID();
+    db.query(
+        `INSERT INTO faq (id, question, answer, category, sort_order, active) VALUES (?, ?, ?, ?, ?, ?)`,
+        [id, question, answer, category || 'Allgemein', sort_order ?? 99, active !== false ? 1 : 0]
+    );
+    await addAuditLog('faq_created', { id, by: req.admin.username }, req.admin.username);
+    const [[row]] = db.query('SELECT * FROM faq WHERE id = ?', [id]);
+    res.json({ success: true, faq: row });
+}));
+
+router.put('/faq/:id', requireAuth, asyncHandler(async (req, res) => {
+    const { question, answer, category, sort_order, active } = req.body;
+    const [[existing]] = db.query('SELECT id FROM faq WHERE id = ?', [req.params.id]);
+    if (!existing) return res.status(404).json({ success: false, message: 'FAQ nicht gefunden.' });
+    db.query(
+        `UPDATE faq SET question=?, answer=?, category=?, sort_order=?, active=?, updated_at=datetime('now') WHERE id=?`,
+        [question, answer, category || 'Allgemein', sort_order ?? 0, active !== false ? 1 : 0, req.params.id]
+    );
+    await addAuditLog('faq_updated', { id: req.params.id, by: req.admin.username }, req.admin.username);
+    const [[row]] = db.query('SELECT * FROM faq WHERE id = ?', [req.params.id]);
+    res.json({ success: true, faq: row });
+}));
+
+router.delete('/faq/:id', requireAuth, asyncHandler(async (req, res) => {
+    const [[existing]] = db.query('SELECT id FROM faq WHERE id = ?', [req.params.id]);
+    if (!existing) return res.status(404).json({ success: false, message: 'FAQ nicht gefunden.' });
+    db.query('DELETE FROM faq WHERE id = ?', [req.params.id]);
+    await addAuditLog('faq_deleted', { id: req.params.id, by: req.admin.username }, req.admin.username);
+    res.json({ success: true });
+}));
 
 export default router;

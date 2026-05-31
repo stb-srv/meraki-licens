@@ -1191,6 +1191,8 @@
   <div class="nav-links">
     <a onclick="showPublicPage('home')">Start</a>
     <a onclick="showPublicPage('features')">Funktionen</a>
+    <a onclick="showPublicPage('pricing')">Preise</a>
+    <a onclick="showPublicPage('faq')">FAQ</a>
     <a onclick="showPublicPage('api')">API</a>
     <a onclick="showPublicPage('legal')">Rechtliches</a>
     <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn" title="Theme wechseln">
@@ -1410,6 +1412,30 @@
     </section>
   </div>
 
+  <!-- ── Pricing ───────────────────────────────────────────────────────── -->
+  <div id="pub-pricing" class="page">
+    <section style="max-width:1100px;margin:0 auto;padding:4rem 2rem">
+      <div class="section-label">Preise</div>
+      <div class="section-title">Der richtige Plan für dein Restaurant</div>
+      <p style="text-align:center;color:var(--text2);margin-bottom:2.5rem;max-width:520px;margin-left:auto;margin-right:auto;">Alle Pläne jährlich abgerechnet. Keine versteckten Kosten. Upgrade jederzeit möglich.</p>
+      <div id="pub-plan-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:1.5rem;">
+        <div style="text-align:center;padding:3rem;color:var(--text2)">Lädt…</div>
+      </div>
+      <p style="text-align:center;margin-top:2rem;color:var(--text2);font-size:.85rem;">Fragen zu den Plänen? <a onclick="showPublicPage('faq')" style="color:var(--accent);cursor:pointer">Schau in unsere FAQ</a> oder <a href="login.html#register" style="color:var(--accent)">registriere dich kostenlos</a>.</p>
+    </section>
+  </div>
+
+  <!-- ── FAQ ────────────────────────────────────────────────────────────── -->
+  <div id="pub-faq" class="page">
+    <section style="max-width:780px;margin:0 auto;padding:4rem 2rem">
+      <div class="section-label">FAQ</div>
+      <div class="section-title">Häufige Fragen</div>
+      <div id="pub-faq-content" style="margin-top:2rem">
+        <div style="text-align:center;padding:2rem;color:var(--text2)">Lädt…</div>
+      </div>
+    </section>
+  </div>
+
   <div id="pub-legal" class="page">
     <section style="max-width:800px;margin:0 auto;padding:4rem 2rem">
       <div class="section-title">Rechtliches</div>
@@ -1517,6 +1543,8 @@
         <li><a onclick="switchTab('users')" id="tab-btn-users"><i data-lucide="user-cog"></i> <span>Admin-User</span></a></li>
         <li><a onclick="switchTab('smtp')" id="tab-btn-smtp"><i data-lucide="mail"></i> <span>SMTP</span></a></li>
         <li><a onclick="switchTab('webhooks')" id="tab-btn-webhooks"><i data-lucide="webhook"></i> <span>Webhooks</span></a></li>
+        <li><a onclick="switchTab('plans')" id="tab-btn-plans"><i data-lucide="tag"></i> <span>Pläne & Preise</span></a></li>
+        <li><a onclick="switchTab('faq')" id="tab-btn-faq"><i data-lucide="help-circle"></i> <span>FAQ</span></a></li>
         <hr class="sidebar-sep">
         <li><a onclick="closeAdmin()"><i data-lucide="home"></i> <span>Startseite</span></a></li>
         <li><a onclick="doLogout()"><i data-lucide="log-out"></i> <span>Logout</span></a></li>
@@ -1693,6 +1721,25 @@
         <div id="smtp-content"><div class="loading"><div class="spinner"></div></div></div>
       </div>
 
+      <!-- ── Pläne & Preise ──────────────────────────────────────────────── -->
+      <div id="tab-plans" class="tab-panel">
+        <div class="dash-header">
+          <h2>Pläne &amp; Preise</h2>
+          <button class="btn btn-ghost btn-sm" onclick="loadAdminPlans()">&#128260; Aktualisieren</button>
+        </div>
+        <p style="color:var(--text2);font-size:.85rem;margin-bottom:1.2rem;">Preise und Beschreibungen sind live — Änderungen werden sofort auf der Website und im Kunden-Portal übernommen.</p>
+        <div id="admin-plans-content"><div class="loading"><div class="spinner"></div></div></div>
+      </div>
+
+      <!-- ── FAQ ────────────────────────────────────────────────────────── -->
+      <div id="tab-faq" class="tab-panel">
+        <div class="dash-header">
+          <h2>FAQ</h2>
+          <button class="btn btn-primary btn-sm" onclick="openFaqModal()">+ Neue Frage</button>
+        </div>
+        <div id="admin-faq-content"><div class="loading"><div class="spinner"></div></div></div>
+      </div>
+
       <div id="tab-webhooks" class="tab-panel">
         <div class="dash-header">
           <h2>Webhooks</h2>
@@ -1820,6 +1867,54 @@
   <div class="modal-footer">
     <button class="btn btn-ghost" onclick="closeModal('modal-edit-user')">Abbrechen</button>
     <button class="btn btn-primary" onclick="saveUserEdit()">Speichern</button>
+  </div>
+</div></div>
+
+<!-- Modal: Plan bearbeiten -->
+<div class="modal-overlay" id="modal-edit-plan"><div class="modal" style="max-width:540px;">
+  <h3>Plan bearbeiten</h3>
+  <input type="hidden" id="ep-plan-id">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+    <div class="form-group"><label>Anzeigename *</label><input type="text" id="ep-label" placeholder="z.B. Pro"></div>
+    <div class="form-group"><label>Preis (EUR/Jahr) *</label><input type="number" step="0.01" id="ep-price" placeholder="59.00"></div>
+  </div>
+  <div class="form-group"><label>Kurzbeschreibung</label><input type="text" id="ep-description" placeholder="Kurze Beschreibung des Plans"></div>
+  <div class="form-group">
+    <label>Features <small style="color:var(--text2);font-weight:400">(eine pro Zeile)</small></label>
+    <textarea id="ep-features" rows="6" placeholder="150 Gerichte im Menü&#10;25 Tische&#10;Online-Reservierungen"></textarea>
+  </div>
+  <div style="display:flex;gap:1rem;align-items:center;">
+    <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-size:.88rem;">
+      <input type="checkbox" id="ep-active" style="width:auto"> Im Shop anzeigen
+    </label>
+    <div class="form-group" style="margin:0;flex:1"><label>Sortierung</label><input type="number" id="ep-sort" placeholder="0" style="width:80px"></div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-ghost" onclick="closeModal('modal-edit-plan')">Abbrechen</button>
+    <button class="btn btn-primary" onclick="savePlan()">Speichern</button>
+  </div>
+</div></div>
+
+<!-- Modal: FAQ bearbeiten/erstellen -->
+<div class="modal-overlay" id="modal-edit-faq"><div class="modal" style="max-width:560px;">
+  <h3 id="faq-modal-title">Neue FAQ-Frage</h3>
+  <input type="hidden" id="ef-id">
+  <div class="form-group"><label>Frage *</label><input type="text" id="ef-question" placeholder="Was bedeutet…?"></div>
+  <div class="form-group"><label>Antwort *</label><textarea id="ef-answer" rows="5" placeholder="Ausführliche Antwort…"></textarea></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+    <div class="form-group"><label>Kategorie</label>
+      <select id="ef-category">
+        <option>Allgemein</option><option>Lizenz & Pläne</option><option>Abrechnung</option><option>Technik</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Sortierung</label><input type="number" id="ef-sort" placeholder="0"></div>
+  </div>
+  <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-size:.88rem;margin-bottom:1rem;">
+    <input type="checkbox" id="ef-active" checked style="width:auto"> Aktiv (öffentlich sichtbar)
+  </label>
+  <div class="modal-footer">
+    <button class="btn btn-ghost" onclick="closeModal('modal-edit-faq')">Abbrechen</button>
+    <button class="btn btn-primary" onclick="saveFaq()">Speichern</button>
   </div>
 </div></div>
 
@@ -2699,6 +2794,8 @@ function showPublicPage(name){
   document.getElementById('main-nav').style.display='';
   document.getElementById('page-admin').classList.remove('active');
   window.scrollTo(0,0);
+  if(name==='pricing') loadPublicPricing();
+  if(name==='faq')     loadPublicFaq();
 }
 function showLegalTab(name){
   document.querySelectorAll('.tab-panel').forEach(function(p){if(p.closest('#pub-legal'))p.classList.remove('active');});
@@ -2847,7 +2944,8 @@ function switchTab(name){
   var loaders={overview:loadOverview,licenses:loadLicenses,customers:loadCustomers,
     invoices:loadInvoices,
     devices:loadDevices,logs:function(){switchSubTab(activeSubTab);},
-    users:loadUsers,smtp:loadSmtp,webhooks:loadWebhooks};
+    users:loadUsers,smtp:loadSmtp,webhooks:loadWebhooks,
+    plans:loadAdminPlans, faq:loadAdminFaq};
   if(loaders[name])loaders[name]();
 }
 
@@ -3530,6 +3628,201 @@ function deleteWebhook(id){
 }
 
 document.addEventListener('DOMContentLoaded',function(){if(TOKEN)openAdmin();});
+
+// ── Pläne & Preise (Admin) ────────────────────────────────────────────────────
+function loadAdminPlans() {
+  var el = document.getElementById('admin-plans-content');
+  el.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  API('/plan-pricing').then(function(d) {
+    var plans = d.plans || [];
+    if (!plans.length) { el.innerHTML = '<p style="color:var(--text2)">Keine Pläne gefunden.</p>'; return; }
+    el.innerHTML = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;">' +
+      plans.map(function(p) {
+        var feats = [];
+        try { feats = JSON.parse(p.features || '[]'); } catch(e) {}
+        return '<div class="card" style="position:relative;">' +
+          '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.5rem;">' +
+            '<div>' +
+              '<span style="font-weight:700;font-size:1rem;">' + esc(p.label) + '</span>' +
+              ' <code style="font-size:.72rem;background:var(--bg3);padding:.1rem .4rem;border-radius:4px;">' + esc(p.plan_id) + '</code>' +
+            '</div>' +
+            '<span style="font-size:.75rem;padding:.15rem .5rem;border-radius:20px;background:' + (p.active ? 'rgba(109,170,69,.15)' : 'rgba(121,120,118,.15)') + ';color:' + (p.active ? 'var(--accent3)' : 'var(--text2)') + ';">' + (p.active ? 'Aktiv' : 'Versteckt') + '</span>' +
+          '</div>' +
+          '<div style="font-size:1.4rem;font-weight:800;color:var(--accent);margin:.3rem 0;">' + (p.price > 0 ? p.price.toFixed(2) + ' €/J.' : 'Kostenlos') + '</div>' +
+          '<p style="color:var(--text2);font-size:.8rem;margin-bottom:.6rem;">' + esc(p.description || '') + '</p>' +
+          '<ul style="list-style:none;font-size:.78rem;color:var(--text2);margin-bottom:.8rem;">' +
+            feats.slice(0, 4).map(function(f) { return '<li style="padding:.1rem 0;">✓ ' + esc(f) + '</li>'; }).join('') +
+            (feats.length > 4 ? '<li style="color:var(--text2);">+ ' + (feats.length - 4) + ' weitere…</li>' : '') +
+          '</ul>' +
+          '<button class="btn btn-ghost btn-sm" onclick="openPlanModal(' + JSON.stringify(p).replace(/"/g,'&quot;') + ')">&#9998; Bearbeiten</button>' +
+        '</div>';
+      }).join('') + '</div>';
+  }).catch(function(e) { el.innerHTML = '<p style="color:var(--accent2)">Fehler: ' + esc(e.message) + '</p>'; });
+}
+
+function openPlanModal(p) {
+  var feats = [];
+  try { feats = JSON.parse(p.features || '[]'); } catch(e) {}
+  document.getElementById('ep-plan-id').value     = p.plan_id;
+  document.getElementById('ep-label').value       = p.label;
+  document.getElementById('ep-price').value       = p.price;
+  document.getElementById('ep-description').value = p.description || '';
+  document.getElementById('ep-features').value    = feats.join('\n');
+  document.getElementById('ep-active').checked    = !!p.active;
+  document.getElementById('ep-sort').value        = p.sort_order || 0;
+  openModal('modal-edit-plan');
+}
+
+function savePlan() {
+  var planId = document.getElementById('ep-plan-id').value;
+  var feats  = document.getElementById('ep-features').value.split('\n').map(function(f){return f.trim();}).filter(Boolean);
+  var body = {
+    label:       document.getElementById('ep-label').value,
+    price:       parseFloat(document.getElementById('ep-price').value) || 0,
+    description: document.getElementById('ep-description').value || null,
+    features:    feats,
+    active:      document.getElementById('ep-active').checked,
+    sort_order:  parseInt(document.getElementById('ep-sort').value) || 0,
+    currency:    'EUR'
+  };
+  API('/plan-pricing/' + encodeURIComponent(planId), { method: 'PUT', body: JSON.stringify(body) })
+    .then(function() { closeModal('modal-edit-plan'); loadAdminPlans(); })
+    .catch(function(e) { showError(e.message || 'Fehler beim Speichern.'); });
+}
+
+// ── FAQ (Admin) ───────────────────────────────────────────────────────────────
+function loadAdminFaq() {
+  var el = document.getElementById('admin-faq-content');
+  el.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  API('/faq').then(function(d) {
+    var faqs = d.faq || [];
+    if (!faqs.length) { el.innerHTML = '<p style="color:var(--text2)">Noch keine FAQ-Einträge. Klicke "+ Neue Frage".</p>'; return; }
+    var byCategory = {};
+    faqs.forEach(function(f) { (byCategory[f.category] = byCategory[f.category] || []).push(f); });
+    el.innerHTML = Object.entries(byCategory).map(function(entry) {
+      var cat = entry[0], items = entry[1];
+      return '<div style="margin-bottom:1.5rem;">' +
+        '<h4 style="font-size:.78rem;font-weight:700;letter-spacing:.08em;color:var(--accent);text-transform:uppercase;margin-bottom:.7rem;">' + esc(cat) + '</h4>' +
+        items.map(function(f) {
+          return '<div class="card" style="margin-bottom:.6rem;padding:1rem 1.2rem;">' +
+            '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;">' +
+              '<div style="flex:1;">' +
+                '<div style="font-weight:600;margin-bottom:.3rem;">' + esc(f.question) + '</div>' +
+                '<div style="color:var(--text2);font-size:.83rem;line-height:1.5;">' + esc(f.answer).slice(0, 120) + (f.answer.length > 120 ? '…' : '') + '</div>' +
+              '</div>' +
+              '<div style="display:flex;gap:.4rem;flex-shrink:0;">' +
+                '<span style="font-size:.72rem;padding:.15rem .5rem;border-radius:20px;background:' + (f.active ? 'rgba(109,170,69,.15)' : 'rgba(121,120,118,.15)') + ';color:' + (f.active ? 'var(--accent3)' : 'var(--text2)') + ';">' + (f.active ? 'Aktiv' : 'Versteckt') + '</span>' +
+                '<button class="btn btn-ghost btn-sm" onclick="openFaqModal(' + JSON.stringify(f).replace(/"/g,'&quot;') + ')">&#9998;</button>' +
+                '<button class="btn btn-danger btn-sm" onclick="deleteFaq(\'' + esc(f.id) + '\')">&#128465;</button>' +
+              '</div>' +
+            '</div>' +
+          '</div>';
+        }).join('') +
+      '</div>';
+    }).join('');
+  }).catch(function(e) { el.innerHTML = '<p style="color:var(--accent2)">Fehler: ' + esc(e.message) + '</p>'; });
+}
+
+function openFaqModal(f) {
+  if (f) {
+    document.getElementById('faq-modal-title').textContent = 'FAQ bearbeiten';
+    document.getElementById('ef-id').value       = f.id;
+    document.getElementById('ef-question').value = f.question;
+    document.getElementById('ef-answer').value   = f.answer;
+    document.getElementById('ef-category').value = f.category || 'Allgemein';
+    document.getElementById('ef-sort').value     = f.sort_order || 0;
+    document.getElementById('ef-active').checked = !!f.active;
+  } else {
+    document.getElementById('faq-modal-title').textContent = 'Neue FAQ-Frage';
+    document.getElementById('ef-id').value = '';
+    document.getElementById('ef-question').value = '';
+    document.getElementById('ef-answer').value = '';
+    document.getElementById('ef-category').value = 'Allgemein';
+    document.getElementById('ef-sort').value = 99;
+    document.getElementById('ef-active').checked = true;
+  }
+  openModal('modal-edit-faq');
+}
+
+function saveFaq() {
+  var id = document.getElementById('ef-id').value;
+  var body = {
+    question:   document.getElementById('ef-question').value,
+    answer:     document.getElementById('ef-answer').value,
+    category:   document.getElementById('ef-category').value,
+    sort_order: parseInt(document.getElementById('ef-sort').value) || 0,
+    active:     document.getElementById('ef-active').checked
+  };
+  if (!body.question || !body.answer) { showError('Frage und Antwort sind Pflichtfelder.'); return; }
+  var method = id ? 'PUT' : 'POST';
+  var path   = id ? '/faq/' + encodeURIComponent(id) : '/faq';
+  API(path, { method: method, body: JSON.stringify(body) })
+    .then(function() { closeModal('modal-edit-faq'); loadAdminFaq(); })
+    .catch(function(e) { showError(e.message || 'Fehler beim Speichern.'); });
+}
+
+function deleteFaq(id) {
+  showConfirm('FAQ-Eintrag löschen?', function() {
+    API('/faq/' + encodeURIComponent(id), { method: 'DELETE' })
+      .then(function() { loadAdminFaq(); })
+      .catch(function(e) { showError(e.message || String(e)); });
+  });
+}
+
+// ── Landing Page: Preise + FAQ laden ─────────────────────────────────────────
+function loadPublicPricing() {
+  var el = document.getElementById('pub-plan-grid');
+  if (!el) return;
+  fetch('/api/v1/plans').then(function(r){ return r.json(); }).then(function(d) {
+    var plans = d.plans || [];
+    if (!plans.length) { el.innerHTML = '<p style="color:var(--text2);text-align:center">Keine Pläne verfügbar.</p>'; return; }
+    var popularId = plans.find(function(p){return p.plan_id==='PRO';}) ? 'PRO' : (plans[Math.floor(plans.length/2)]||{}).plan_id;
+    el.innerHTML = plans.map(function(p) {
+      var feats = p.features || [];
+      var isP = p.plan_id === popularId;
+      return '<div style="background:var(--card);border:2px solid ' + (isP ? 'var(--accent)' : 'var(--border)') + ';border-radius:12px;padding:1.8rem 1.5rem;display:flex;flex-direction:column;position:relative;">' +
+        (isP ? '<div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;font-size:.72rem;font-weight:700;padding:.2rem .9rem;border-radius:20px;">&#11088; Beliebt</div>' : '') +
+        '<div style="font-family:var(--font-display);font-size:1.15rem;font-weight:800;margin-bottom:.3rem;">' + esc(p.label) + '</div>' +
+        '<div style="color:var(--text2);font-size:.82rem;margin-bottom:1rem;flex:1;">' + esc(p.description || '') + '</div>' +
+        '<div style="font-family:var(--font-display);font-size:2.2rem;font-weight:800;color:var(--accent);line-height:1;margin-bottom:.3rem;">' +
+          (p.price > 0 ? p.price.toFixed(0) + ' €' : 'Kostenlos') +
+          (p.price > 0 ? '<span style="font-size:.85rem;font-weight:400;color:var(--text2);"> / Jahr</span>' : '') +
+        '</div>' +
+        '<ul style="list-style:none;margin:.9rem 0 1.4rem;font-size:.83rem;display:flex;flex-direction:column;gap:.35rem;">' +
+          feats.map(function(f){ return '<li><span style="color:var(--accent3);font-weight:700;">✓</span> ' + esc(f) + '</li>'; }).join('') +
+        '</ul>' +
+        '<a href="login.html#register" style="display:block;text-align:center;background:' + (isP ? 'var(--accent)' : 'transparent') + ';color:' + (isP ? '#fff' : 'var(--accent)') + ';border:2px solid var(--accent);border-radius:8px;padding:.65rem;font-weight:700;text-decoration:none;font-size:.9rem;">' +
+          (p.price === 0 ? 'Kostenlos starten' : 'Jetzt bestellen') +
+        '</a>' +
+      '</div>';
+    }).join('');
+  }).catch(function(){ el.innerHTML = '<p style="text-align:center;color:var(--text2)">Preise konnten nicht geladen werden.</p>'; });
+}
+
+function loadPublicFaq() {
+  var el = document.getElementById('pub-faq-content');
+  if (!el) return;
+  fetch('/api/v1/faq').then(function(r){ return r.json(); }).then(function(d) {
+    var faqs = d.faq || [];
+    if (!faqs.length) { el.innerHTML = '<p style="text-align:center;color:var(--text2)">Noch keine FAQ-Einträge.</p>'; return; }
+    var byCategory = {};
+    faqs.forEach(function(f) { (byCategory[f.category] = byCategory[f.category] || []).push(f); });
+    el.innerHTML = Object.entries(byCategory).map(function(entry) {
+      return '<div style="margin-bottom:2rem;">' +
+        '<h3 style="font-size:.78rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:1rem;">' + esc(entry[0]) + '</h3>' +
+        entry[1].map(function(f) {
+          var uid = 'faq-' + Math.random().toString(36).slice(2);
+          return '<details style="border:1px solid var(--border);border-radius:10px;margin-bottom:.6rem;overflow:hidden;">' +
+            '<summary style="padding:1rem 1.2rem;cursor:pointer;font-weight:600;list-style:none;display:flex;justify-content:space-between;align-items:center;">' +
+              esc(f.question) + ' <span style="color:var(--accent);font-size:1.2rem;transition:transform .2s;">+</span>' +
+            '</summary>' +
+            '<div style="padding:.1rem 1.2rem 1.1rem;color:var(--text2);font-size:.9rem;line-height:1.7;border-top:1px solid var(--border);">' + esc(f.answer) + '</div>' +
+          '</details>';
+        }).join('') +
+      '</div>';
+    }).join('');
+  }).catch(function(){ el.innerHTML = '<p style="text-align:center;color:var(--text2)">FAQ konnten nicht geladen werden.</p>'; });
+}
 
 function showError(msg, title) {
   document.getElementById('modal-error-title').textContent = title || 'Fehler';

@@ -412,22 +412,10 @@ router.post('/forgot-password', registerLimiter, asyncHandler(async (req, res) =
     }
 }));
 
-// ── GET /plans ────────────────────────────────────────────────────────────────
+// ── GET /plans (aus DB) ───────────────────────────────────────────────────────
 router.get('/plans', asyncHandler(async (req, res) => {
-    const descriptions = {
-        TRIAL: 'Kostenlose Testlizenz für 30 Tage', FREE: 'Kostenlose Basislizenz',
-        STARTER: 'Ideal für kleinere Gastronomiebetriebe', PRO: 'Voller Funktionsumfang für wachsende Restaurants',
-        PRO_PLUS: 'Erweiterte Kapazitäten und Analytics', ENTERPRISE: 'Unbegrenzte Tische und maximaler Leistungsumfang'
-    };
-    const prices = { TRIAL: 0.00, FREE: 0.00, STARTER: 29.00, PRO: 59.00, PRO_PLUS: 89.00, ENTERPRISE: 199.00 };
-    const plans = [];
-    for (const [id, plan] of Object.entries(PLAN_DEFINITIONS)) {
-        if (plan.active !== undefined && !plan.active) continue;
-        plans.push({ id, name: plan.label || id, description: plan.description || descriptions[id] || '',
-            price: plan.price !== undefined ? plan.price : (prices[id] !== undefined ? prices[id] : 0.00),
-            currency: plan.currency || 'EUR', interval: plan.interval || (id === 'TRIAL' ? 'monthly' : 'yearly') });
-    }
-    res.json({ success: true, plans });
+    const [rows] = db.query('SELECT * FROM plan_pricing WHERE active = 1 ORDER BY sort_order ASC');
+    res.json({ success: true, plans: rows.map(p => ({ ...p, features: parseJsonField(p.features, []) })) });
 }));
 
 // ── POST /licenses/book ───────────────────────────────────────────────────────
