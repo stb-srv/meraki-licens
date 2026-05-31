@@ -218,13 +218,11 @@ router.post('/invoices/:id/resend', requireAuth, asyncHandler(async (req, res) =
     const [[settings]] = db.query('SELECT * FROM invoice_settings WHERE id = 1');
     if (!settings) return res.status(500).json({ success: false, message: 'Rechnungs-Einstellungen fehlen.' });
 
-    let pdfPath  = invoice.pdf_path;
     const filename   = `Rechnung-${invoice.invoice_number}.pdf`;
     const storageDir = path.join(process.env.STORAGE_PATH || './storage', 'invoices');
-    if (!pdfPath || !fs.existsSync(pdfPath)) {
-        pdfPath = path.join(storageDir, filename);
-        await generateInvoicePDF({ ...settings, ...invoice }, pdfPath);
-    }
+    const pdfPath    = path.join(storageDir, filename);
+    // Immer neu generieren – stellt sicher dass aktuelle Daten und Positionen drin sind
+    await generateInvoicePDF({ ...settings, ...invoice }, pdfPath);
 
     let mailError = null;
     if (invoice.customer_email) {
