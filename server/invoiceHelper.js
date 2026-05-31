@@ -16,16 +16,31 @@ function toDbDate(d) {
 }
 
 export function generateInvoiceNumber() {
-    const [settings] = query('SELECT invoice_prefix, next_number FROM invoice_settings WHERE id = 1');
+    const [[settings]] = query('SELECT invoice_prefix, next_number FROM invoice_settings WHERE id = 1');
     if (!settings) throw new Error('Invoice settings with ID 1 not found in database.');
 
     const prefix = settings.invoice_prefix || 'INV';
-    const nextNumber = settings.next_number || 1;
-    const year = new Date().getFullYear();
-    const paddedNumber = String(nextNumber).padStart(4, '0');
-    const invoiceNumber = `${prefix}-${year}-${paddedNumber}`;
+    const year   = new Date().getFullYear();
 
-    query('UPDATE invoice_settings SET next_number = next_number + 1 WHERE id = 1');
+    // Start at stored next_number, but never below the actual DB maximum to avoid gaps
+    const [[{ maxNum }]] = query(
+        `SELECT COALESCE(MAX(CAST(SUBSTR(invoice_number, -4) AS INTEGER)), 0) AS maxNum
+         FROM invoices WHERE invoice_number LIKE ?`,
+        [`${prefix}-${year}-%`]
+    );
+    let nextNumber = Math.max(settings.next_number || 1, maxNum + 1);
+
+    // Safety loop: skip numbers already in use (handles manual inserts or race gaps)
+    let invoiceNumber;
+    for (let i = 0; i < 500; i++) {
+        const candidate = `${prefix}-${year}-${String(nextNumber).padStart(4, '0')}`;
+        const [[{ n }]] = query('SELECT COUNT(*) AS n FROM invoices WHERE invoice_number = ?', [candidate]);
+        if (n === 0) { invoiceNumber = candidate; break; }
+        nextNumber++;
+    }
+    if (!invoiceNumber) throw new Error('Keine freie Rechnungsnummer gefunden.');
+
+    query('UPDATE invoice_settings SET next_number = ? WHERE id = 1', [nextNumber + 1]);
     return invoiceNumber;
 }
 
