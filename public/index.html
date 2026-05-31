@@ -1931,41 +1931,54 @@
 </div></div>
 
 <!-- Modal für Rechnungs-Einstellungen -->
-<div class="modal-overlay" id="modal-invoice-settings"><div class="modal" style="max-width: 600px;">
+<div class="modal-overlay" id="modal-invoice-settings"><div class="modal" style="max-width:620px;">
   <h3>⚙️ Rechnungs-Einstellungen</h3>
-  <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-    <div class="form-group"><label>Firma *</label>
-      <input type="text" id="is-company-name" placeholder="z.B. OPA! Santorini">
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+    <div class="form-group"><label>Firmenname *</label>
+      <input type="text" id="is-company-name" placeholder="z.B. OPA! Santorini GmbH">
     </div>
     <div class="form-group"><label>Rechnungspräfix</label>
-      <input type="text" id="is-invoice-prefix" placeholder="INV">
+      <input type="text" id="is-invoice-prefix" placeholder="INV" style="max-width:100px;">
     </div>
   </div>
-  <div class="form-group" style="margin-bottom: 1rem;"><label>Adresse *</label>
-    <textarea id="is-company-address" rows="3" placeholder="Straße, PLZ, Ort"></textarea>
+
+  <div class="form-group"><label>Adresse *</label>
+    <textarea id="is-company-address" rows="3" placeholder="Musterstraße 1&#10;12345 Musterstadt&#10;Deutschland"></textarea>
   </div>
-  <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
     <div class="form-group"><label>Steuernummer / USt-IdNr.</label>
       <input type="text" id="is-company-tax-id" placeholder="DE123456789">
     </div>
-    <div class="form-group"><label>Logo-Pfad (optional)</label>
-      <input type="text" id="is-logo-path" placeholder="./public/logo.png">
+    <div class="form-group"><label>Fußzeilentext (optional)</label>
+      <input type="text" id="is-footer-text" placeholder="Vielen Dank für Ihr Vertrauen!">
     </div>
   </div>
-  <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-    <div class="form-group"><label>IBAN</label>
-      <input type="text" id="is-company-iban" placeholder="DE...">
+
+  <fieldset style="border:1px solid var(--border);border-radius:8px;padding:12px 16px;margin:0.5rem 0 1rem;">
+    <legend style="font-size:.8rem;font-weight:600;color:var(--text2);padding:0 6px;">🏦 Bankverbindung</legend>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+      <div class="form-group" style="margin-bottom:0.5rem;"><label>Bank / Institut</label>
+        <input type="text" id="is-company-bank-name" placeholder="z.B. Volksbank Muster">
+      </div>
+      <div class="form-group" style="margin-bottom:0.5rem;"><label>IBAN</label>
+        <input type="text" id="is-company-iban" placeholder="DE12 3456 7890 1234 5678 90">
+      </div>
     </div>
-    <div class="form-group"><label>BIC</label>
-      <input type="text" id="is-company-bic" placeholder="GENO...">
+    <div class="form-group" style="margin-bottom:0;"><label>BIC / SWIFT</label>
+      <input type="text" id="is-company-bic" placeholder="GENODED1xxx" style="max-width:200px;">
     </div>
-  </div>
-  <div class="form-group" style="margin-bottom: 1rem;"><label>Fußzeilentext (optional)</label>
-    <textarea id="is-footer-text" rows="2" placeholder="z.B. Vielen Dank für Ihren Einkauf!"></textarea>
-  </div>
-  <div class="modal-footer">
-    <button class="btn btn-ghost" onclick="closeModal('modal-invoice-settings')">Abbrechen</button>
-    <button class="btn btn-primary" onclick="saveInvoiceSettings()">Speichern</button>
+  </fieldset>
+
+  <div class="modal-footer" style="justify-content:space-between;">
+    <button class="btn btn-ghost btn-sm" onclick="previewInvoicePDF()" style="gap:6px;">
+      <i data-lucide="eye" style="width:14px;height:14px;"></i> PDF Vorschau
+    </button>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-ghost" onclick="closeModal('modal-invoice-settings')">Abbrechen</button>
+      <button class="btn btn-primary" onclick="saveInvoiceSettings()">Speichern</button>
+    </div>
   </div>
 </div></div>
 
@@ -2426,15 +2439,16 @@ function deleteInvoice(id) {
 
 function openInvoiceSettingsModal() {
   API('/admin/invoice-settings').then(function(settings) {
-    document.getElementById('is-company-name').value = settings.company_name || '';
-    document.getElementById('is-invoice-prefix').value = settings.invoice_prefix || 'INV';
+    document.getElementById('is-company-name').value     = settings.company_name || '';
+    document.getElementById('is-invoice-prefix').value  = settings.invoice_prefix || 'INV';
     document.getElementById('is-company-address').value = settings.company_address || '';
-    document.getElementById('is-company-tax-id').value = settings.company_tax_id || '';
-    document.getElementById('is-logo-path').value = settings.logo_path || '';
-    document.getElementById('is-company-iban').value = settings.company_iban || '';
-    document.getElementById('is-company-bic').value = settings.company_bic || '';
-    document.getElementById('is-footer-text').value = settings.footer_text || '';
+    document.getElementById('is-company-tax-id').value  = settings.company_tax_id || '';
+    document.getElementById('is-company-iban').value    = settings.company_iban || '';
+    document.getElementById('is-company-bic').value     = settings.company_bic || '';
+    document.getElementById('is-company-bank-name').value = settings.company_bank_name || '';
+    document.getElementById('is-footer-text').value     = settings.footer_text || '';
     openModal('modal-invoice-settings');
+    if (window.lucide) window.lucide.createIcons();
   }).catch(function(e) {
     showError('Fehler beim Laden der Einstellungen: ' + (e.message || String(e)));
   });
@@ -2442,14 +2456,14 @@ function openInvoiceSettingsModal() {
 
 function saveInvoiceSettings() {
   var body = {
-    company_name: document.getElementById('is-company-name').value,
-    invoice_prefix: document.getElementById('is-invoice-prefix').value || 'INV',
-    company_address: document.getElementById('is-company-address').value,
-    company_tax_id: document.getElementById('is-company-tax-id').value || null,
-    logo_path: document.getElementById('is-logo-path').value || null,
-    company_iban: document.getElementById('is-company-iban').value || null,
-    company_bic: document.getElementById('is-company-bic').value || null,
-    footer_text: document.getElementById('is-footer-text').value || null
+    company_name:      document.getElementById('is-company-name').value,
+    invoice_prefix:    document.getElementById('is-invoice-prefix').value || 'INV',
+    company_address:   document.getElementById('is-company-address').value,
+    company_tax_id:    document.getElementById('is-company-tax-id').value || null,
+    company_iban:      document.getElementById('is-company-iban').value || null,
+    company_bic:       document.getElementById('is-company-bic').value || null,
+    company_bank_name: document.getElementById('is-company-bank-name').value || null,
+    footer_text:       document.getElementById('is-footer-text').value || null
   };
   
   if (!body.company_name || !body.company_address) {
@@ -2466,6 +2480,25 @@ function saveInvoiceSettings() {
   }).catch(function(e) {
     showError('Fehler beim Speichern der Einstellungen: ' + (e.message || String(e)));
   });
+}
+
+function previewInvoicePDF() {
+  var token = TOKEN;
+  var url = '/api/admin/invoice-settings/preview-pdf';
+  // PDF in neuem Tab öffnen (mit Auth-Header via fetch + Blob-URL)
+  fetch(url, { headers: { 'Authorization': 'Bearer ' + token } })
+    .then(function(r) {
+      if (!r.ok) return r.json().then(function(d) { throw new Error(d.message || 'Fehler'); });
+      return r.blob();
+    })
+    .then(function(blob) {
+      var blobUrl = window.URL.createObjectURL(blob);
+      window.open(blobUrl, '_blank');
+    })
+    .catch(function(e) {
+      showError('PDF-Vorschau fehlgeschlagen: ' + (e.message || String(e)) +
+        '\n\nBitte zuerst Einstellungen speichern (Firma und Adresse sind Pflichtfelder).');
+    });
 }
 
 function renderPagination(pg, funcName) {

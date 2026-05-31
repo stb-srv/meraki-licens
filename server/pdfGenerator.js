@@ -73,9 +73,9 @@ function buildPDFLayout(invoiceData, doc) {
 
     // --- RECIPIENT INFO ---
     doc.moveTo(50, 140).lineTo(545, 140).strokeColor(borderColor).lineWidth(1).stroke();
-    
+
     doc.fillColor(lightGray).fontSize(7.5).font('Helvetica-Bold').text('RECHNUNGSEMPFÄNGER', 50, 152);
-    
+
     doc.fillColor(textColor).fontSize(9.5).font('Helvetica-Bold');
     let recipientY = 166;
     if (invoiceData.customer_company) {
@@ -88,16 +88,15 @@ function buildPDFLayout(invoiceData, doc) {
         recipientY += 13;
     }
 
+    // Adresse aus separaten Feldern zusammenbauen
     doc.font('Helvetica');
-    if (invoiceData.customer_billing_address) {
-        const billAddressLines = (invoiceData.customer_billing_address || '').split('\n').filter(Boolean);
-        for (const line of billAddressLines) {
-            doc.text(line.trim(), 50, recipientY);
-            recipientY += 13;
-        }
-    }
-    if (invoiceData.customer_country && recipientY < 225) {
-        doc.text(invoiceData.customer_country, 50, recipientY);
+    const billingLines = [
+        invoiceData.customer_billing_street,
+        [invoiceData.customer_billing_zip, invoiceData.customer_billing_city].filter(Boolean).join(' '),
+        invoiceData.customer_billing_country
+    ].filter(Boolean);
+    for (const line of billingLines) {
+        doc.text(line.trim(), 50, recipientY);
         recipientY += 13;
     }
 
@@ -175,10 +174,17 @@ function buildPDFLayout(invoiceData, doc) {
 
     // Column 2: Bank connection
     if (invoiceData.company_iban) {
-        doc.text('Bankverbindung:', 220, footerY + 10, { width: colWidth });
-        doc.text(`IBAN: ${invoiceData.company_iban}`, 220, footerY + 22, { width: colWidth });
+        let bankY = footerY + 10;
+        doc.text('Bankverbindung:', 220, bankY, { width: colWidth });
+        bankY += 12;
+        if (invoiceData.company_bank_name) {
+            doc.text(invoiceData.company_bank_name, 220, bankY, { width: colWidth });
+            bankY += 10;
+        }
+        doc.text(`IBAN: ${invoiceData.company_iban}`, 220, bankY, { width: colWidth });
+        bankY += 10;
         if (invoiceData.company_bic) {
-            doc.text(`BIC: ${invoiceData.company_bic}`, 220, footerY + 32, { width: colWidth });
+            doc.text(`BIC: ${invoiceData.company_bic}`, 220, bankY, { width: colWidth });
         }
     }
 
