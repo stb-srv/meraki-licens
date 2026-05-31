@@ -232,7 +232,7 @@ router.post('/invoices/:id/send', requireAuth, asyncHandler(async (req, res) => 
 
     // 2. Generate PDF
     const filename = `Rechnung-${invoice.invoice_number}.pdf`;
-    const storageDir = process.env.STORAGE_PATH || './storage/invoices';
+    const storageDir = path.join(process.env.STORAGE_PATH || './storage', 'invoices');
     const pdfPath = path.join(storageDir, filename);
 
     await generateInvoicePDF(mergedData, pdfPath);
@@ -301,7 +301,7 @@ router.post('/invoices/:id/resend', requireAuth, asyncHandler(async (req, res) =
     // 3. Regeneate or use existing PDF
     let pdfPath = invoice.pdf_path;
     const filename = `Rechnung-${invoice.invoice_number}.pdf`;
-    const storageDir = process.env.STORAGE_PATH || './storage/invoices';
+    const storageDir = path.join(process.env.STORAGE_PATH || './storage', 'invoices');
 
     if (!pdfPath || !fs.existsSync(pdfPath)) {
         pdfPath = path.join(storageDir, filename);

@@ -12,7 +12,6 @@ import { PLAN_DEFINITIONS } from './server/plans.js';
 import fs from 'fs';
 import publicRoutes from './server/routes/public.js';
 import adminRoutes from './server/routes/admin.js';
-import adminInvoices from './server/routes/admin-invoices.js';
 import portalRoutes from './server/routes/customer-portal.js';
 import resellerRoutes from './server/routes/reseller.js';
 import statusRoutes from './server/routes/status.js';
@@ -155,7 +154,7 @@ app.use('/api/v1/trial/register', (req, res, next) => {
 app.use(express.json());
 
 // ── Ensure Invoice Storage Exists ───────────────────────────────────────────
-const storageDir = process.env.STORAGE_PATH || './storage/invoices';
+const storageDir = path.join(process.env.STORAGE_PATH || './storage', 'invoices');
 if (!fs.existsSync(storageDir)) {
     fs.mkdirSync(storageDir, { recursive: true });
     console.log(`📁 Rechnungs-Speicherverzeichnis erstellt unter: ${storageDir}`);
@@ -187,7 +186,6 @@ app.use('/api/v1/heartbeat', (req, res, next) => {
 // ── Routes ──────────────────────────────────────────────────────────────────
 app.use('/api/v1', publicRoutes);
 app.use('/api/admin', requireIpWhitelist, adminRoutes);
-app.use('/api/admin', requireIpWhitelist, adminInvoices);
 app.use('/api/portal', portalRoutes);
 app.use('/api/v1/reseller', resellerRoutes);
 app.use('/status', statusRoutes);

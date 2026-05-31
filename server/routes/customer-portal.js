@@ -627,7 +627,7 @@ router.post('/forgot-password', registerLimiter, asyncHandler(async (req, res) =
       [resetToken, expires, customer.id]
     );
 
-    const portalUrl = (process.env.PORTAL_URL || '').replace(/\/$/, '');
+    const portalUrl = (process.env.PORTAL_URL || 'https://licens-prod.stb-srv.de').replace(/\/$/, '');
     await sendTemplateMail('passwordReset', customer.email, {
       name: customer.name,
       reset_url: `${portalUrl}/login.html?reset=${resetToken}`
