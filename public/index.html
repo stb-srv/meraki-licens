@@ -1875,19 +1875,27 @@
 </div></div>
 
 <!-- Modal für neue Rechnung -->
-<div class="modal-overlay" id="modal-new-invoice"><div class="modal">
+<div class="modal-overlay" id="modal-new-invoice"><div class="modal" style="max-width:560px;">
   <h3>🧾 Neue Rechnung erstellen</h3>
   <div class="form-group"><label>Kunde *</label>
     <select id="ni-customer-id" onchange="onInvoiceCustomerChange()">
       <option value="">-- Kunde auswählen --</option>
     </select>
   </div>
-  <div class="form-group"><label>Lizenz</label>
-    <select id="ni-license-key">
-      <option value="">-- Kunde zuerst wählen --</option>
-    </select>
+
+  <!-- Lizenzen als Checkboxen (erscheint nach Kunden-Auswahl) -->
+  <div class="form-group" id="ni-licenses-group" style="display:none;">
+    <label>Lizenzen <small style="color:var(--text2);font-weight:400;">— alle die berechnet werden sollen auswählen</small></label>
+    <div id="ni-licenses-list" style="border:1px solid var(--border);border-radius:6px;max-height:180px;overflow-y:auto;padding:4px 0;background:var(--bg2);"></div>
   </div>
-  <div class="form-group"><label>Betrag in EUR *</label>
+  <!-- Fallback: manuelle Eingabe wenn keine Lizenz verknüpft -->
+  <div class="form-group" id="ni-no-license-group" style="display:none;">
+    <label>Lizenz-Key <small style="color:var(--text2);font-weight:400;">(optional)</small></label>
+    <input type="text" id="ni-license-key-manual" placeholder="OPA-PRO-XXXX-2025">
+    <small style="color:var(--yellow,#f59e0b);margin-top:3px;display:block;">⚠ Keine verknüpften Lizenzen gefunden. Key optional manuell eingeben.</small>
+  </div>
+
+  <div class="form-group"><label>Betrag je Lizenz in EUR *</label>
     <input type="number" step="0.01" id="ni-amount" placeholder="99.00">
   </div>
   <div class="form-group"><label>Fälligkeit</label>
@@ -2094,11 +2102,13 @@ function filterInvoices() {
 }
 
 var _niCustomerMap = {};
+var _niFoundLicenses = [];
 
 function openNewInvoiceModal() {
   API('/admin/customers?limit=1000').then(function(d) {
     var customers = d.customers || [];
     _niCustomerMap = {};
+    _niFoundLicenses = [];
     var html = '<option value="">-- Kunde auswählen --</option>';
     customers.forEach(function(c) {
       _niCustomerMap[c.id] = c;
@@ -2106,7 +2116,10 @@ function openNewInvoiceModal() {
       html += '<option value="' + esc(c.id) + '">' + esc(displayName) + '</option>';
     });
     document.getElementById('ni-customer-id').innerHTML = html;
-    document.getElementById('ni-license-key').innerHTML = '<option value="">-- Kunde zuerst wählen --</option>';
+    document.getElementById('ni-licenses-group').style.display = 'none';
+    document.getElementById('ni-no-license-group').style.display = 'none';
+    document.getElementById('ni-licenses-list').innerHTML = '';
+    document.getElementById('ni-license-key-manual').value = '';
     document.getElementById('ni-amount').value = '';
     document.getElementById('ni-due-days').value = '31';
     document.getElementById('ni-status').value = 'draft';
@@ -2119,47 +2132,102 @@ function openNewInvoiceModal() {
 
 function onInvoiceCustomerChange() {
   var customerId = document.getElementById('ni-customer-id').value;
-  var licSelect = document.getElementById('ni-license-key');
-  if (!customerId) {
-    licSelect.innerHTML = '<option value="">-- Kunde zuerst wählen --</option>';
-    return;
-  }
-  licSelect.innerHTML = '<option value="">Lädt...</option>';
-  API('/admin/licenses?customer_id=' + encodeURIComponent(customerId) + '&limit=100').then(function(d) {
-    var licenses = d.licenses || d || [];
-    if (!Array.isArray(licenses)) licenses = [];
-    var html = '<option value="">-- Keine Lizenz verknüpfen --</option>';
-    licenses.forEach(function(l) {
-      var label = esc(l.license_key) + (l.associated_domain ? ' – ' + esc(l.associated_domain) : '') + ' [' + esc(l.type) + ']';
-      html += '<option value="' + esc(l.license_key) + '">' + label + '</option>';
+  var licensesGroup  = document.getElementById('ni-licenses-group');
+  var noLicenseGroup = document.getElementById('ni-no-license-group');
+  var licensesList   = document.getElementById('ni-licenses-list');
+
+  licensesGroup.style.display = 'none';
+  noLicenseGroup.style.display = 'none';
+  _niFoundLicenses = [];
+
+  if (!customerId) return;
+
+  licensesList.innerHTML = '<div style="padding:8px 12px;color:var(--text2);font-size:.85rem;">Lädt…</div>';
+  licensesGroup.style.display = '';
+
+  var customer = _niCustomerMap[customerId] || {};
+
+  API('/admin/licenses?customer_id=' + encodeURIComponent(customerId) + '&limit=200')
+    .then(function(d) {
+      var licenses = d.licenses || [];
+      if (licenses.length > 0) return licenses;
+      // Fallback: Namenssuche wenn keine customer_id-Verknüpfung vorhanden
+      if (!customer.name) return [];
+      return API('/admin/licenses?search=' + encodeURIComponent(customer.name) + '&limit=200')
+        .then(function(d2) { return d2.licenses || []; });
+    })
+    .then(function(licenses) {
+      _niFoundLicenses = licenses;
+      if (licenses.length === 0) {
+        licensesGroup.style.display = 'none';
+        noLicenseGroup.style.display = '';
+        return;
+      }
+      var html = licenses.map(function(l) {
+        var autoCheck = licenses.length === 1 ? ' checked' : '';
+        var domain    = l.associated_domain ? ' – <span style="color:var(--text2)">' + esc(l.associated_domain) + '</span>' : '';
+        var badge     = '<span style="font-size:.75rem;background:var(--bg3);border-radius:4px;padding:1px 5px;margin-left:4px;">' + esc(l.type) + '</span>';
+        return '<label style="display:flex;align-items:center;gap:8px;padding:7px 12px;cursor:pointer;" ' +
+          'onmouseover="this.style.background=\'var(--hover)\'" onmouseout="this.style.background=\'\'">' +
+          '<input type="checkbox" value="' + esc(l.license_key) + '" class="ni-lic-cb"' + autoCheck +
+          ' style="accent-color:var(--primary);width:15px;height:15px;flex-shrink:0;">' +
+          '<span style="font-size:.83rem;font-family:monospace;">' + esc(l.license_key) + domain + badge + '</span>' +
+          '</label>';
+      }).join('');
+      licensesList.innerHTML = html;
+      licensesGroup.style.display = '';
+      noLicenseGroup.style.display = 'none';
+    })
+    .catch(function() {
+      licensesGroup.style.display = 'none';
+      noLicenseGroup.style.display = '';
     });
-    licSelect.innerHTML = html;
-    if (licenses.length === 1) licSelect.value = licenses[0].license_key;
-  }).catch(function() {
-    licSelect.innerHTML = '<option value="">-- Keine Lizenz gefunden --</option>';
-  });
 }
 
 function saveInvoice() {
   var customer_id = document.getElementById('ni-customer-id').value;
-  var license_key = document.getElementById('ni-license-key').value || null;
-  var amount = parseFloat(document.getElementById('ni-amount').value) || null;
-  var dueDays = parseInt(document.getElementById('ni-due-days').value) || 31;
-  var dueDate = new Date(); dueDate.setDate(dueDate.getDate() + dueDays);
-  var due_date = dueDate.toISOString().slice(0, 10);
-  var status = document.getElementById('ni-status').value;
-  var note = document.getElementById('ni-note').value || null;
+  var amount      = parseFloat(document.getElementById('ni-amount').value);
+  var dueDays     = parseInt(document.getElementById('ni-due-days').value) || 31;
+  var dueDate     = new Date(); dueDate.setDate(dueDate.getDate() + dueDays);
+  var due_date    = dueDate.toISOString().slice(0, 10);
+  var status      = document.getElementById('ni-status').value;
+  var note        = document.getElementById('ni-note').value || null;
 
-  if (!customer_id || isNaN(amount)) {
+  if (!customer_id || isNaN(amount) || amount <= 0) {
     alert('Bitte Kunde und Betrag angeben.');
     return;
   }
 
-  var items = [{
-    description: note || 'Lizenzgebühr',
-    quantity: 1,
-    unit_price: amount
-  }];
+  // Ausgewählte Lizenzen (Checkboxen)
+  var checkedBoxes  = Array.from(document.querySelectorAll('.ni-lic-cb:checked'));
+  var selectedKeys  = checkedBoxes.map(function(cb) { return cb.value; });
+
+  // Manuelles Fallback-Feld
+  if (selectedKeys.length === 0) {
+    var manualKey = document.getElementById('ni-license-key-manual').value.trim();
+    if (manualKey) selectedKeys = [manualKey];
+  }
+
+  var items;
+  if (selectedKeys.length === 0) {
+    items = [{ description: note || 'Lizenzgebühr', quantity: 1, unit_price: amount }];
+  } else {
+    items = selectedKeys.map(function(key) {
+      var lic  = _niFoundLicenses.find(function(l) { return l.license_key === key; });
+      var desc = 'Lizenzgebühr';
+      if (lic) {
+        desc = 'Lizenzgebühr ' + (lic.type || 'Lizenz');
+        if (lic.associated_domain) desc += ' – ' + lic.associated_domain;
+      } else if (key) {
+        desc = 'Lizenzgebühr – ' + key;
+      }
+      if (note) desc += ' (' + note + ')';
+      return { description: desc, quantity: 1, unit_price: amount };
+    });
+  }
+
+  // Primärer Lizenz-Key für die Rechnung (nur wenn genau eine gewählt)
+  var license_key = selectedKeys.length === 1 ? selectedKeys[0] : null;
 
   var body = {
     customer_id: customer_id,
