@@ -221,7 +221,7 @@ if (process.env.NODE_ENV !== 'test') {
 // ── Start ────────────────────────────────────────────────────────────────────
 if (process.env.NODE_ENV !== 'test') {
     app.listen(PORT, () => {
-        console.log(`\n🏛️  OPA! Santorini License Server v2.1 läuft auf http://localhost:${PORT}`);
+        console.log(`\n🏛️  Meraki License Server v2.1 läuft auf http://localhost:${PORT}`);
         console.log(`📋  Pläne: ${Object.keys(PLAN_DEFINITIONS).join(' | ')}`);
         console.log(`🌐  CORS: ${staticAllowedOrigins.length > 0 ? staticAllowedOrigins.join(', ') + ' + dynamisch aus DB' : 'nur dynamisch aus DB (CORS_ORIGINS nicht gesetzt)'}`);
         console.log(`🔐  HMAC Signing: ${isHmacActive() ? 'AKTIV' : 'INAKTIV'}`);

@@ -106,7 +106,7 @@ router.post('/2fa/setup', requireAuth, asyncHandler(async (req, res) => {
     db.query('UPDATE admins SET two_factor_secret = ? WHERE username = ?', [secret, req.admin.username]);
   }
 
-  const otpauth = authenticator.keyuri(req.admin.username, 'OPA Santorini License', secret);
+  const otpauth = authenticator.keyuri(req.admin.username, 'Meraki License', secret);
   const qrCodeUrl = await QRCode.toDataURL(otpauth);
 
   res.json({ success: true, secret, qr_code: qrCodeUrl, enabled: !!admin.two_factor_enabled });

@@ -48,7 +48,7 @@ export function up(db) {
          'Die Gerichte-Anzahl bezieht sich auf die aktiven Einträge in deiner digitalen Speisekarte. Archivierte oder saisonale Gerichte zählen nicht dazu. Der Free-Plan erlaubt 30 aktive Gerichte, was für kleine Karten (z.B. Pizzeria oder Imbiss) ausreicht.',
          'Lizenz & Pläne', 1],
         ['faq-3', 'Wie funktioniert die Lizenz-Aktivierung?',
-         'Nach der Bestellung erhältst du eine Rechnung per E-Mail. Sobald die Zahlung eingegangen ist, wird deine Lizenz von uns aktiviert – du siehst den Status direkt im Kunden-Portal. Der Lizenz-Key muss anschließend in deiner OPA! Santorini Installation hinterlegt werden.',
+         'Nach der Bestellung erhältst du eine Rechnung per E-Mail. Sobald die Zahlung eingegangen ist, wird deine Lizenz von uns aktiviert – du siehst den Status direkt im Kunden-Portal. Der Lizenz-Key muss anschließend in deiner Meraki Installation hinterlegt werden.',
          'Lizenz & Pläne', 2],
         ['faq-4', 'Kann ich meinen Plan jederzeit wechseln?',
          'Ja – ein Upgrade ist jederzeit möglich. Nimm einfach Kontakt zu uns auf oder bestelle den neuen Plan direkt im Portal. Die verbleibende Laufzeit deines aktuellen Plans wird anteilig angerechnet.',

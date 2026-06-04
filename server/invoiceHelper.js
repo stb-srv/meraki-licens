@@ -72,7 +72,7 @@ export function createInvoiceFromLicense(licenseKey, createdBy = 'system') {
         const price = priceMap[planType] || 0.00;
 
         const items = [{
-            description: `Lizenzgebühr OPA! Santorini - ${planDetails.label || planType}`,
+            description: `Lizenzgebühr Meraki - ${planDetails.label || planType}`,
             quantity: 1,
             unit_price: price
         }];

@@ -34,7 +34,7 @@ router.post('/trial', requireResellerKey, asyncHandler(async (req, res) => {
     if (existing[0]) return res.status(409).json({ success: false, message: 'Bereits ein aktiver Trial für diese Domain.', license_key: existing[0].license_key });
 
     const plan      = PLAN_DEFINITIONS['TRIAL'];
-    const key       = 'OPA-' + crypto.randomBytes(6).toString('hex').toUpperCase().match(/.{4}/g).join('-');
+    const key       = 'MERAKI-' + crypto.randomBytes(6).toString('hex').toUpperCase().match(/.{4}/g).join('-');
     const expiresAt = toDbDate(new Date(Date.now() + plan.expires_days * 24 * 60 * 60 * 1000));
     const notes     = JSON.stringify({ contact_email, reseller: req.reseller.name, source: 'reseller_api' });
 

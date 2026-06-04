@@ -1,4 +1,4 @@
-# OPA-Santorini License Server
+# Meraki License Server
 
 ![Node.js](https://img.shields.io/badge/Node.js-%3E%3D%2018-339933?logo=node.js&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-blue)
@@ -8,7 +8,7 @@
 
 ## 2. Kurzbeschreibung
 
-Der **Meraki License Server** ist der zentrale REST-API-Lizenzserver für das [OPA-Santorini Restaurant-Management-System (CMS)](https://github.com/stb-srv/OPA-Sanatori). Er dient zur sicheren Verwaltung, Validierung und Überwachung von Lizenzen für registrierte CMS-Instanzen und stellt sicher, dass lizenzierte Restaurant-Features und Gerätelimits eingehalten werden. Durch signierte kryptografische Tokens ermöglicht er sowohl hochsichere Echtzeit-Validierungen als auch zeitlich begrenzte Offline-Freischaltungen für Restaurant-Instanzen vor Ort.
+Der **Meraki License Server** ist der zentrale REST-API-Lizenzserver für das [Meraki Restaurant-Management-System (CMS)](https://github.com/stb-srv/OPA-Sanatori). Er dient zur sicheren Verwaltung, Validierung und Überwachung von Lizenzen für registrierte CMS-Instanzen und stellt sicher, dass lizenzierte Restaurant-Features und Gerätelimits eingehalten werden. Durch signierte kryptografische Tokens ermöglicht er sowohl hochsichere Echtzeit-Validierungen als auch zeitlich begrenzte Offline-Freischaltungen für Restaurant-Instanzen vor Ort.
 
 ---
 
@@ -56,8 +56,8 @@ Befolgen Sie diese Schritte, um den Server lokal oder auf einer Produktionsumgeb
 
 ```bash
 # 1. Repository klonen
-git clone https://github.com/stb-srv/licens-srv_OPA-Santorini
-cd licens-srv_OPA-Santorini
+git clone https://github.com/stb-srv/licens-srv_Meraki
+cd licens-srv_Meraki
 
 # 2. Abhängigkeiten installieren
 npm install

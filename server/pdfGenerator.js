@@ -39,7 +39,7 @@ function buildPDFLayout(invoiceData, doc) {
 
     // --- SENDER INFO (Top Left) ---
     doc.fillColor(primaryColor).fontSize(14).font('Helvetica-Bold');
-    doc.text(invoiceData.company_name || 'OPA! Santorini', 50, 50);
+    doc.text(invoiceData.company_name || 'Meraki', 50, 50);
     
     doc.fillColor(textColor).fontSize(8.5).font('Helvetica');
     const addressLines = (invoiceData.company_address || '').split('\n').filter(Boolean);
@@ -167,7 +167,7 @@ function buildPDFLayout(invoiceData, doc) {
     doc.fillColor(textColor).fontSize(footerTextSize).font('Helvetica');
 
     // Column 1: Company details
-    doc.text(invoiceData.company_name || 'OPA! Santorini', 50, footerY + 10, { width: colWidth });
+    doc.text(invoiceData.company_name || 'Meraki', 50, footerY + 10, { width: colWidth });
     if (invoiceData.company_tax_id) {
         doc.text(`Steuernummer / USt-IdNr.: ${invoiceData.company_tax_id}`, 50, footerY + 22, { width: colWidth });
     }
@@ -189,7 +189,7 @@ function buildPDFLayout(invoiceData, doc) {
     }
 
     // Column 3: Custom footer text or generic message
-    const defaultFooterText = 'Vielen Dank für Ihre Bestellung und das Vertrauen in OPA! Santorini Restaurant-Management-System.';
+    const defaultFooterText = 'Vielen Dank für Ihre Bestellung und das Vertrauen in Meraki Restaurant-Management-System.';
     doc.fillColor(lightGray).fontSize(6.5).text(invoiceData.footer_text || defaultFooterText, 390, footerY + 10, { width: 155, align: 'right' });
 }
 

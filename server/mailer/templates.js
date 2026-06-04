@@ -1,6 +1,6 @@
 /**
  * server/mailer/templates.js
- * HTML-E-Mail-Templates für den OPA! Santorini Lizenzserver.
+ * HTML-E-Mail-Templates für den Meraki Lizenzserver.
  */
 
 function layout(title, bodyHtml) {
@@ -19,7 +19,7 @@ function layout(title, bodyHtml) {
           <tr>
             <td style="background:linear-gradient(135deg,#6c63ff 0%,#5a52d5 100%);border-radius:12px 12px 0 0;padding:28px 32px">
               <h1 style="margin:0;color:#fff;font-size:20px;font-weight:700;letter-spacing:-0.3px">
-                &#9889; OPA! Santorini Lizenzserver
+                &#9889; Meraki Lizenzserver
               </h1>
             </td>
           </tr>
@@ -31,7 +31,7 @@ function layout(title, bodyHtml) {
           <tr>
             <td style="background:#f8f8fc;border:1px solid #e8e8f0;border-top:none;border-radius:0 0 12px 12px;padding:18px 32px;text-align:center">
               <p style="margin:0;color:#aaa;font-size:12px">
-                OPA! Santorini Lizenzserver &nbsp;&bull;&nbsp; Automatisch generierte E-Mail
+                Meraki Lizenzserver &nbsp;&bull;&nbsp; Automatisch generierte E-Mail
               </p>
             </td>
           </tr>
@@ -63,7 +63,7 @@ function infoBox(rows) {
 const TEMPLATES = {
 
     test: (d) => ({
-        subject: 'OPA! Santorini \u2014 SMTP Test \u2705',
+        subject: 'Meraki \u2014 SMTP Test \u2705',
         html: layout('SMTP Test', `
           <h2 style="margin:0 0 12px;font-size:18px;color:#222">SMTP-Test erfolgreich &#9989;</h2>
           <p style="margin:0 0 20px;color:#555;line-height:1.7">
@@ -74,16 +74,16 @@ const TEMPLATES = {
             ['SMTP-Server', d.host || 'konfiguriert']
           ])}
         `),
-        text: `OPA! Santorini Lizenzserver — SMTP Test erfolgreich.\n\nGesendet: ${new Date().toLocaleString('de-DE')}`
+        text: `Meraki Lizenzserver — SMTP Test erfolgreich.\n\nGesendet: ${new Date().toLocaleString('de-DE')}`
     }),
 
     // Neuer Kunde angelegt — sendet Login-Daten mit automatisch generiertem Benutzernamen
     accountCreated: (d) => ({
-        subject: 'Willkommen bei OPA! Santorini \u2014 Deine Zugangsdaten',
+        subject: 'Willkommen bei Meraki \u2014 Deine Zugangsdaten',
         html: layout('Account erstellt', `
           <h2 style="margin:0 0 8px;font-size:18px;color:#222">Willkommen, ${d.name || 'Kunde'}! &#127881;</h2>
           <p style="margin:0 0 20px;color:#555;line-height:1.7">
-            Dein Zugang zum <strong>OPA! Santorini Kunden-Portal</strong> wurde erfolgreich angelegt.
+            Dein Zugang zum <strong>Meraki Kunden-Portal</strong> wurde erfolgreich angelegt.
             Dort kannst du deine Lizenzen einsehen, Domains verwalten und deine Kaufhistorie abrufen.
           </p>
 
@@ -117,16 +117,16 @@ const TEMPLATES = {
             Fragen? Schreib uns an support@stb-srv.de
           </p>
         `),
-        text: `Willkommen beim OPA! Santorini Kunden-Portal!\n\nDeine Zugangsdaten:\n\nBenutzername: ${d.username || d.email}\nE-Mail:       ${d.email}\nPasswort:     ${d.password}\n\nDu kannst dich mit dem Benutzernamen ODER der E-Mail-Adresse einloggen.\n\nPortal-URL: ${d.login_url}\n\nWICHTIG: Bitte \u00e4ndere dein Passwort nach dem ersten Login.\n\nBei Fragen: support@stb-srv.de`
+        text: `Willkommen beim Meraki Kunden-Portal!\n\nDeine Zugangsdaten:\n\nBenutzername: ${d.username || d.email}\nE-Mail:       ${d.email}\nPasswort:     ${d.password}\n\nDu kannst dich mit dem Benutzernamen ODER der E-Mail-Adresse einloggen.\n\nPortal-URL: ${d.login_url}\n\nWICHTIG: Bitte \u00e4ndere dein Passwort nach dem ersten Login.\n\nBei Fragen: support@stb-srv.de`
     }),
 
     portalInvite: (d) => ({
-        subject: 'Einladung zum OPA! Santorini Kunden-Portal',
+        subject: 'Einladung zum Meraki Kunden-Portal',
         html: layout('Portal-Einladung', `
           <h2 style="margin:0 0 8px;font-size:18px;color:#222">Willkommen im Kunden-Portal &#127881;</h2>
           <p style="margin:0 0 20px;color:#555;line-height:1.7">
             Hallo ${d.name || 'Kunde'},<br><br>
-            du wurdest eingeladen, auf das <strong>OPA! Santorini Kunden-Portal</strong> zuzugreifen.
+            du wurdest eingeladen, auf das <strong>Meraki Kunden-Portal</strong> zuzugreifen.
             Dort kannst du deine Lizenzen einsehen, Domains binden und deine Kaufhistorie abrufen.
           </p>
           <p style="margin:0 0 20px;color:#555;line-height:1.7">
@@ -146,16 +146,16 @@ const TEMPLATES = {
             Falls du diese Einladung nicht erwartet hast, ignoriere diese E-Mail.
           </p>
         `),
-        text: `Einladung zum OPA! Santorini Kunden-Portal\n\nHallo ${d.name},\n\nHier ist dein Einladungslink:\n${d.invite_url}\n\nDer Link ist 24 Stunden gültig.`
+        text: `Einladung zum Meraki Kunden-Portal\n\nHallo ${d.name},\n\nHier ist dein Einladungslink:\n${d.invite_url}\n\nDer Link ist 24 Stunden gültig.`
     }),
 
     licenseCreated: (d) => ({
-        subject: `Deine OPA! Santorini Lizenz ist bereit`,
+        subject: `Deine Meraki Lizenz ist bereit`,
         html: layout('Lizenz erstellt', `
           <h2 style="margin:0 0 8px;font-size:18px;color:#222">Deine Lizenz ist aktiv &#127881;</h2>
           <p style="margin:0 0 20px;color:#555;line-height:1.7">
             Hallo ${d.customer_name || 'Kunde'},<br><br>
-            deine Lizenz f\u00fcr <strong>OPA! Santorini</strong> wurde erfolgreich erstellt und ist sofort einsatzbereit.
+            deine Lizenz f\u00fcr <strong>Meraki</strong> wurde erfolgreich erstellt und ist sofort einsatzbereit.
           </p>
           ${infoBox([
             ['Lizenzschl\u00fcssel', `<code style="background:#f0f2f5;padding:2px 6px;border-radius:4px;font-size:13px">${d.license_key}</code>`],
@@ -171,7 +171,7 @@ const TEMPLATES = {
     }),
 
     licenseExpiringSoon: (d) => ({
-        subject: `Deine OPA! Santorini Lizenz läuft in ${d.days_left || '?'} Tagen ab`,
+        subject: `Deine Meraki Lizenz läuft in ${d.days_left || '?'} Tagen ab`,
         html: layout('Lizenz läuft ab', `
           <h2 style="margin:0 0 8px;font-size:18px;color:#e67e22">&#9888;&#65039; Lizenz l\u00e4uft bald ab</h2>
           <p style="margin:0 0 20px;color:#555;line-height:1.7">
@@ -188,7 +188,7 @@ const TEMPLATES = {
     }),
 
     licenseRenewed: (d) => ({
-        subject: 'Deine Lizenz wurde verlängert – OPA Santorini',
+        subject: 'Deine Lizenz wurde verlängert – Meraki',
         html: layout('Lizenz verlängert', `
           <h2 style="margin:0 0 8px;font-size:18px;color:#27ae60">Lizenz verl\u00e4ngert &#10003;</h2>
           <p style="margin:0 0 20px;color:#555;line-height:1.7">
@@ -206,7 +206,7 @@ const TEMPLATES = {
     }),
 
     licenseRevoked: (d) => ({
-        subject: 'Deine Lizenz wurde gesperrt – OPA Santorini',
+        subject: 'Deine Lizenz wurde gesperrt – Meraki',
         html: layout('Lizenz widerrufen', `
           <h2 style="margin:0 0 8px;font-size:18px;color:#e74c3c">Lizenz widerrufen &#10060;</h2>
           <p style="margin:0 0 20px;color:#555;line-height:1.7">
@@ -223,13 +223,13 @@ const TEMPLATES = {
 
     // Passwort-Reset angefordert (Kunden-Portal)
     passwordReset: (d) => ({
-        subject: 'Passwort zurücksetzen – OPA Santorini',
+        subject: 'Passwort zurücksetzen – Meraki',
         html: layout('Passwort zur\u00fccksetzen', `
           <h2 style="margin:0 0 8px;font-size:18px;color:#222">Passwort zur\u00fccksetzen &#128274;</h2>
           <p style="margin:0 0 20px;color:#555;line-height:1.7">
             Hallo ${d.name || 'Kunde'},<br><br>
             wir haben eine Anfrage zum Zur\u00fccksetzen deines Passworts f\u00fcr das
-            <strong>OPA! Santorini Kunden-Portal</strong> erhalten.
+            <strong>Meraki Kunden-Portal</strong> erhalten.
           </p>
           <div style="text-align:center;margin:28px 0">
             <a href="${d.reset_url}" style="display:inline-block;background:#6c63ff;color:#fff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:700;font-size:15px">
@@ -258,10 +258,10 @@ const TEMPLATES = {
             day: '2-digit', month: 'long', year: 'numeric'
         });
         return {
-            subject: `🍽️ Ihr OPA! Santorini Trial ist aktiv – Key: ${d.license_key}`,
-            html: layout('Willkommen bei OPA! Santorini', `
+            subject: `🍽️ Ihr Meraki Trial ist aktiv – Key: ${d.license_key}`,
+            html: layout('Willkommen bei Meraki', `
                 <h1 style="color:#1b3a5c; font-size:1.4rem; margin:0 0 16px;">
-                    Willkommen bei OPA! Santorini &#127881;
+                    Willkommen bei Meraki &#127881;
                 </h1>
                 <p style="margin:0 0 16px; color:#555; line-height:1.7;">Hallo ${d.restaurant_name},</p>
                 <p style="margin:0 0 16px; color:#555; line-height:1.7;">Ihr <strong>30-Tage Trial</strong> ist jetzt aktiv. Hier sind Ihre Zugangsdaten:</p>
@@ -286,15 +286,15 @@ const TEMPLATES = {
 
                 <p style="color:#6b7280; font-size:.85rem; margin-top:32px;">
                     Bei Fragen antworten Sie einfach auf diese E-Mail.<br>
-                    – Das OPA! Santorini Team
+                    – Das Meraki Team
                 </p>
             `),
-            text: `Willkommen bei OPA! Santorini!\n\nIhr 30-Tage Trial ist jetzt aktiv.\n\nLizenz-Key: ${d.license_key}\nPlan: ${d.plan_label}\nDomain: ${d.domain}\nGültig bis: ${expDate}\n\nBei Fragen: support@stb-srv.de`
+            text: `Willkommen bei Meraki!\n\nIhr 30-Tage Trial ist jetzt aktiv.\n\nLizenz-Key: ${d.license_key}\nPlan: ${d.plan_label}\nDomain: ${d.domain}\nGültig bis: ${expDate}\n\nBei Fragen: support@stb-srv.de`
         };
     },
 
     invoiceSent: (d) => ({
-        subject: `Ihre OPA! Santorini Rechnung – ${d.invoice_number}`,
+        subject: `Ihre Meraki Rechnung – ${d.invoice_number}`,
         html: layout('Ihre Rechnung ist bereit', `
           <h2 style="margin:0 0 8px;font-size:18px;color:#222">Hallo ${d.customer_name || 'Kunde'},</h2>
           <p style="margin:0 0 20px;color:#555;line-height:1.7">
@@ -313,14 +313,14 @@ const TEMPLATES = {
           </div>
           <p style="margin:20px 0 0;color:#aaa;font-size:13px">
             Vielen Dank für Ihre Treue!<br>
-            Das OPA! Santorini Team
+            Das Meraki Team
           </p>
         `),
-        text: `Ihre OPA! Santorini Rechnung ${d.invoice_number} ist da.\n\nGesamtbetrag: ${(parseFloat(d.amount_gross) || 0).toFixed(2)} €\nFälligkeitsdatum: ${d.due_date ? new Date(d.due_date).toLocaleDateString('de-DE') : 'sofort'}\n\nSie finden die Rechnung als PDF im Anhang oder im Kunden-Portal unter: ${d.invoice_url}`
+        text: `Ihre Meraki Rechnung ${d.invoice_number} ist da.\n\nGesamtbetrag: ${(parseFloat(d.amount_gross) || 0).toFixed(2)} €\nFälligkeitsdatum: ${d.due_date ? new Date(d.due_date).toLocaleDateString('de-DE') : 'sofort'}\n\nSie finden die Rechnung als PDF im Anhang oder im Kunden-Portal unter: ${d.invoice_url}`
     }),
 
     invoiceOverdue: (d) => ({
-        subject: `⚠️ DRINGEND: Zahlungserinnerung Rechnung ${d.invoice_number} – OPA! Santorini`,
+        subject: `⚠️ DRINGEND: Zahlungserinnerung Rechnung ${d.invoice_number} – Meraki`,
         html: layout('Zahlungserinnerung', `
           <h2 style="margin:0 0 8px;font-size:18px;color:#e74c3c">Zahlungserinnerung / Mahnung</h2>
           <p style="margin:0 0 20px;color:#555;line-height:1.7">
@@ -329,7 +329,7 @@ const TEMPLATES = {
           </p>
           <div style="background:#fde8e8;border:1px solid #f8b4b4;border-radius:8px;padding:14px 18px;margin:20px 0">
             <p style="margin:0;color:#9b1c1c;font-size:13px;line-height:1.6">
-              ⚠️ <strong>Wichtiger Hinweis:</strong> Bitte begleichen Sie den ausstehenden Betrag umgehend, um eine Unterbrechung Ihrer OPA! Santorini Lizenz-Dienste zu vermeiden.
+              ⚠️ <strong>Wichtiger Hinweis:</strong> Bitte begleichen Sie den ausstehenden Betrag umgehend, um eine Unterbrechung Ihrer Meraki Lizenz-Dienste zu vermeiden.
             </p>
           </div>
           ${infoBox([
@@ -345,19 +345,19 @@ const TEMPLATES = {
           </div>
           <p style="margin:20px 0 0;color:#aaa;font-size:13px">
             Sollten Sie die Zahlung bereits angewiesen haben, betrachten Sie dieses Schreiben bitte als gegenstandslos.<br>
-            Das OPA! Santorini Team
+            Das Meraki Team
           </p>
         `),
         text: `Dringende Zahlungserinnerung für Rechnung ${d.invoice_number}.\n\nGesamtbetrag: ${(parseFloat(d.amount_gross) || 0).toFixed(2)} €\nFällig war am: ${d.due_date ? new Date(d.due_date).toLocaleDateString('de-DE') : 'sofort'}\n\nBitte begleichen Sie den Betrag umgehend im Kunden-Portal unter: ${d.invoice_url} um eine Sperrung Ihrer Lizenz zu vermeiden.`
     }),
 
     licenseExpiring7d: (d) => ({
-        subject: `⚠️ ACHTUNG: Deine OPA! Santorini Lizenz läuft in 7 Tagen ab`,
+        subject: `⚠️ ACHTUNG: Deine Meraki Lizenz läuft in 7 Tagen ab`,
         html: layout('Lizenz läuft in 7 Tagen ab', `
           <h2 style="margin:0 0 8px;font-size:18px;color:#e74c3c">⚠️ Wichtiger Hinweis: Deine Lizenz läuft in 7 Tagen ab!</h2>
           <p style="margin:0 0 20px;color:#555;line-height:1.7">
             Hallo ${d.customer_name || 'Kunde'},<br><br>
-            deine OPA! Santorini Lizenz läuft am <strong>${d.expires_at ? new Date(d.expires_at).toLocaleDateString('de-DE') : 'unbekannt'}</strong> (in genau 7 Tagen) ab.
+            deine Meraki Lizenz läuft am <strong>${d.expires_at ? new Date(d.expires_at).toLocaleDateString('de-DE') : 'unbekannt'}</strong> (in genau 7 Tagen) ab.
           </p>
           <div style="background:#feecdc;border:1px solid #fbd38d;border-radius:8px;padding:14px 18px;margin:20px 0">
             <p style="margin:0;color:#c05621;font-size:13px;line-height:1.6">
@@ -371,18 +371,18 @@ const TEMPLATES = {
           ])}
           <p style="margin:20px 0 0;color:#aaa;font-size:13px">
             Wende dich bei Fragen direkt an unseren Support.<br>
-            Das OPA! Santorini Team
+            Das Meraki Team
           </p>
         `),
-        text: `Deine OPA! Santorini Lizenz läuft am ${d.expires_at ? new Date(d.expires_at).toLocaleDateString('de-DE') : 'unbekannt'} (in 7 Tagen) ab.\n\nBitte verlängere deine Lizenz umgehend im Portal, um Ausfälle in deinem Restaurant zu vermeiden.\n\nLizenzschlüssel: ${d.license_key}`
+        text: `Deine Meraki Lizenz läuft am ${d.expires_at ? new Date(d.expires_at).toLocaleDateString('de-DE') : 'unbekannt'} (in 7 Tagen) ab.\n\nBitte verlängere deine Lizenz umgehend im Portal, um Ausfälle in deinem Restaurant zu vermeiden.\n\nLizenzschlüssel: ${d.license_key}`
     }),
 
     emailVerification: (d) => ({
-        subject: 'E-Mail-Adresse bestätigen - OPA Santorini',
+        subject: 'E-Mail-Adresse bestätigen - Meraki',
         html: layout('E-Mail-Adresse bestätigen', `
           <h2 style="margin:0 0 8px;font-size:18px;color:#222">Hallo ${d.name || 'Kunde'},</h2>
           <p style="margin:0 0 20px;color:#555;line-height:1.7">
-            vielen Dank für deine Registrierung beim <strong>OPA! Santorini Lizenzserver</strong>.
+            vielen Dank für deine Registrierung beim <strong>Meraki Lizenzserver</strong>.
             Bitte klicke auf den folgenden Button, um deine E-Mail-Adresse zu bestätigen und deinen Account zu aktivieren.
             Der Link ist <strong>24 Stunden gültig</strong>.
           </p>

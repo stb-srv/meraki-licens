@@ -234,7 +234,7 @@ describe('Customer Portal API', () => {
                     return Promise.resolve([[{ invoice_prefix: 'INV', next_number: 1 }], []]);
                 }
                 if (sql.includes('SELECT * FROM licenses WHERE license_key = ?')) {
-                    return Promise.resolve([[{ license_key: 'OPA-PRO-1234-2026', customer_id: 'cust1', type: 'PRO' }], []]);
+                    return Promise.resolve([[{ license_key: 'MERAKI-PRO-1234-2026', customer_id: 'cust1', type: 'PRO' }], []]);
                 }
                 if (sql.includes('SELECT name, currency FROM customers WHERE id = ?')) {
                     return Promise.resolve([[{ name: 'Max', currency: 'EUR' }], []]);

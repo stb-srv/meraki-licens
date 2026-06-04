@@ -1,5 +1,5 @@
 /**
- * Zentrale Plan-Definitionen für OPA! Santorini.
+ * Zentrale Plan-Definitionen für Meraki.
  * Diese Datei ist die EINZIGE Quelle der Wahrheit für alle Pläne.
  * Änderungen hier wirken sich automatisch auf Validierung, Tokens und Admin-Panel aus.
  */

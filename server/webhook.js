@@ -28,7 +28,7 @@ export async function fireWebhook(event, payload) {
         try {
             const sig = secret ? crypto.createHmac('sha256', secret).update(body).digest('hex') : null;
             const headers = { 'Content-Type': 'application/json' };
-            if (sig) headers['X-OPA-Signature'] = sig;
+            if (sig) headers['X-MERAKI-Signature'] = sig;
 
             const response = await fetch(url, { method: 'POST', headers, body, signal: AbortSignal.timeout(5000) });
             if (!response.ok) throw new Error(`HTTP ${response.status} ${response.statusText}`);

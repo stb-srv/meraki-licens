@@ -3,12 +3,12 @@ import db from './db.js';
 
 export const generateKey = (type) => {
     const prefix = {
-        FREE: 'OPA-FREE',
-        STARTER: 'OPA-START',
-        PRO: 'OPA-PRO',
-        PRO_PLUS: 'OPA-PROPLUS',
-        ENTERPRISE: 'OPA-ENT'
-    }[type] || 'OPA-UNKNOWN';
+        FREE: 'MERAKI-FREE',
+        STARTER: 'MERAKI-START',
+        PRO: 'MERAKI-PRO',
+        PRO_PLUS: 'MERAKI-PROPLUS',
+        ENTERPRISE: 'MERAKI-ENT'
+    }[type] || 'MERAKI-UNKNOWN';
     const rand = crypto.randomBytes(4).toString('hex').toUpperCase();
     return `${prefix}-${rand}-${new Date().getFullYear()}`;
 };

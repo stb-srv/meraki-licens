@@ -188,8 +188,8 @@ router.delete('/webhooks/:id', requireAuth, requireSuperAdmin, asyncHandler(asyn
 router.get('/webhooks/signing-info', requireAuth, (req, res) => {
     res.json({
         success: true,
-        algorithm: 'HMAC-SHA256', header: 'X-OPA-Signature',
-        description: 'Jeder Webhook-Request enthält den Header "X-OPA-Signature" (wenn ein Secret konfiguriert ist).'
+        algorithm: 'HMAC-SHA256', header: 'X-MERAKI-Signature',
+        description: 'Jeder Webhook-Request enthält den Header "X-MERAKI-Signature" (wenn ein Secret konfiguriert ist).'
     });
 });
 
