@@ -18,7 +18,7 @@ function normalizeLicense(l) {
     return {
         ...l,
         tags:               parseJsonField(l.tags, []),
-        allowed_modules:    parseJsonField(l.allowed_modules, []),
+        allowed_modules:    parseJsonField(l.allowed_modules, {}),
         limits:             parseJsonField(l.limits, {}),
         analytics_daily:    parseJsonField(l.analytics_daily, {}),
         analytics_features: parseJsonField(l.analytics_features, {}),

@@ -213,7 +213,7 @@ router.post('/validate', validateLimiter, asyncHandler(async (req, res) => {
             license_key, type: l.type, plan_label: plan.label, expires_at: l.expires_at,
             allowed_modules: allowedModules, limits, domain: domain || l.associated_domain,
             issued_at: Math.floor(Date.now() / 1000)
-        }, '73h');
+        }, '80h');
 
         const finalResponse = { ...responsePayload };
         if (signedToken) { finalResponse.license_token = signedToken; finalResponse.token = signedToken; }
@@ -256,7 +256,7 @@ router.post('/refresh', validateLimiter, asyncHandler(async (req, res) => {
             license_key, type: l.type, plan_label: plan.label, expires_at: l.expires_at,
             allowed_modules: allowedModules, limits, domain: domain || l.associated_domain,
             customer_name: l.customer_name || null, issued_at: Math.floor(Date.now() / 1000)
-        }, '73h');
+        }, '80h');
 
         res.json({ status: 'active', token: signedToken, type: l.type, plan_label: plan.label, expires_at: l.expires_at, allowed_modules: allowedModules, limits });
     } catch (e) {

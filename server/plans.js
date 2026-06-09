@@ -10,18 +10,17 @@ export const PLAN_DEFINITIONS = {
         max_tables: 8,
         expires_days: 30,
         modules: {
-            menu_edit:            true,
-            multilanguage:        false,
-            seasonal_menu:        false,
-            orders_kitchen:       true,
-            reservations_online:  false,
-            reservations_phone:   true,
-            custom_branding:      false,
-            analytics:            false,
-            qr_pay:               false,
-            online_orders:        false,
-            backup:               false,
-            image_ai:             false
+            menu_edit:      true,
+            multilanguage:  false,
+            seasonal_menu:  false,
+            orders_kitchen: true,
+            reservations:   true,
+            custom_design:  false,
+            analytics:      false,
+            qr_pay:         false,
+            online_orders:  false,
+            backup:         false,
+            image_ai:       false
         }
     },
     FREE: {
@@ -30,15 +29,15 @@ export const PLAN_DEFINITIONS = {
         max_tables: 5,
         expires_days: 36500,
         modules: {
-            menu_edit: true,
-            multilanguage: false,
-            seasonal_menu: false,
+            menu_edit:      true,
+            multilanguage:  false,
+            seasonal_menu:  false,
             orders_kitchen: false,
-            reservations_online: false,
-            reservations_phone: true,
-            custom_branding: false,
-            analytics: false,
-            qr_pay: false
+            reservations:   false,
+            custom_design:  false,
+            analytics:      false,
+            qr_pay:         false,
+            online_orders:  false
         }
     },
     STARTER: {
@@ -47,15 +46,15 @@ export const PLAN_DEFINITIONS = {
         max_tables: 10,
         expires_days: 365,
         modules: {
-            menu_edit: true,
-            multilanguage: true,
-            seasonal_menu: false,
+            menu_edit:      true,
+            multilanguage:  true,
+            seasonal_menu:  false,
             orders_kitchen: true,
-            reservations_online: false,
-            reservations_phone: true,
-            custom_branding: false,
-            analytics: false,
-            qr_pay: false
+            reservations:   true,
+            custom_design:  false,
+            analytics:      false,
+            qr_pay:         false,
+            online_orders:  false
         }
     },
     PRO: {
@@ -64,15 +63,15 @@ export const PLAN_DEFINITIONS = {
         max_tables: 25,
         expires_days: 365,
         modules: {
-            menu_edit: true,
-            multilanguage: true,
-            seasonal_menu: true,
+            menu_edit:      true,
+            multilanguage:  true,
+            seasonal_menu:  true,
             orders_kitchen: true,
-            reservations_online: true,
-            reservations_phone: true,
-            custom_branding: true,
-            analytics: false,
-            qr_pay: true
+            reservations:   true,
+            custom_design:  true,
+            analytics:      false,
+            qr_pay:         true,
+            online_orders:  false
         }
     },
     PRO_PLUS: {
@@ -81,15 +80,15 @@ export const PLAN_DEFINITIONS = {
         max_tables: 50,
         expires_days: 365,
         modules: {
-            menu_edit: true,
-            multilanguage: true,
-            seasonal_menu: true,
+            menu_edit:      true,
+            multilanguage:  true,
+            seasonal_menu:  true,
             orders_kitchen: true,
-            reservations_online: true,
-            reservations_phone: true,
-            custom_branding: true,
-            analytics: true,
-            qr_pay: true
+            reservations:   true,
+            custom_design:  true,
+            analytics:      true,
+            qr_pay:         true,
+            online_orders:  true
         }
     },
     ENTERPRISE: {
@@ -98,15 +97,15 @@ export const PLAN_DEFINITIONS = {
         max_tables: 999,
         expires_days: 365,
         modules: {
-            menu_edit: true,
-            multilanguage: true,
-            seasonal_menu: true,
+            menu_edit:      true,
+            multilanguage:  true,
+            seasonal_menu:  true,
             orders_kitchen: true,
-            reservations_online: true,
-            reservations_phone: true,
-            custom_branding: true,
-            analytics: true,
-            qr_pay: true
+            reservations:   true,
+            custom_design:  true,
+            analytics:      true,
+            qr_pay:         true,
+            online_orders:  true
         }
     }
 };

@@ -10,8 +10,11 @@ export const RSA_PUBLIC_KEY = process.env.RSA_PUBLIC_KEY
     ? process.env.RSA_PUBLIC_KEY.replace(/\\n/g, '\n')
     : null;
 
-// HMAC_SECRET: nur intern in diesem Modul verwendet
-const HMAC_SECRET = process.env.HMAC_SECRET || 'hmac-change-me-in-production';
+// HMAC_SECRET: wird für Offline-Token-Signierung verwendet
+const HMAC_SECRET = process.env.HMAC_SECRET;
+if (!HMAC_SECRET || HMAC_SECRET === 'hmac-change-me-in-production') {
+    throw new Error('FATAL: HMAC_SECRET ist nicht gesetzt oder verwendet den unsicheren Default-Wert. Bitte in .env konfigurieren.');
+}
 
 export const createSignedLicenseToken = (payload, expiresIn = '72h') => {
     if (!RSA_PRIVATE_KEY) return null;
