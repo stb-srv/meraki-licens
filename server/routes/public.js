@@ -8,6 +8,7 @@ import { domainMatches, getClientIp, addAuditLog, parseJsonField, normalizeDomai
 import { fireWebhook } from '../webhook.js';
 import { sendTemplateMail } from '../mailer/index.js';
 import { validateLimiter, setupLimiter, trialLimiter, offlineTokenLimiter, MIN_PASSWORD_LENGTH, asyncHandler } from '../middleware.js';
+import logger from '../logger.js';
 
 const router = Router();
 const SETUP_TOKEN = process.env.SETUP_TOKEN || '';
@@ -42,10 +43,10 @@ router.post('/setup', setupLimiter, asyncHandler(async (req, res) => {
         const hash = await bcrypt.hash(password, 12);
         db.query('INSERT INTO admins (username, password_hash, role) VALUES (?, ?, ?)', [username, hash, 'superadmin']);
         await addAuditLog('setup_completed', { username, ip: getClientIp(req) });
-        console.log(`✅  Setup abgeschlossen: Superadmin '${username}' erstellt.`);
+        logger.info({ username }, 'Setup abgeschlossen');
         res.json({ success: true, message: `Superadmin '${username}' erfolgreich erstellt. SETUP_TOKEN kann jetzt aus .env entfernt werden.` });
     } catch (e) {
-        console.error('Setup-Fehler:', e.message);
+        logger.error({ err: e }, 'Setup-Fehler');
         res.status(500).json({ success: false, message: 'Internal server error' });
     }
 }));
@@ -102,7 +103,7 @@ router.post('/trial/register', trialLimiter, asyncHandler(async (req, res) => {
                 limits: { max_dishes: plan.menu_items, max_tables: plan.max_tables }
             });
         } catch (mailErr) {
-            console.warn(`📧 Willkommens-Mail fehlgeschlagen:`, mailErr.message);
+            logger.warn({ err: mailErr }, 'Willkommens-Mail fehlgeschlagen');
         }
     }
 
@@ -220,7 +221,7 @@ router.post('/validate', validateLimiter, asyncHandler(async (req, res) => {
 
         return res.json(isHmacActive() ? signResponse(finalResponse) : finalResponse);
     } catch (e) {
-        console.error(e);
+        logger.error({ err: e }, 'Validate error');
         res.status(500).json({ status: 'error', message: 'Internal server error' });
     }
 }));
@@ -260,7 +261,7 @@ router.post('/refresh', validateLimiter, asyncHandler(async (req, res) => {
 
         res.json({ status: 'active', token: signedToken, type: l.type, plan_label: plan.label, expires_at: l.expires_at, allowed_modules: allowedModules, limits });
     } catch (e) {
-        console.error(e);
+        logger.error({ err: e }, 'Refresh error');
         res.status(500).json({ status: 'error', message: 'Internal server error' });
     }
 }));
@@ -304,7 +305,7 @@ router.post('/offline-token', offlineTokenLimiter, asyncHandler(async (req, res)
         await addAuditLog('offline_token_issued', { license_key, domain, device_id: device_id || null, duration_hours: hours, ip: getClientIp(req) });
         res.json({ success: true, offline_token: token, valid_hours: hours });
     } catch (e) {
-        console.error(e);
+        logger.error({ err: e }, 'Offline token error');
         res.status(500).json({ success: false, message: 'Internal server error' });
     }
 }));

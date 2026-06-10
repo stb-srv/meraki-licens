@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import rateLimit from 'express-rate-limit';
 import db from './db.js';
 import { RSA_PRIVATE_KEY, RSA_PUBLIC_KEY } from './crypto.js';
+import logger from './logger.js';
 
 const ADMIN_SECRET    = process.env.ADMIN_SECRET || 'change-me-in-production';
 const USE_RS256_ADMIN = !!(RSA_PRIVATE_KEY && RSA_PUBLIC_KEY);
@@ -19,7 +20,7 @@ export const requireIpWhitelist = (req, res, next) => {
     const normalizedIp = clientIp.replace(/^::ffff:/, '');
     const isWhitelisted = ADMIN_IP_WHITELIST.some(ip => ip === '*' || normalizedIp === ip || clientIp === ip);
     if (!isWhitelisted) {
-        console.warn(`🛑  IP Blocked: ${clientIp} attempted to access admin routes.`);
+        logger.warn({ clientIp }, 'IP Blocked: attempted to access admin routes');
         return res.status(403).json({ success: false, message: 'Access denied: IP not whitelisted.' });
     }
     next();
@@ -56,7 +57,7 @@ export const requireAuth = async (req, res, next) => {
                 return res.status(401).json({ success: false, message: 'Session abgelaufen oder widerrufen.' });
             }
         } catch (dbErr) {
-            console.error('[requireAuth] DB-Fehler:', dbErr.message);
+            logger.error({ err: dbErr }, 'requireAuth DB-Fehler');
             return res.status(500).json({ success: false, message: 'Interner Fehler bei Session-Prüfung.' });
         }
 
