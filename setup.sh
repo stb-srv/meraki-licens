@@ -40,17 +40,18 @@ run_privileged() { $SUDO "$@"; }
 clear
 echo -e "${BOLD}${CYAN}"
 echo "  ╔═══════════════════════════════════════════════════════╗"
-echo "  ║       OPA-Santorini License Server – Setup            ║"
+echo "  ║         Meraki License Server – Setup                 ║"
 echo "  ╚═══════════════════════════════════════════════════════╝"
 echo -e "${NC}"
 echo "  Dieses Script installiert und konfiguriert den Server"
-echo "  vollständig, inkl. Node.js, nginx, systemd-Service und"
-echo "  dem ersten Admin-Account."
+echo "  vollständig: Node.js, nginx, systemd-Service."
+echo "  Alle Secrets werden automatisch generiert."
+echo "  Den Admin-Account richtest du danach im Browser ein."
 echo ""
 
 # ── Konfigurations-Variablen ──────────────────────────────────────────────────
-APP_DIR="/opt/licens-srv"
-APP_USER="licens-srv"
+APP_DIR="/opt/meraki-licens"
+APP_USER="meraki-licens"
 NODE_VERSION="20"
 
 # ── Interaktive Eingabe ───────────────────────────────────────────────────────
@@ -87,29 +88,6 @@ if [[ "${SETUP_SSL^^}" == "J" ]]; then
 fi
 
 echo ""
-step "Admin-Account für den License Server"
-
-ask "Admin-Benutzername [admin]:"
-read -r ADMIN_USERNAME
-ADMIN_USERNAME="${ADMIN_USERNAME:-admin}"
-
-while true; do
-    ask "Admin-Passwort (min. 12 Zeichen):"
-    read -rs ADMIN_PASSWORD
-    echo ""
-    ask "Passwort bestätigen:"
-    read -rs ADMIN_PASSWORD2
-    echo ""
-    if [[ "$ADMIN_PASSWORD" != "$ADMIN_PASSWORD2" ]]; then
-        err "Passwörter stimmen nicht überein. Erneut versuchen."
-    elif [[ ${#ADMIN_PASSWORD} -lt 12 ]]; then
-        err "Passwort zu kurz (min. 12 Zeichen)."
-    else
-        break
-    fi
-done
-
-echo ""
 step "Repository"
 ask "Git-Repository-URL [aktuelle Verzeichnis kopieren / leer = lokale Dateien]:"
 read -r GIT_REPO
@@ -121,7 +99,6 @@ echo "  App-Verzeichnis : $APP_DIR"
 echo "  Domain          : $DOMAIN"
 echo "  Port            : $APP_PORT"
 echo "  Service-User    : $APP_USER"
-echo "  Admin-User      : $ADMIN_USERNAME"
 echo "  Nginx           : ${SETUP_NGINX^^}"
 echo "  SSL             : ${SETUP_SSL^^}"
 [[ -n "$GIT_REPO" ]] && echo "  Repository      : $GIT_REPO"
@@ -226,7 +203,7 @@ ok "Secrets generiert (RSA 2048, AES-256)"
 step ".env Konfigurationsdatei"
 
 run_privileged bash -c "cat > '${APP_DIR}/.env'" <<EOF
-# OPA-Santorini License Server – Konfiguration
+# Meraki License Server – Konfiguration
 # Generiert am $(date '+%Y-%m-%d %H:%M:%S')
 
 PORT=${APP_PORT}
@@ -248,7 +225,7 @@ APP_URL=https://${DOMAIN}
 
 CORS_ORIGINS=https://${DOMAIN}
 
-# SMTP (optional – kann über Admin-Panel konfiguriert werden)
+# SMTP (optional – über Admin-Panel konfigurierbar)
 # SMTP_HOST=
 # SMTP_PORT=587
 # SMTP_SECURE=false
@@ -293,15 +270,16 @@ fi
 
 run_privileged bash -c "cat > /etc/systemd/system/licens-srv.service" <<EOF
 [Unit]
-Description=OPA Santorini License Server
-Documentation=https://github.com/stbkazawa/licens-srv_OPA-Santorini
+Description=Meraki License Server
+Documentation=https://github.com/stb-srv/meraki-licens
 After=network.target
 Wants=network-online.target
 
 [Service]
 Type=simple
 WorkingDirectory=${APP_DIR}
-ExecStart=/usr/bin/node server.js
+ExecStartPre=/usr/bin/node ${APP_DIR}/init.js
+ExecStart=/usr/bin/node ${APP_DIR}/server.js
 Restart=always
 RestartSec=5
 StandardOutput=journal
@@ -409,44 +387,20 @@ for i in {1..15}; do
     [[ $i -eq 15 ]] && { err "Server startet nicht – prüfe: journalctl -u licens-srv.service -n 50"; exit 1; }
 done
 
-# ── Admin-Account anlegen ─────────────────────────────────────────────────────
-step "Ersten Admin-Account anlegen"
-
-SETUP_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
-    "http://127.0.0.1:${APP_PORT}/api/v1/setup" \
-    -H "Content-Type: application/json" \
-    -d "{\"setup_token\":\"${SETUP_TOKEN}\",\"username\":\"${ADMIN_USERNAME}\",\"password\":\"${ADMIN_PASSWORD}\"}")
-
-HTTP_CODE=$(echo "$SETUP_RESPONSE" | tail -1)
-RESPONSE_BODY=$(echo "$SETUP_RESPONSE" | head -1)
-
-if [[ "$HTTP_CODE" == "200" ]]; then
-    ok "Admin-Account '${ADMIN_USERNAME}' erfolgreich angelegt"
-
-    # SETUP_TOKEN aus .env entfernen (Security)
-    run_privileged sed -i "s/^SETUP_TOKEN=.*/SETUP_TOKEN=/" "${APP_DIR}/.env"
-    ok "SETUP_TOKEN aus .env entfernt (Setup deaktiviert)"
-
-    run_privileged systemctl restart licens-srv.service
-elif [[ "$HTTP_CODE" == "409" ]]; then
-    warn "Admin-Account existiert bereits (Setup wurde evtl. schon ausgeführt)"
-else
-    warn "Setup-Endpoint Antwort (HTTP ${HTTP_CODE}): ${RESPONSE_BODY}"
-    warn "Manuell ausführen:"
-    warn "  curl -X POST http://127.0.0.1:${APP_PORT}/api/v1/setup \\"
-    warn "    -H 'Content-Type: application/json' \\"
-    warn "    -d '{\"setup_token\":\"${SETUP_TOKEN}\",\"username\":\"${ADMIN_USERNAME}\",\"password\":\"DEIN_PASSWORT\"}'"
-fi
-
 # ── Abschluss ─────────────────────────────────────────────────────────────────
 echo ""
 echo -e "${BOLD}${GREEN}╔═══════════════════════════════════════════════════════╗${NC}"
-echo -e "${BOLD}${GREEN}║           Setup erfolgreich abgeschlossen!            ║${NC}"
+echo -e "${BOLD}${GREEN}║       Meraki License Server – Installation fertig!    ║${NC}"
 echo -e "${BOLD}${GREEN}╚═══════════════════════════════════════════════════════╝${NC}"
 echo ""
-echo -e "  ${BOLD}Admin-Panel:${NC}  https://${DOMAIN}/"
-echo -e "  ${BOLD}API Status:${NC}   https://${DOMAIN}/api/status"
-echo -e "  ${BOLD}Benutzername:${NC} ${ADMIN_USERNAME}"
+echo -e "  ${BOLD}${CYAN}▶  Jetzt Setup im Browser abschließen:${NC}"
+echo ""
+if [[ "${SETUP_SSL^^}" == "J" && "$DOMAIN" != "localhost" ]]; then
+    echo -e "     ${BOLD}https://${DOMAIN}/setup${NC}"
+else
+    echo -e "     ${BOLD}http://${DOMAIN}/setup${NC}"
+    echo -e "     ${BOLD}http://localhost:${APP_PORT}/setup${NC}  (lokal)"
+fi
 echo ""
 echo -e "  ${BOLD}Service-Befehle:${NC}"
 echo "    systemctl status  licens-srv.service"
@@ -455,6 +409,4 @@ echo "    journalctl -u licens-srv.service -f"
 echo ""
 echo -e "  ${BOLD}Konfiguration:${NC}  ${APP_DIR}/.env"
 echo -e "  ${BOLD}Datenbank:${NC}      ${APP_DIR}/data/licens.db"
-echo ""
-warn "Das Passwort wurde nicht gespeichert – bewahre es sicher auf!"
 echo ""

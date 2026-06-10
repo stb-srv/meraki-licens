@@ -8,8 +8,8 @@
     "node": ">=18"
   },
   "scripts": {
-    "start": "node server.js",
-    "dev": "node --watch server.js",
+    "start": "node init.js && node server.js",
+    "dev": "node init.js && node --watch server.js",
     "setup-db": "node setup-db.js",
     "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest"
   },

@@ -17,6 +17,13 @@ function toDbDate(d) {
     return (d instanceof Date ? d : new Date(d)).toISOString().slice(0, 19).replace('T', ' ');
 }
 
+// ── Setup Status ──────────────────────────────────────────────────────────────
+router.get('/setup-status', asyncHandler(async (req, res) => {
+    const [[{ count }]] = db.query('SELECT COUNT(*) as count FROM admins');
+    if (count > 0) return res.json({ needed: false });
+    res.json({ needed: true, setup_token: process.env.SETUP_TOKEN || null });
+}));
+
 // ── Setup ─────────────────────────────────────────────────────────────────────
 router.post('/setup', setupLimiter, asyncHandler(async (req, res) => {
     if (!SETUP_TOKEN)

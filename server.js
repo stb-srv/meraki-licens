@@ -188,6 +188,9 @@ app.use('/api/portal', portalRoutes);
 app.use('/api/v1/reseller', resellerRoutes);
 app.use('/status', statusRoutes);
 
+// ── Setup Wizard ──────────────────────────────────────────────────────────────
+app.get('/setup', (req, res) => res.sendFile(path.join(__dirname, 'public', 'setup.html')));
+
 // ── Static Files ──────────────────────────────────────────────────────────────
 app.use(express.static(path.join(__dirname, 'public')));
 

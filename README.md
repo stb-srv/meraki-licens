@@ -1,260 +1,196 @@
 # Meraki License Server
 
 ![Node.js](https://img.shields.io/badge/Node.js-%3E%3D%2018-339933?logo=node.js&logoColor=white)
+![SQLite](https://img.shields.io/badge/Database-SQLite-003B57?logo=sqlite&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-blue)
 ![Status](https://img.shields.io/badge/Status-Production-success)
 
----
-
-## 2. Kurzbeschreibung
-
-Der **Meraki License Server** ist der zentrale REST-API-Lizenzserver für das [Meraki Restaurant-Management-System (CMS)](https://github.com/stb-srv/OPA-Sanatori). Er dient zur sicheren Verwaltung, Validierung und Überwachung von Lizenzen für registrierte CMS-Instanzen und stellt sicher, dass lizenzierte Restaurant-Features und Gerätelimits eingehalten werden. Durch signierte kryptografische Tokens ermöglicht er sowohl hochsichere Echtzeit-Validierungen als auch zeitlich begrenzte Offline-Freischaltungen für Restaurant-Instanzen vor Ort.
+Zentraler REST-API-Lizenzserver für das [Meraki Restaurant-Management-System (CMS)](https://github.com/stb-srv/OPA-Sanatori). Verwaltet, validiert und überwacht Lizenzen für registrierte CMS-Instanzen – mit signierten kryptografischen Tokens für sichere Echtzeit-Validierungen und zeitlich begrenzte Offline-Freischaltungen.
 
 ---
 
-## 3. Features
+## Schnellstart (Produktion)
 
-* **🔑 Lizenzverwaltung & Validierung:** Vollwertiges Key-Management mit Unterstützung von Typen (TRIAL, FREE, BASIC, PRO, ENTERPRISE), Domain-Binding (mit Wildcard-Support) und automatischen Validierungs-Checks.
-* **🧑‍💼 Integriertes Kunden-Portal:** Dedizierter Bereich für Kunden zur Profilverwaltung, zum Ändern ihrer Rechnungsadresse und zum Verwalten verknüpfter Domains und Lizenzen.
-* **🧾 Automatisches Rechnungssystem:** Dynamische Generierung von Rechnungen bei Lizenz-Erstellung oder -Verlängerung inklusive Mahnwesen-Cronjob für überfällige Posten.
-* **📄 PDF-Generierung:** Automatisierte Erstellung professioneller Rechnungs-PDFs via `pdfkit` mit konfigurierbarem Design, Firmenlogo und Steuerangaben.
-* **🤝 Reseller-System:** Dedizierte Endpunkte für Reseller zur automatisierten Lizenzbestellung und -ausgabe über verschlüsselte API-Keys.
-* **🔐 Zwei-Faktor-Authentifizierung (2FA):** Optionale Absicherung von Superadmin- und Admin-Accounts mittels zeitbasierter Einmalpasswörter (TOTP/Google Authenticator) inklusive QR-Code-Setup.
-* **📡 Webhooks & Logs:** Event-getriebene HTTP POST Notifications an Drittsysteme bei Lizenz- oder Rechnungsereignissen inklusive detailliertem Logging.
-* **⏰ Zuverlässige Cron-Jobs:** Automatische Bereinigung abgelaufener Nonces, Prüfung fälliger/überfälliger Rechnungen und E-Mail-Ablaufwarnungen vor dem Lizenzende.
-* **🔄 Auto-Migrationssystem:** Vollautomatisches Schema- und Datenmigrationssystem direkt beim Serverstart – manuelle DB-Setups entfallen komplett.
-* **📩 Self-Registration (In Progress):** Integriertes Feature zur E-Mail-Verifizierung und Kundenregistrierung für den einfachen Einstieg.
-
----
-
-## 4. Voraussetzungen
-
-* **Node.js** >= 18.x
-* **MySQL / MariaDB** >= 10.5.x
-* **pdfkit** (für PDF-Generierung)
-
-### Installierte npm-Abhängigkeiten (aus `package.json`):
-
-* `express` – Web-Framework für die REST-API
-* `mysql2` – MySQL/MariaDB-Treiber mit Promise-Support
-* `bcryptjs` – Sicheres Passwort-Hashing für Admin- und Kunden-Accounts
-* `jsonwebtoken` – Token-basierte Authentifizierung (RS256 für Lizenzen, HS256 für Portal- & Admin-Sessions)
-* `helmet` – Schutz vor gängigen Web-Schachstellen durch HTTP-Header
-* `cors` – Steuerung von Cross-Origin Resource Sharing
-* `express-rate-limit` – Schutz vor Brute-Force und API-Abuse
-* `nodemailer` – Integrierter E-Mail-Versand (SMTP)
-* `otplib` – Implementierung von TOTP für die 2FA
-* `qrcode` – Generierung von Setup-QR-Codes im Admin-Bereich
-* `pdfkit` – Modul zur Erstellung von Rechnungs-PDFs
-* `dotenv` – Laden von Konfigurationsvariablen aus der `.env`-Datei
-
----
-
-## 5. Installation & Setup
-
-Befolgen Sie diese Schritte, um den Server lokal oder auf einer Produktionsumgebung einzurichten:
+### Einzeiler-Setup auf Ubuntu/Debian
 
 ```bash
-# 1. Repository klonen
-git clone https://github.com/stb-srv/licens-srv_Meraki
-cd licens-srv_Meraki
+git clone https://github.com/stb-srv/meraki-licens
+cd meraki-licens
+bash setup.sh
+```
 
-# 2. Abhängigkeiten installieren
+Das Script installiert Node.js, nginx und richtet den systemd-Service ein. Es fragt nur nach Domain, Port und SSL. **Alle kryptografischen Secrets werden automatisch generiert.** Den Admin-Account erstellst du danach im Browser – kein manuelles Bearbeiten von Konfigurationsdateien nötig.
+
+### Lokal / ohne setup.sh
+
+```bash
+git clone https://github.com/stb-srv/meraki-licens
+cd meraki-licens
 npm install
-
-# 3. Umgebungsvariablen einrichten
-cp .env.example .env
-
-# 4. Passe die .env-Datei an (Datenbank-Zugangsdaten, Secrets und SMTP)
-# nano .env
-
-# 5. Server starten
 npm start
 ```
 
-> 💡 **Hinweis:** Die Datenbank-Migrationen laufen beim Start (`npm start`) **vollkommen automatisch** ab. Es ist keine manuelle Ausführung von Einrichtungs-Skripten nötig.
+`npm start` erkennt beim ersten Start automatisch, dass keine `.env` vorhanden ist, generiert alle Secrets und zeigt die Setup-URL:
+
+```
+  ╔══════════════════════════════════════════════════════╗
+  ║   Meraki License Server – Ersteinrichtung           ║
+  ╚══════════════════════════════════════════════════════╝
+
+  ✓  .env erstellt – alle Secrets automatisch generiert
+
+  Setup jetzt im Browser abschließen:
+
+    → http://localhost:4000/setup
+```
+
+Öffne die URL, lege Benutzernamen und Passwort für den Superadmin-Account fest – fertig.
 
 ---
 
-## 6. Datenbank-Migrationen
+## Was automatisch passiert
 
-Der Server verfügt über ein eingebautes, robustes Migrationssystem.
+| Schritt | Automatisch |
+|---|---|
+| `.env` erstellen | ✅ |
+| `ADMIN_SECRET` generieren | ✅ |
+| `HMAC_SECRET` generieren (Offline-Tokens) | ✅ |
+| `PORTAL_SECRET` generieren (Kunden-Portal JWT) | ✅ |
+| RSA-Schlüsselpaar generieren (2048-bit) | ✅ |
+| Datenbank-Migrationen ausführen | ✅ |
+| Admin-Account erstellen | Im Browser unter `/setup` |
+| SMTP / Domain konfigurieren | Im Admin-Panel |
 
-> 📢 **Automatischer Ablauf:** Die Migrationen laufen **automatisch** beim Serverstart (`npm start`).
-> Neue Dateien im Verzeichnis `server/migrations/` werden beim nächsten Start
-> automatisch erkannt und ausgeführt. Eine bereits ausgeführte Migration
-> wird nicht erneut angewendet (das Tracking erfolgt über die Tabelle `schema_migrations` in der DB).
+---
 
-### Manueller Aufruf (z.B. für Debugging oder CI/CD):
-Falls Sie Migrationen manuell ausführen oder das Schema unabhängig vom Server-Boot prüfen möchten, führen Sie folgenden Befehl aus:
+## Features
+
+- **Lizenzverwaltung & Validierung** — Key-Management mit Typen (TRIAL, FREE, BASIC, PRO, ENTERPRISE), Domain-Binding mit Wildcard-Support
+- **Kunden-Portal** — Dedizierter Bereich zur Profilverwaltung, Domain-Zuweisung und Rechnungsdownload
+- **Automatisches Rechnungssystem** — PDF-Generierung via `pdfkit`, Mahnwesen-Cronjob, konfigurierbares Design
+- **Reseller-System** — Automatisierte Lizenzbestellung über verschlüsselte API-Keys
+- **Zwei-Faktor-Authentifizierung (2FA)** — TOTP via Authenticator-App für alle Admin-Accounts
+- **Webhooks & Audit-Log** — Event-getriebene Notifications an Drittsysteme + vollständiges Audit-Protokoll
+- **Trial Self-Registration** — Kunden registrieren 30-Tage-Trials direkt aus dem CMS heraus
+- **Auto-Migration** — Schema-Migrationen laufen automatisch beim Serverstart
+
+---
+
+## Voraussetzungen
+
+- **Node.js** >= 18.x
+- **Kein Datenbankserver nötig** — SQLite ist integriert
+- Ubuntu 22.04 / 24.04 oder Debian 12 (für `setup.sh`)
+
+---
+
+## Umgebungsvariablen (`.env`)
+
+Die `.env` wird beim ersten `npm start` **automatisch mit sicheren Zufallswerten erstellt**. Optionale Parameter kannst du danach anpassen.
+
+| Variable | Pflicht | Beschreibung |
+|---|---|---|
+| `PORT` | Nein | HTTP-Port (Standard: `4000`) |
+| `DB_PATH` | Nein | SQLite-Datenbankpfad (Standard: `./data/licens.db`) |
+| `STORAGE_PATH` | Nein | PDF-Speicherpfad (Standard: `./storage`) |
+| `ADMIN_SECRET` | **Ja** | JWT-Secret für Admin-Sessions |
+| `HMAC_SECRET` | **Ja** | Secret für HMAC-Offline-Tokens (min. 32 Zeichen) |
+| `PORTAL_SECRET` | **Ja** | JWT-Secret für Kunden-Portal-Sessions |
+| `RSA_PRIVATE_KEY` | Empfohlen | PEM-Privatschlüssel für RS256 Lizenz-Tokens |
+| `RSA_PUBLIC_KEY` | Empfohlen | PEM-Öffentlicher Schlüssel für CMS-seitige Verifikation |
+| `SETUP_TOKEN` | Einmalig | Token für Ersteinrichtung (nach Setup irrelevant) |
+| `CORS_ORIGINS` | Nein | Erlaubte Origins, kommagetrennt (leer = dynamisch aus DB) |
+| `ADMIN_IP_WHITELIST` | Nein | Erlaubte IPs für Admin-Zugriff, kommagetrennt |
+| `PORTAL_URL` | Nein | Basis-URL für Portal-Links in E-Mails |
+| `APP_URL` | Nein | App-URL für E-Mail-Links |
+| `SMTP_HOST` | Nein | SMTP-Server (alternativ über Admin-Panel konfigurierbar) |
+| `SMTP_PORT` | Nein | SMTP-Port (Standard: `587`) |
+| `SMTP_USER` | Nein | SMTP-Benutzername |
+| `SMTP_PASS` | Nein | SMTP-Passwort |
+| `SMTP_FROM` | Nein | Absender-Adresse |
+
+---
+
+## Entwicklung
+
 ```bash
-node server/migrate.js
+npm run dev                        # Startet mit --watch (Hot Reload)
+npm test                           # Jest-Tests ausführen
+npx jest tests/admin.test.js       # Einzelne Test-Datei ausführen
+node server/migrate.js             # Migrationen manuell ausführen
 ```
 
-### Neue Migration hinzufügen:
-Um eine neue Tabellenänderung oder ein neues Schema einzuführen, verwenden Sie folgende Namenskonvention:
+---
 
-**Namenskonvention:** `vierstellige laufende Nummer` + `Underscore` + `kurze Beschreibung`.
-Beispiel: `0020_add_new_table.js` (oder `.sql` für reines SQL).
+## Datenbank-Migrationen
 
-Beispiel-Template für eine neue JavaScript-basierte Migration:
-```js
-export async function up(db) {
-    await db.query(`ALTER TABLE customers ADD COLUMN IF NOT EXISTS my_field VARCHAR(255) NULL`);
-}
+Migrationen laufen **automatisch** beim Serverstart. Neue Dateien in `server/migrations/` werden beim nächsten Start einmalig ausgeführt.
 
-export async function down(db) {
-    await db.query(`ALTER TABLE customers DROP COLUMN IF EXISTS my_field`);
-}
-
-export default up;
-```
-
-### Neue Migration schreiben — Pflicht-Template
+**Neue Migration erstellen** (`server/migrations/NNNN_beschreibung.js`):
 
 ```js
-// server/migrations/NNNN_meine_migration.js
 import { DB_SCHEMA } from '../db-schema.js';
 
-export async function up(db) {
-    // Verwende DB_SCHEMA.PK.customers statt hartcodierten 'CHAR(36)'
-    // Verwende DB_SCHEMA.FIELDS.uuid für neue UUID-Spalten
-    // Verwende DB_SCHEMA.CHARSET und DB_SCHEMA.ENGINE für alle CREATE TABLE
-    await db.query(`
+export function up(db) {  // kein async – better-sqlite3 ist synchron
+    db.exec(`
         CREATE TABLE IF NOT EXISTS meine_tabelle (
-            id          ${DB_SCHEMA.FIELDS.uuid} NOT NULL PRIMARY KEY,
-            customer_id ${DB_SCHEMA.PK.customers} NOT NULL,
-            name        ${DB_SCHEMA.FIELDS.shortText} NOT NULL,
-            created_at  ${DB_SCHEMA.FIELDS.timestamp} DEFAULT CURRENT_TIMESTAMP
-        ) ENGINE=${DB_SCHEMA.ENGINE} DEFAULT CHARSET=${DB_SCHEMA.CHARSET};
+            id         TEXT NOT NULL PRIMARY KEY,
+            name       TEXT NOT NULL,
+            created_at TEXT DEFAULT (datetime('now'))
+        );
     `);
 }
-
 export default up;
 ```
 
-> ⚠️ Foreign Keys immer NACH der Tabellenerstellung per ALTER TABLE hinzufügen
-> und vorher den Typ des Referenz-Feldes via information_schema prüfen.
-> Siehe 0017_invoices.js als Referenz-Implementierung.
+> Nummerierung: vierstellig, fortlaufend (z.B. `0022_neue_tabelle.js`). Foreign Keys inline in `CREATE TABLE` — kein `ALTER TABLE` nötig.
 
 ---
 
-## 7. Umgebungsvariablen (.env)
+## API-Übersicht
 
-Die Konfiguration der API erfolgt über Umgebungsvariablen in der `.env`-Datei:
+### Public (`/api/v1/`) — kein Auth
 
-| Variable | Pflicht / Optional | Beispielwert | Beschreibung |
-| :--- | :--- | :--- | :--- |
-| `PORT` | Optional | `4000` | Port, auf dem die Express-App lauscht (Fallback `4000`). |
-| `DB_HOST` | **Pflicht** | `localhost` | Host-Adresse des MySQL/MariaDB-Servers. |
-| `DB_PORT` | Optional | `3306` | Port des MySQL/MariaDB-Servers. |
-| `DB_USER` | **Pflicht** | `licens_user` | Datenbank-Benutzername. |
-| `DB_PASS` | **Pflicht** | `sicheres_passwort` | Datenbank-Passwort. |
-| `DB_NAME` | **Pflicht** | `licens_db` | Name der MySQL-Datenbank. |
-| `ADMIN_SECRET` | **Pflicht** | `sehr_langes_admin_secret` | JWT-Secret zur HS256-Signierung von Admin-Tokens. |
-| `PORTAL_SECRET` | **Pflicht** | `sehr_langes_portal_secret` | JWT-Secret zur HS256-Signierung von Kunden-Portal-Tokens. |
-| `HMAC_SECRET` | **Pflicht** | `sehr_langes_hmac_secret` | HMAC-Secret zum Signieren und Prüfen von Offline-Tokens. |
-| `RSA_PRIVATE_KEY` | Optional | `-----BEGIN RSA PRIVATE KEY-----...` | PEM-formatierter privater RSA-Schlüssel zur RS256-Signierung von Lizenz-Tokens. |
-| `RSA_PUBLIC_KEY` | Optional | `-----BEGIN PUBLIC KEY-----...` | PEM-formatierter öffentlicher RSA-Schlüssel zur CMS-seitigen Verifikation. |
-| `CORS_ORIGINS` | Optional | `https://cms.meinrestaurant.de` | Kommagetrennte Ursprungsdomains für CORS. Wenn leer, wird dynamisch aus aktiven Lizenzen abgeglichen. |
-| `SMTP_HOST` | Optional | `smtp.example.com` | Hostname des SMTP-Servers für Mail-Benachrichtigungen. |
-| `SMTP_PORT` | Optional | `587` | Port des SMTP-Servers. |
-| `SMTP_USER` | Optional | `noreply@domain.de` | Benutzername des SMTP-Servers. |
-| `SMTP_PASS` | Optional | `smtp_password` | Passwort des SMTP-Servers. |
-| `SETUP_TOKEN` | Optional | `once_setup_key_123` | Einmaliges Token zum initialen Setup des ersten Admin-Accounts. |
-| `STORAGE_PATH` | Optional | `./storage` | Ordnerpfad, unter dem die Rechnungs-PDFs gespeichert werden. |
-| `PORTAL_URL` | Optional | `https://portal.domain.de` | Basis-URL des Kundenportals für E-Mail-Einladungslinks. |
+| Methode | Route | Beschreibung |
+|---|---|---|
+| `GET` | `/setup-status` | Prüft ob Setup benötigt wird |
+| `POST` | `/setup` | Erstellt ersten Superadmin (einmalig) |
+| `POST` | `/validate` | Lizenz-Key validieren (Domain, Device, Nonce) |
+| `POST` | `/heartbeat` | Letzten Aktivitätszeitpunkt aktualisieren |
+| `POST` | `/refresh` | Lizenz-Token erneuern |
+| `POST` | `/offline-token` | Offline-Token ausstellen (max. 168h) |
+| `GET` | `/public-key` | RSA-Öffentlichschlüssel abrufen |
+| `POST` | `/trial/register` | 30-Tage Trial-Lizenz registrieren |
+
+### Admin (`/api/admin/`) — Admin JWT
+
+Vollständiges CRUD für Lizenzen, Kunden, Rechnungen, Geräte, Webhooks und Einstellungen. Login via `POST /api/admin/login`.
+
+### Kunden-Portal (`/api/portal/`) — Portal JWT
+
+Selbstverwaltung: Profil, Domains, Rechnungsdownload. Login via `POST /api/portal/login`.
 
 ---
 
-## 8. API-Übersicht
+## Sicherheit
 
-### Public API (`/api/v1/...`)
-| Methode | Route | Beschreibung | Auth |
-| :--- | :--- | :--- | :--- |
-| `POST` | `/setup` | Erstellt ersten Superadmin-Account (nur wenn SETUP_TOKEN gesetzt) | `X-Setup-Token` Header |
-| `POST` | `/validate` | Validiert Lizenz-Key (Domain-Binding, Device, Nonce-Check) | Keine |
-| `POST` | `/heartbeat` | Aktualisiert den Zeitstempel des letzten Lebenszeichens | Keine |
-| `POST` | `/refresh` | Erneuert einen gültigen Lizenz-Token | Keine |
-| `POST` | `/verify-license-token` | Verifiziert einen RS256 signierten Lizenz-Token | Keine |
-| `POST` | `/offline-token` | Stellt einen zeitlich begrenzten Offline-Token aus (max. 168h) | Keine |
-| `POST` | `/verify-offline-token` | Überprüft die Validität eines Offline-Tokens | Keine |
-| `GET` | `/public-key` | Liefert den öffentlichen RSA-Schlüssel für die CMS-Verifikation | Keine |
-| `POST` | `/trial/register` | Registriert eine neue kostenlose Trial-Lizenz | Keine |
-
-### Admin API (`/api/admin/...`)
-| Methode | Route | Beschreibung | Auth |
-| :--- | :--- | :--- | :--- |
-| `POST` | `/login` | Administrator Login (liefert JWT zurück) | Keine / Rate-Limit |
-| `POST` | `/logout` | Revokiert die aktive Admin-Session | Admin JWT |
-| `GET` | `/stats` | Liefert globale System- und Aktivitätsstatistiken | Admin JWT |
-| `GET` | `/stats/invoices` | Liefert Rechnungs-KPIs (MRR, ausstehend, bezahlt, etc.) | Admin JWT |
-| `GET` | `/analytics` | Liefert detaillierte Feature- und Nutzungsstatistiken | Admin JWT |
-| `GET` | `/licenses` | Listet alle Lizenzen auf | Admin JWT |
-| `POST` | `/licenses` | Erstellt eine neue Lizenz | Admin JWT |
-| `GET` | `/licenses/:key` | Zeigt Details einer einzelnen Lizenz | Admin JWT |
-| `PATCH` | `/licenses/:key/status` | Ändert den Status einer Lizenz (aktiv/sperren) | Admin JWT |
-| `POST` | `/licenses/:key/renew` | Verlängert die Lizenz-Laufzeit | Admin JWT |
-| `DELETE` | `/licenses/:key` | Löscht eine Lizenz aus dem System | Admin JWT |
-| `PATCH` | `/licenses/:key/customer` | Verknüpft einen Kunden mit einer Lizenz | Admin JWT |
-| `GET` | `/customers` | Listet alle Kundenstammdaten auf | Admin JWT |
-| `POST` | `/customers` | Erstellt ein neues Kundenprofil | Admin JWT |
-| `PATCH` | `/customers/:id` | Aktualisiert Kunden-Stammdaten | Admin JWT |
-| `DELETE` | `/customers/:id` | Löscht ein Kundenprofil | Admin JWT |
-| `GET` | `/devices` | Listet alle registrierten Geräte auf | Admin JWT |
-| `PATCH` | `/devices/:id/deactivate` | Deaktiviert ein registriertes Client-Gerät | Admin JWT |
-| `DELETE` | `/devices/:id` | Löscht eine Geräte-Registrierung | Admin JWT |
-| `GET` | `/invoices` | Listet alle Rechnungen auf | Admin JWT |
-| `GET` | `/invoices/:id` | Zeigt Details einer Rechnung inklusive Items | Admin JWT |
-| `POST` | `/invoices` | Erstellt manuell eine neue Rechnung | Admin JWT |
-| `POST` | `/invoices/:id/resend` | Versendet eine Rechnung erneut per Mail samt PDF | Admin JWT |
-| `GET` | `/audit-log` | Liefert filterbare Protokolle aller sicherheitsrelevanten Aktionen | Admin JWT |
-| `GET` | `/users` | Listet alle Admin-Benutzer auf | Superadmin JWT |
-| `POST` | `/users` | Erstellt einen neuen Admin- oder Superadmin-User | Superadmin JWT |
-| `DELETE` | `/users/:username` | Löscht einen Admin-User aus dem System | Superadmin JWT |
-
-### Kunden-Portal (`/api/portal/...`)
-| Methode | Route | Beschreibung | Auth |
-| :--- | :--- | :--- | :--- |
-| `POST` | `/login` | Kunden-Login im Portal | Keine |
-| `GET` | `/me` | Ruft das eigene Kundenprofil und Zahlungsstatus ab | Portal JWT |
-| `PATCH` | `/update-profile` | Aktualisiert Stammdaten und die Rechnungsanschrift | Portal JWT |
-| `GET` | `/licenses` | Listet alle eigenen Lizenzen des Kunden auf | Portal JWT |
-| `PATCH` | `/licenses/:key/domain` | Aktualisiert die zugeordnete Domain einer Lizenz | Portal JWT |
-| `GET` | `/invoices` | Listet alle Rechnungen des Kunden auf | Portal JWT |
-| `GET` | `/invoices/:id/pdf` | Lädt das PDF einer spezifischen Rechnung herunter | Portal JWT |
+- Alle Secrets werden als kryptografisch sichere Zufallswerte generiert (96 Hex-Zeichen, RSA 2048-bit)
+- RS256 für Lizenz-Tokens — CMS verifiziert lokal gegen Public Key ohne API-Rückfrage
+- Admin-API mit `ADMIN_IP_WHITELIST` auf bekannte IPs beschränkbar
+- 2FA für alle Admin-Accounts über TOTP/Authenticator-App
 
 ---
 
-## 9. Kunden-Portal
+## Update
 
-Das Kunden-Portal ermöglicht Kunden die selbstständige Verwaltung ihrer Accounts und Lizenzen ohne Admin-Intervention:
-* **Login & Profilverwaltung:** Sicherer Zugang und Bearbeitung der eigenen Stammdaten sowie der Rechnungsanschrift (`billing_street`, `billing_city`, `billing_zip`, `billing_country`, `tax_id`).
-* **Lizenzübersicht:** Einsehen aller zugeordneten Lizenzen, Laufzeiten und Module sowie eigenständiges Zuweisen und Ändern der verknüpften Domain.
-* **Rechnungsdownload:** Einsicht in die Rechnungshistorie und direkter Download der generierten Rechnungs-PDFs.
-* **Passwort zurücksetzen:** Möglichkeit zum sicheren Zurücksetzen des Passworts bei Verlust.
+```bash
+bash update.sh
+```
 
----
-
-## 10. Rechnungssystem
-
-Der License Server beinhaltet ein vollautomatisches Rechnungsmodul:
-* **Automatische Erstellung:** Rechnungen werden vollautomatisch über den Cronjob (z.B. bei Lizenzverlängerungen) oder direkt bei manueller Lizenz-Erstellung im Admin-Panel generiert.
-* **PDF-Generierung & Speicherung:** Rechnungen werden als professionelle PDFs generiert und sicher unter `${STORAGE_PATH}/invoices/` (Standard: `storage/invoices/`) abgelegt.
-* **Rechnungs-Wiederversand:** Bereits gesendete Rechnungen können im Admin-Bereich mit einem Klick neu generiert und erneut per E-Mail an den Kunden verschickt werden (Audit-gesichert inklusive Aufzeichnung des `resent_count`).
-* **Flexibilität:** Der Rechnungsnummernkreis sowie Präfixe (`INV-`) und Steuerdaten sind flexibel über die Datenbank und Admin-Einstellungen definierbar.
+Sichert `.env` und Datenbank, holt die neueste Version von GitHub, installiert Dependencies und startet den Server neu.
 
 ---
 
-## 11. Sicherheitshinweise
+## Lizenz
 
-* **Sichere Secrets:** Verwenden Sie für `ADMIN_SECRET`, `PORTAL_SECRET` und `HMAC_SECRET` zwingend kryptografisch sichere Zufallsschlüssel mit mindestens 32 Zeichen (z. B. generiert über `openssl rand -hex 48`).
-* **RSA-Verschlüsselung:** Nutzen Sie für Produktionsumgebungen unbedingt RSA-Schlüsselpaare (RS256). Dies erlaubt es dem CMS vor Ort, die Lizenz-Tokens autark und ohne ständige API-Abfragen lokal gegen den Public Key zu verifizieren.
-* **IP-Whitelist:** Die Admin-API und sensitive Endpunkte können über die Variable `ADMIN_IP_WHITELIST` in der `.env`-Datei zusätzlich gegen unerlaubte externe Zugriffe per IP-Sperre abgesichert werden.
-* **Zwei-Faktor-Authentifizierung (2FA):** Aktivieren Sie für Admins und Superadmins die Zwei-Faktor-Authentifizierung via App (TOTP) zum Schutz vor unberechtigten Login-Versuchen.
-
----
-
-## 12. Lizenz
-
-Dieses Projekt ist unter der **MIT-Lizenz** lizenziert.
+MIT
