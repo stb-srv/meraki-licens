@@ -14,7 +14,7 @@
     "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest"
   },
   "dependencies": {
-    "@meraki/plans": "file:../meraki-plans",
+    "@meraki/plans": "github:stb-srv/meraki-plans",
     "bcryptjs": "^2.4.3",
     "better-sqlite3": "^12.10.0",
     "cors": "^2.8.5",

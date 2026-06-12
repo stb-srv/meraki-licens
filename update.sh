@@ -28,6 +28,7 @@ PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BACKUP_DIR="$PROJECT_DIR/backups"
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 PM2_APP_NAME="meraki-licens"
+SYSTEMD_SERVICE="licens-srv"
 
 echo ""
 echo -e "${BOLD}${CYAN}🏛️  OPA! Santorini License Server — Update Script${NC}"
@@ -114,6 +115,9 @@ cd "$PROJECT_DIR"
 if command -v pm2 &>/dev/null && pm2 describe "$PM2_APP_NAME" &>/dev/null; then
     pm2 stop "$PM2_APP_NAME" --silent
     echo -e "  ${GREEN}✓ PM2: '$PM2_APP_NAME' gestoppt${NC}"
+elif systemctl is-active --quiet "$SYSTEMD_SERVICE" 2>/dev/null; then
+    systemctl stop "$SYSTEMD_SERVICE"
+    echo -e "  ${GREEN}✓ systemd: '$SYSTEMD_SERVICE' gestoppt${NC}"
 else
     echo -e "  ${CYAN}→ Kein laufender Prozess gefunden – weiter${NC}"
 fi
@@ -121,7 +125,7 @@ fi
 # ── Schritt 5: Migration durchführen ──────────────────────────────────────────
 echo -e "\n${BOLD}🔄 Schritt 5/6: Daten migrieren...${NC}"
 cd "$PROJECT_DIR"
-node migrate.js
+node server/migrate.js
 
 # ── Schritt 6: Server neu starten ─────────────────────────────────────────────
 echo -e "\n${BOLD}🚀 Schritt 6/6: Server neu starten...${NC}"
@@ -136,9 +140,9 @@ if command -v pm2 &>/dev/null; then
         echo -e "  ${GREEN}✓ PM2: '$PM2_APP_NAME' neu registriert und gestartet${NC}"
     fi
     pm2 save --silent
-elif systemctl list-units --type=service 2>/dev/null | grep -q "$PM2_APP_NAME"; then
-    systemctl restart "$PM2_APP_NAME"
-    echo -e "  ${GREEN}✓ systemd: '$PM2_APP_NAME' neu gestartet${NC}"
+elif systemctl list-unit-files --type=service 2>/dev/null | grep -q "^$SYSTEMD_SERVICE\.service"; then
+    systemctl restart "$SYSTEMD_SERVICE"
+    echo -e "  ${GREEN}✓ systemd: '$SYSTEMD_SERVICE' neu gestartet${NC}"
 else
     echo -e "  ${YELLOW}⚠️  Kein PM2/systemd gefunden – bitte manuell starten:${NC}"
     echo -e "  ${CYAN}     npm start${NC}"
