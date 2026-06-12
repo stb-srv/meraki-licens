@@ -6,7 +6,7 @@
   <title>Meraki &ndash; Lizenzserver</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;0,900;1,300;1,400&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   <style>
@@ -32,12 +32,28 @@
       --shadow-sm: 0 1px 3px rgba(20,22,26,0.06);
       --shadow-md: 0 4px 12px rgba(20,22,26,0.08);
       --shadow-lg: 0 12px 32px rgba(20,22,26,0.12);
-      --radius: 12px;
+      --radius: var(--radius-lg);
       --nav-bg: rgba(245,245,240,0.92);
       --card: #ffffff;
-      --font-body: 'Inter', system-ui, sans-serif;
-      --font-display: 'Inter', sans-serif;
-      --font-mono: 'JetBrains Mono', monospace;
+      --font-body: 'Roboto', sans-serif;
+      --font-display: 'Roboto', sans-serif;
+      --font-mono: 'Roboto Mono', monospace;
+      /* Type scale */
+      --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+      --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+      --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+      --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+      --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+      --text-2xl: clamp(2rem, 1.2rem + 2.5vw, 3.5rem);
+      /* Spacing (4px base) */
+      --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem;
+      --space-4: 1rem; --space-6: 1.5rem; --space-8: 2rem;
+      --space-10: 2.5rem; --space-12: 3rem; --space-16: 4rem;
+      /* Border radius */
+      --radius-sm: 0.375rem; --radius-md: 0.5rem;
+      --radius-lg: 0.75rem; --radius-xl: 1rem;
+      /* Transitions */
+      --transition-interactive: 180ms cubic-bezier(0.16, 1, 0.3, 1);
     }
     [data-theme="dark"] {
       --bg: #0d0f12;
@@ -77,10 +93,16 @@
       transition: background .3s, color .3s;
       overflow-x: hidden;
     }
-    h1, h2, h3, h4, .nav-logo, .sidebar-brand {
+    h1, h2, h3, h4, h5, h6, .nav-logo, .sidebar-brand {
       font-family: var(--font-display);
       letter-spacing: -0.02em;
+      line-height: 1.2;
     }
+    h1, h2 { font-weight: 700; }
+    h3, h4 { font-weight: 500; }
+    input, button, select, textarea { font-family: var(--font-body); }
+    button, label { line-height: 1.4; letter-spacing: 0.01em; }
+    button { font-weight: 500; }
     
     nav {
       position: sticky;
@@ -90,15 +112,15 @@
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border);
-      padding: 0 2.5rem;
+      padding: 0 var(--space-10);
       display: flex;
       align-items: center;
       justify-content: space-between;
       height: 64px;
     }
     .nav-logo {
-      font-size: 1.3rem;
-      font-weight: 800;
+      font-size: var(--text-lg);
+      font-weight: 700;
       color: var(--primary);
       display: flex;
       align-items: center;
@@ -117,8 +139,8 @@
     .nav-links a {
       color: var(--text2);
       text-decoration: none;
-      font-size: 0.9rem;
-      font-weight: 600;
+      font-size: var(--text-sm);
+      font-weight: 500;
       transition: all 0.2s;
       cursor: pointer;
     }
@@ -131,14 +153,14 @@
       align-items: center;
       justify-content: center;
       gap: .4rem;
-      padding: .55rem 1.25rem;
-      border-radius: 8px;
+      padding: var(--space-2) var(--space-6);
+      border-radius: var(--radius-md);
       border: none;
       cursor: pointer;
-      font-size: .88rem;
+      font-size: var(--text-sm);
       font-family: var(--font-body);
-      font-weight: 600;
-      transition: all 180ms cubic-bezier(0.16,1,0.3,1);
+      font-weight: 500;
+      transition: all var(--transition-interactive);
       text-decoration: none;
       white-space: nowrap;
     }
@@ -180,22 +202,22 @@
       opacity: .9;
     }
     .btn-sm {
-      padding: .4rem .85rem;
-      font-size: .8rem;
-      border-radius: 6px;
+      padding: var(--space-2) var(--space-3);
+      font-size: var(--text-sm);
+      border-radius: var(--radius-sm);
     }
     .btn-xs {
-      padding: .25rem .55rem;
-      font-size: .75rem;
-      border-radius: 4px;
+      padding: var(--space-1) var(--space-2);
+      font-size: var(--text-xs);
+      border-radius: var(--radius-sm);
     }
     
     .theme-toggle {
       background: transparent;
       border: 1px solid var(--border);
       color: var(--text2);
-      border-radius: 8px;
-      padding: 0.4rem;
+      border-radius: var(--radius-md);
+      padding: var(--space-2);
       cursor: pointer;
       transition: all 0.2s;
       display: inline-flex;
@@ -225,7 +247,7 @@
       align-items: center;
       justify-content: center;
       text-align: center;
-      padding: 4rem 2rem;
+      padding: var(--space-16) var(--space-8);
       background: var(--bg);
     }
     .hero-badge {
@@ -233,57 +255,57 @@
       border: 1px solid var(--primary-hl);
       color: var(--primary);
       border-radius: 999px;
-      padding: 0.35rem 0.95rem;
-      font-size: 0.8rem;
-      font-weight: 600;
-      margin-bottom: 1.5rem;
-      letter-spacing: 0.05em;
+      padding: var(--space-1) var(--space-4);
+      font-size: var(--text-sm);
+      font-weight: 500;
+      margin-bottom: var(--space-6);
+      letter-spacing: 0.08em;
     }
     .hero h1 {
       font-size: clamp(2rem, 4vw, 3rem);
-      font-weight: 800;
+      font-weight: 700;
       line-height: 1.15;
       max-width: 800px;
       color: var(--text);
     }
     .hero p {
       color: var(--text2);
-      font-size: 1.1rem;
+      font-size: var(--text-base);
       max-width: 520px;
-      margin: 1.5rem auto;
+      margin: var(--space-6) auto;
     }
     .hero-btns {
       display: flex;
       gap: 1rem;
       flex-wrap: wrap;
       justify-content: center;
-      margin-top: 2rem;
+      margin-top: var(--space-8);
     }
     
     section {
-      padding: 5rem 2rem;
+      padding: 5rem var(--space-8);
       max-width: 1100px;
       margin: 0 auto;
     }
     .section-label {
-      font-size: 0.8rem;
+      font-size: var(--text-sm);
       font-weight: 700;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.08em;
       color: var(--primary);
       text-transform: uppercase;
-      margin-bottom: 0.8rem;
+      margin-bottom: var(--space-3);
     }
     .section-title {
       font-size: clamp(1.5rem, 3vw, 2.2rem);
-      font-weight: 800;
-      margin-bottom: 0.8rem;
+      font-weight: 700;
+      margin-bottom: var(--space-3);
       font-family: var(--font-display);
       color: var(--text);
     }
     .section-sub {
       color: var(--text2);
       max-width: 560px;
-      margin-bottom: 3rem;
+      margin-bottom: var(--space-12);
     }
     
     .feature-grid {
@@ -295,7 +317,7 @@
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 2rem;
+      padding: var(--space-8);
       box-shadow: var(--shadow-sm);
       transition: box-shadow 0.2s, transform 0.2s, border-color 0.2s;
     }
@@ -308,17 +330,17 @@
       color: var(--primary);
       width: 24px;
       height: 24px;
-      margin-bottom: 1.25rem;
+      margin-bottom: var(--space-6);
     }
     .feature-card h3 {
-      font-size: 1.1rem;
+      font-size: var(--text-base);
       font-weight: 700;
-      margin-bottom: 0.5rem;
+      margin-bottom: var(--space-2);
       color: var(--text);
     }
     .feature-card p {
       color: var(--text2);
-      font-size: 0.88rem;
+      font-size: var(--text-sm);
     }
     
     .plans-grid {
@@ -330,7 +352,7 @@
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 2.25rem 1.75rem;
+      padding: var(--space-10) var(--space-8);
       box-shadow: var(--shadow-sm);
       position: relative;
       transition: box-shadow 0.2s, transform 0.2s, border-color 0.2s;
@@ -349,29 +371,29 @@
       transform: translateX(-50%);
       background: var(--primary);
       color: #fff;
-      font-size: 0.72rem;
+      font-size: var(--text-xs);
       font-weight: 700;
-      padding: 0.25rem 0.85rem;
+      padding: var(--space-1) var(--space-3);
       border-radius: 999px;
       white-space: nowrap;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.08em;
     }
     .plan-name {
-      font-size: 1.25rem;
-      font-weight: 800;
+      font-size: var(--text-lg);
+      font-weight: 700;
       font-family: var(--font-display);
-      margin-bottom: 0.5rem;
+      margin-bottom: var(--space-2);
       color: var(--text);
     }
     .plan-features {
       list-style: none;
-      margin-top: 1.5rem;
+      margin-top: var(--space-6);
     }
     .plan-features li {
-      font-size: 0.85rem;
+      font-size: var(--text-sm);
       color: var(--text2);
-      padding: 0.45rem 0;
+      padding: var(--space-2) 0;
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
@@ -380,30 +402,30 @@
       border-bottom: none;
     }
     .plan-features li::before {
-      content: '✓ ';
+      content: 'âœ“ ';
       color: var(--success);
-      margin-right: 0.45rem;
+      margin-right: var(--space-2);
       font-weight: bold;
     }
     
     .api-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.88rem;
+      font-size: var(--text-sm);
     }
     .api-table th {
       background: var(--bg3);
-      padding: 0.85rem 1.2rem;
+      padding: var(--space-3) var(--space-4);
       text-align: left;
       color: var(--text2);
-      font-weight: 600;
-      font-size: 0.8rem;
+      font-weight: 500;
+      font-size: var(--text-sm);
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.08em;
       border-bottom: 1px solid var(--border);
     }
     .api-table td {
-      padding: 0.85rem 1.2rem;
+      padding: var(--space-3) var(--space-4);
       border-bottom: 1px solid var(--border);
       color: var(--text);
     }
@@ -414,9 +436,9 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      padding: 0.2rem 0.5rem;
-      border-radius: 4px;
-      font-size: 0.72rem;
+      padding: var(--space-1) var(--space-2);
+      border-radius: var(--radius-sm);
+      font-size: var(--text-xs);
       font-weight: 700;
       line-height: 1;
     }
@@ -438,10 +460,10 @@
     }
     code {
       background: var(--bg3);
-      padding: 0.15rem 0.35rem;
-      border-radius: 4px;
+      padding: 0.15rem var(--space-1);
+      border-radius: var(--radius-sm);
       font-family: var(--font-mono);
-      font-size: 0.85em;
+      font-size: var(--text-sm);
       color: var(--primary);
     }
     
@@ -449,50 +471,50 @@
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 2.5rem;
+      padding: var(--space-10);
       line-height: 1.8;
       box-shadow: var(--shadow-sm);
     }
     .legal-content h2 {
-      font-size: 1.2rem;
-      margin-top: 1.75rem;
-      margin-bottom: 0.6rem;
+      font-size: var(--text-lg);
+      margin-top: var(--space-8);
+      margin-bottom: var(--space-2);
       color: var(--primary);
       font-family: var(--font-display);
-      font-weight: 800;
+      font-weight: 700;
     }
     .legal-content h2:first-child {
       margin-top: 0;
     }
     .legal-content p, .legal-content li {
       color: var(--text2);
-      font-size: 0.9rem;
-      margin-bottom: 0.75rem;
+      font-size: var(--text-sm);
+      margin-bottom: var(--space-3);
     }
     .legal-content ul {
-      padding-left: 1.25rem;
-      margin: 0.75rem 0;
+      padding-left: var(--space-6);
+      margin: var(--space-3) 0;
     }
     .tabs-row {
       display: flex;
       gap: 0.5rem;
-      margin-bottom: 1.5rem;
+      margin-bottom: var(--space-6);
       flex-wrap: wrap;
     }
     
     footer {
       border-top: 1px solid var(--border);
-      padding: 2rem;
+      padding: var(--space-8);
       text-align: center;
       color: var(--text2);
-      font-size: 0.85rem;
+      font-size: var(--text-sm);
       background: var(--bg2);
     }
     footer a {
       color: var(--text2);
       cursor: pointer;
       text-decoration: underline;
-      margin: 0 .5rem;
+      margin: 0 var(--space-2);
     }
     footer a:hover {
       color: var(--text);
@@ -513,45 +535,45 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 2rem;
+      padding: var(--space-8);
     }
     .login-card {
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 3rem 2.25rem;
+      padding: var(--space-12) var(--space-10);
       width: 100%;
       max-width: 400px;
       box-shadow: var(--shadow-lg);
     }
     .login-card h2 {
       text-align: center;
-      margin-bottom: 2rem;
+      margin-bottom: var(--space-8);
       font-family: var(--font-display);
-      font-weight: 800;
-      font-size: 1.5rem;
+      font-weight: 700;
+      font-size: var(--text-xl);
       color: var(--text);
     }
     
     .form-group {
-      margin-bottom: 1.25rem;
+      margin-bottom: var(--space-6);
     }
     .form-group label {
       display: block;
-      font-size: 0.85rem;
+      font-size: var(--text-sm);
       color: var(--text2);
-      margin-bottom: 0.4rem;
+      margin-bottom: var(--space-2);
       font-weight: 500;
     }
     .form-group input, .form-group select, .form-group textarea {
       width: 100%;
       background: var(--bg2);
       border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 0.55rem 0.85rem;
+      border-radius: var(--radius-md);
+      padding: var(--space-2) var(--space-3);
       color: var(--text);
       font-family: var(--font-body);
-      font-size: 0.88rem;
+      font-size: var(--text-sm);
       outline: none;
       transition: border-color 150ms ease;
     }
@@ -564,10 +586,10 @@
     }
     
     .alert {
-      padding: 0.75rem 1rem;
-      border-radius: 8px;
-      font-size: 0.88rem;
-      margin-bottom: 1.25rem;
+      padding: var(--space-3) var(--space-4);
+      border-radius: var(--radius-md);
+      font-size: var(--text-sm);
+      margin-bottom: var(--space-6);
     }
     .alert-error {
       background: var(--danger-hl);
@@ -595,7 +617,7 @@
       width: 240px;
       background: var(--bg2);
       border-right: 1px solid var(--border);
-      padding: 1.5rem 1rem;
+      padding: var(--space-6) var(--space-4);
       flex-shrink: 0;
       display: flex;
       flex-direction: column;
@@ -603,18 +625,18 @@
     }
     .sidebar-brand {
       font-family: var(--font-display);
-      font-weight: 800;
-      font-size: 1.2rem;
+      font-weight: 700;
+      font-size: var(--text-lg);
       color: var(--text);
       display: flex;
       align-items: center;
       gap: 0.6rem;
-      padding: 0 0.5rem;
+      padding: 0 var(--space-2);
     }
     .sidebar-user {
-      font-size: 0.8rem;
+      font-size: var(--text-sm);
       color: var(--text2);
-      padding: 0 0.5rem;
+      padding: 0 var(--space-2);
       margin-top: -0.8rem;
     }
     .sidebar-menu {
@@ -627,10 +649,10 @@
       display: flex;
       align-items: center;
       gap: 0.75rem;
-      padding: 0.6rem 1rem;
+      padding: var(--space-2) var(--space-4);
       color: var(--text2);
       text-decoration: none;
-      font-size: 0.9rem;
+      font-size: var(--text-sm);
       font-family: var(--font-body);
       font-weight: 500;
       border-radius: var(--radius);
@@ -649,28 +671,28 @@
     .sidebar-menu li a.active {
       background: var(--primary-hl);
       color: var(--primary);
-      font-weight: 600;
+      font-weight: 500;
     }
     .sidebar-sep {
       border: none;
       border-top: 1px solid var(--border);
-      margin: 0.5rem 0;
+      margin: var(--space-2) 0;
     }
     
     .main-area {
       flex: 1;
       overflow-y: auto;
-      padding: 2rem 2.5rem;
+      padding: var(--space-8) var(--space-10);
     }
     .dash-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 2rem;
+      margin-bottom: var(--space-8);
     }
     .dash-header h2 {
-      font-size: 1.5rem;
-      font-weight: 800;
+      font-size: var(--text-xl);
+      font-weight: 700;
       color: var(--text);
     }
     
@@ -678,13 +700,13 @@
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap: 1.25rem;
-      margin-bottom: 2rem;
+      margin-bottom: var(--space-8);
     }
     .stat-card {
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 1.5rem;
+      padding: var(--space-6);
       box-shadow: var(--shadow-sm);
       display: flex;
       flex-direction: column;
@@ -695,20 +717,20 @@
       box-shadow: var(--shadow-md);
     }
     .stat-label {
-      font-size: 0.8rem;
+      font-size: var(--text-sm);
       color: var(--text2);
       font-weight: 500;
     }
     .stat-value {
-      font-size: 2rem;
-      font-weight: 800;
+      font-size: var(--text-xl);
+      font-weight: 700;
       font-family: var(--font-display);
       color: var(--text);
       line-height: 1;
     }
     .stat-trend {
-      font-size: 0.78rem;
-      font-weight: 600;
+      font-size: var(--text-xs);
+      font-weight: 500;
       color: var(--success);
     }
     .stat-trend.down {
@@ -721,27 +743,27 @@
       border-radius: var(--radius);
       box-shadow: var(--shadow-sm);
       overflow: hidden;
-      margin-bottom: 1.5rem;
+      margin-bottom: var(--space-6);
     }
     table.data-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.88rem;
+      font-size: var(--text-sm);
       text-align: left;
     }
     table.data-table th {
       background: var(--bg3);
       color: var(--text2);
-      font-weight: 600;
-      font-size: 0.8rem;
+      font-weight: 500;
+      font-size: var(--text-sm);
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      padding: 0.85rem 1.2rem;
+      letter-spacing: 0.08em;
+      padding: var(--space-3) var(--space-4);
       border-bottom: 1px solid var(--border);
       white-space: nowrap;
     }
     table.data-table td {
-      padding: 0.85rem 1.2rem;
+      padding: var(--space-3) var(--space-4);
       border-bottom: 1px solid var(--border);
       color: var(--text);
       vertical-align: middle;
@@ -757,10 +779,10 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      padding: 0.2rem 0.6rem;
+      padding: var(--space-1) var(--space-2);
       border-radius: 999px;
-      font-size: 0.75rem;
-      font-weight: 600;
+      font-size: var(--text-xs);
+      font-weight: 500;
       line-height: 1;
     }
     .badge-active {
@@ -824,11 +846,11 @@
       align-items: center;
       background: var(--bg3);
       border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 2px 6px;
-      font-size: 0.75rem;
+      border-radius: var(--radius-sm);
+      padding: 2px var(--space-2);
+      font-size: var(--text-xs);
       color: var(--text2);
-      margin-right: 4px;
+      margin-right: var(--space-1);
     }
     
     .modal-overlay {
@@ -839,7 +861,7 @@
       display: none;
       align-items: center;
       justify-content: center;
-      padding: 1rem;
+      padding: var(--space-4);
     }
     .modal-overlay.open {
       display: flex;
@@ -847,8 +869,8 @@
     .modal {
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 2rem;
+      border-radius: var(--radius-lg);
+      padding: var(--space-8);
       width: 100%;
       max-width: 520px;
       max-height: 90vh;
@@ -856,33 +878,33 @@
       box-shadow: var(--shadow-lg);
     }
     .modal h3 {
-      margin-bottom: 1.25rem;
+      margin-bottom: var(--space-6);
       font-family: var(--font-display);
-      font-size: 1.25rem;
-      font-weight: 800;
+      font-size: var(--text-lg);
+      font-weight: 700;
       color: var(--text);
     }
     .modal-footer {
       display: flex;
       gap: 0.75rem;
       justify-content: flex-end;
-      margin-top: 1.5rem;
+      margin-top: var(--space-6);
     }
     
     .toolbar {
       display: flex;
       gap: .8rem;
       align-items: center;
-      margin-bottom: 1.25rem;
+      margin-bottom: var(--space-6);
       flex-wrap: wrap;
     }
     .toolbar input {
       background: var(--bg2);
       border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: .55rem .85rem;
+      border-radius: var(--radius-md);
+      padding: var(--space-2) var(--space-3);
       color: var(--text);
-      font-size: .88rem;
+      font-size: var(--text-sm);
       outline: none;
       flex: 1;
       min-width: 180px;
@@ -896,16 +918,16 @@
       gap: .4rem;
       align-items: center;
       justify-content: flex-end;
-      margin-top: .8rem;
-      font-size: .85rem;
+      margin-top: var(--space-3);
+      font-size: var(--text-sm);
       color: var(--text2);
     }
     .pagination button {
       background: var(--bg3);
       border: 1px solid var(--border);
-      border-radius: 6px;
+      border-radius: var(--radius-sm);
       color: var(--text);
-      padding: .25rem .7rem;
+      padding: var(--space-1) var(--space-3);
       cursor: pointer;
     }
     .pagination button:hover {
@@ -919,9 +941,9 @@
     .log-entry {
       background: var(--bg3);
       border-radius: var(--radius);
-      padding: 1rem;
-      margin-bottom: 0.5rem;
-      font-size: 0.85rem;
+      padding: var(--space-4);
+      margin-bottom: var(--space-2);
+      font-size: var(--text-sm);
       display: flex;
       gap: 0.85rem;
       align-items: flex-start;
@@ -947,12 +969,12 @@
     }
     .log-time {
       color: var(--text3);
-      font-size: 0.75rem;
+      font-size: var(--text-xs);
     }
     
     .loading {
       text-align: center;
-      padding: 3rem;
+      padding: var(--space-12);
       color: var(--text2);
     }
     .spinner {
@@ -978,18 +1000,18 @@
     .subtabs {
       display: flex;
       gap: 0.5rem;
-      margin-bottom: 1.5rem;
+      margin-bottom: var(--space-6);
       flex-wrap: wrap;
     }
     .subtab-btn {
       background: var(--bg3);
       border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 0.45rem 1rem;
+      border-radius: var(--radius-md);
+      padding: var(--space-2) var(--space-4);
       color: var(--text2);
-      font-size: 0.85rem;
+      font-size: var(--text-sm);
       cursor: pointer;
-      font-weight: 600;
+      font-weight: 500;
       transition: all 180ms ease;
     }
     .subtab-btn:hover {
@@ -1012,12 +1034,12 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 1rem;
+      padding: var(--space-4);
       background: var(--bg3);
       border-top: 1px solid var(--border);
       border-bottom-left-radius: 10px;
       border-bottom-right-radius: 10px;
-      font-size: .85rem;
+      font-size: var(--text-sm);
       color: var(--text2);
       flex-wrap: wrap;
       gap: .8rem;
@@ -1032,14 +1054,14 @@
       flex-direction: column;
       align-items: center;
       text-align: center;
-      padding: 4rem 2rem;
+      padding: var(--space-16) var(--space-8);
       color: var(--text2);
     }
     
     @media(max-width:768px) {
       .sidebar {
         width: 72px;
-        padding: 1.5rem 0.5rem;
+        padding: var(--space-6) var(--space-2);
       }
       .sidebar-brand span, .sidebar-user, .sidebar-menu li a span, .sidebar-sep {
         display: none;
@@ -1049,16 +1071,16 @@
       }
       .sidebar-menu li a {
         justify-content: center;
-        padding: 0.7rem;
+        padding: var(--space-3);
       }
       .main-area {
-        padding: 1.25rem;
+        padding: var(--space-6);
       }
       .theme-toggle .toggle-label {
         display: none;
       }
       nav {
-        padding: 0 1rem;
+        padding: 0 var(--space-4);
       }
       .nav-logo {
         white-space: nowrap;
@@ -1083,11 +1105,11 @@
       }
     }
     
-    /* ── Advanced Cookie Banner ── */
+    /* â”€â”€ Advanced Cookie Banner â”€â”€ */
     #cookie-advanced-settings {
       display: none;
-      margin-top: 1.2rem;
-      padding-top: 1rem;
+      margin-top: var(--space-4);
+      padding-top: var(--space-4);
       border-top: 1px solid var(--border);
       width: 100%;
     }
@@ -1095,10 +1117,10 @@
       display: flex;
       align-items: flex-start;
       gap: 1rem;
-      margin-bottom: 0.8rem;
-      padding: 0.6rem;
+      margin-bottom: var(--space-3);
+      padding: var(--space-2);
       background: var(--bg3);
-      border-radius: 8px;
+      border-radius: var(--radius-md);
       border: 1px solid transparent;
       transition: all 0.2s;
     }
@@ -1109,14 +1131,14 @@
       flex: 1;
     }
     .cookie-name {
-      font-weight: 600;
-      font-size: 0.88rem;
+      font-weight: 500;
+      font-size: var(--text-sm);
       display: block;
       margin-bottom: 0.1rem;
       color: var(--text);
     }
     .cookie-desc {
-      font-size: 0.78rem;
+      font-size: var(--text-xs);
       color: var(--text2);
       display: block;
     }
@@ -1141,7 +1163,7 @@
       bottom: 0;
       background-color: var(--bg);
       transition: .3s;
-      border-radius: 20px;
+      border-radius: var(--radius-xl);
       border: 1px solid var(--border);
     }
     .slider:before {
@@ -1168,11 +1190,11 @@
       cursor: not-allowed;
     }
     .cookie-badge {
-      font-size: 0.65rem;
+      font-size: var(--text-xs);
       background: var(--bg2);
-      padding: 1px 5px;
-      border-radius: 4px;
-      margin-left: 0.4rem;
+      padding: 1px var(--space-1);
+      border-radius: var(--radius-sm);
+      margin-left: var(--space-2);
       color: var(--text2);
     }
   </style>
@@ -1207,9 +1229,9 @@
 
   <div id="pub-home" class="page active">
     <div class="hero">
-      <span class="hero-badge">v2.1 · Lizenzserver</span>
-      <h1>Sichere Lizenzverwaltung für Meraki</h1>
-      <p>Ein dedizierter REST-API-Lizenzserver für die Meraki-Gastronomiesoftware &mdash; mit JWT-basierter Validierung, Offline-Unterstützung und zentralem Admin-Panel.</p>
+      <span class="hero-badge">v2.1 Â· Lizenzserver</span>
+      <h1>Sichere Lizenzverwaltung fÃ¼r Meraki</h1>
+      <p>Ein dedizierter REST-API-Lizenzserver fÃ¼r die Meraki-Gastronomiesoftware &mdash; mit JWT-basierter Validierung, Offline-UnterstÃ¼tzung und zentralem Admin-Panel.</p>
       <div class="hero-btns">
         <button class="btn btn-primary" onclick="window.location.href='login.html'">Login</button>
         <button class="btn btn-ghost" onclick="showPublicPage('features')">Funktionen entdecken</button>
@@ -1222,7 +1244,7 @@
     <section>
       <div class="section-label">Funktionen</div>
       <div class="section-title">Alles, was ein Lizenzserver braucht</div>
-      <p class="section-sub">Von der Online-Validierung bis zum Offline-Token &mdash; entwickelt für den Einsatz in Gastronomiebetrieben.</p>
+      <p class="section-sub">Von der Online-Validierung bis zum Offline-Token &mdash; entwickelt fÃ¼r den Einsatz in Gastronomiebetrieben.</p>
       <div class="feature-grid">
         <div class="feature-card">
           <i data-lucide="shield-check" class="feat-icon"></i>
@@ -1232,12 +1254,12 @@
         <div class="feature-card">
           <i data-lucide="wifi-off" class="feat-icon"></i>
           <h3>Offline-Tokens</h3>
-          <p>Zeitgebundene Offline-Tokens für Betriebe ohne stabiles Internet. Nonce-basierter Replay-Schutz.</p>
+          <p>Zeitgebundene Offline-Tokens fÃ¼r Betriebe ohne stabiles Internet. Nonce-basierter Replay-Schutz.</p>
         </div>
         <div class="feature-card">
           <i data-lucide="scroll-text" class="feat-icon"></i>
           <h3>Audit-Log</h3>
-          <p>Vollständige Ereignisprotokollierung aller Validierungen und Admin-Aktionen mit IP und Zeitstempel.</p>
+          <p>VollstÃ¤ndige Ereignisprotokollierung aller Validierungen und Admin-Aktionen mit IP und Zeitstempel.</p>
         </div>
         <div class="feature-card">
           <i data-lucide="gauge" class="feat-icon"></i>
@@ -1252,22 +1274,22 @@
         <div class="feature-card">
           <i data-lucide="mail" class="feat-icon"></i>
           <h3>SMTP &amp; Webhooks</h3>
-          <p>E-Mail-Benachrichtigungen und Webhook-Events für Lizenzänderungen und Ablauferinnerungen.</p>
+          <p>E-Mail-Benachrichtigungen und Webhook-Events fÃ¼r LizenzÃ¤nderungen und Ablauferinnerungen.</p>
         </div>
       </div>
     </section>
     
-    <div style="text-align:center;padding:2rem 0 3rem">
-      <button class="btn btn-primary" onclick="showPublicPage('pricing')" style="width:auto;padding:.7rem 2rem;">Unsere Pläne &amp; Preise ansehen &rarr;</button>
+    <div style="text-align:center;padding: var(--space-8) 0 var(--space-12)">
+      <button class="btn btn-primary" onclick="showPublicPage('pricing')" style="width:auto;padding: var(--space-3) var(--space-8);">Unsere PlÃ¤ne &amp; Preise ansehen &rarr;</button>
     </div>
   </div>
 
   <div id="pub-api" class="page">
-    <section style="max-width:1000px;margin:0 auto;padding:4rem 2rem">
+    <section style="max-width:1000px;margin: 0 auto;padding: var(--space-16) var(--space-8)">
       <div class="section-label">Dokumentation</div>
       <div class="section-title">API-Referenz</div>
-      <h3 style="margin-bottom:.8rem;color:var(--text2);font-size:.95rem">Öffentliche Endpunkte</h3>
-      <div class="table-wrap" style="margin-bottom:2rem">
+      <h3 style="margin-bottom: var(--space-3);color:var(--text2);font-size: var(--text-sm)">Ã–ffentliche Endpunkte</h3>
+      <div class="table-wrap" style="margin-bottom: var(--space-8)">
         <table class="api-table">
           <thead>
             <tr>
@@ -1306,7 +1328,7 @@
         </table>
       </div>
       
-      <h3 style="margin-bottom:.8rem;color:var(--text2);font-size:.95rem">Admin-Endpunkte</h3>
+      <h3 style="margin-bottom: var(--space-3);color:var(--text2);font-size: var(--text-sm)">Admin-Endpunkte</h3>
       <div class="table-wrap">
         <table class="api-table">
           <thead>
@@ -1355,7 +1377,7 @@
             <tr>
               <td><span class="method method-get">GET</span></td>
               <td><code>/api/admin/devices</code></td>
-              <td>Geräte-Liste</td>
+              <td>GerÃ¤te-Liste</td>
             </tr>
             <tr>
               <td><span class="method method-patch">PATCH</span></td>
@@ -1365,7 +1387,7 @@
             <tr>
               <td><span class="method method-patch">PATCH</span></td>
               <td><code>/api/admin/users/:username/password</code></td>
-              <td>Passwort ändern</td>
+              <td>Passwort Ã¤ndern</td>
             </tr>
           </tbody>
         </table>
@@ -1373,69 +1395,69 @@
     </section>
   </div>
 
-  <!-- ── Pricing ───────────────────────────────────────────────────────── -->
+  <!-- â”€â”€ Pricing â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
   <div id="pub-pricing" class="page">
-    <section style="max-width:1100px;margin:0 auto;padding:4rem 2rem">
+    <section style="max-width:1100px;margin: 0 auto;padding: var(--space-16) var(--space-8)">
       <div class="section-label">Preise</div>
-      <div class="section-title">Der richtige Plan für dein Restaurant</div>
-      <p style="text-align:center;color:var(--text2);margin-bottom:2.5rem;max-width:520px;margin-left:auto;margin-right:auto;">Alle Pläne jährlich abgerechnet. Keine versteckten Kosten. Upgrade jederzeit möglich.</p>
+      <div class="section-title">Der richtige Plan fÃ¼r dein Restaurant</div>
+      <p style="text-align:center;color:var(--text2);margin-bottom: var(--space-10);max-width:520px;margin-left: auto;margin-right: auto;">Alle PlÃ¤ne jÃ¤hrlich abgerechnet. Keine versteckten Kosten. Upgrade jederzeit mÃ¶glich.</p>
       <div id="pub-plan-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:1.5rem;">
-        <div style="text-align:center;padding:3rem;color:var(--text2)">Lädt…</div>
+        <div style="text-align:center;padding: var(--space-12);color:var(--text2)">LÃ¤dtâ€¦</div>
       </div>
-      <p style="text-align:center;margin-top:2rem;color:var(--text2);font-size:.85rem;">Fragen zu den Plänen? <a onclick="showPublicPage('faq')" style="color:var(--accent);cursor:pointer">Schau in unsere FAQ</a> oder <a href="login.html#register" style="color:var(--accent)">registriere dich kostenlos</a>.</p>
+      <p style="text-align:center;margin-top: var(--space-8);color:var(--text2);font-size: var(--text-sm);">Fragen zu den PlÃ¤nen? <a onclick="showPublicPage('faq')" style="color:var(--accent);cursor:pointer">Schau in unsere FAQ</a> oder <a href="login.html#register" style="color:var(--accent)">registriere dich kostenlos</a>.</p>
     </section>
   </div>
 
-  <!-- ── FAQ ────────────────────────────────────────────────────────────── -->
+  <!-- â”€â”€ FAQ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
   <div id="pub-faq" class="page">
-    <section style="max-width:780px;margin:0 auto;padding:4rem 2rem">
+    <section style="max-width:780px;margin: 0 auto;padding: var(--space-16) var(--space-8)">
       <div class="section-label">FAQ</div>
-      <div class="section-title">Häufige Fragen</div>
-      <div id="pub-faq-content" style="margin-top:2rem">
-        <div style="text-align:center;padding:2rem;color:var(--text2)">Lädt…</div>
+      <div class="section-title">HÃ¤ufige Fragen</div>
+      <div id="pub-faq-content" style="margin-top: var(--space-8)">
+        <div style="text-align:center;padding: var(--space-8);color:var(--text2)">LÃ¤dtâ€¦</div>
       </div>
     </section>
   </div>
 
   <div id="pub-legal" class="page">
-    <section style="max-width:800px;margin:0 auto;padding:4rem 2rem">
+    <section style="max-width:800px;margin: 0 auto;padding: var(--space-16) var(--space-8)">
       <div class="section-title">Rechtliches</div>
       <div class="tabs-row">
         <button class="btn btn-primary btn-sm" onclick="showLegalTab('impressum')">Impressum</button>
-        <button class="btn btn-ghost btn-sm" onclick="showLegalTab('datenschutz')">Datenschutzerklärung</button>
+        <button class="btn btn-ghost btn-sm" onclick="showLegalTab('datenschutz')">DatenschutzerklÃ¤rung</button>
       </div>
       <div id="tab-impressum" class="tab-panel active legal-content">
         <h2>Verantwortlich</h2>
-        <p><strong>[Ihr vollständiger Name]</strong><br>[Straße und Hausnummer]<br>[PLZ] [Ort]<br>Deutschland</p>
+        <p><strong>[Ihr vollstÃ¤ndiger Name]</strong><br>[StraÃŸe und Hausnummer]<br>[PLZ] [Ort]<br>Deutschland</p>
         <h2>Kontakt</h2>
         <p>E-Mail: kontakt@beispiel.de</p>
         <h2>Streitschlichtung</h2>
-        <p>Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung bereit: <a href="https://ec.europa.eu/consumers/odr/" target="_blank" style="color:var(--primary)">https://ec.europa.eu/consumers/odr/</a></p>
+        <p>Die EuropÃ¤ische Kommission stellt eine Plattform zur Online-Streitbeilegung bereit: <a href="https://ec.europa.eu/consumers/odr/" target="_blank" style="color:var(--primary)">https://ec.europa.eu/consumers/odr/</a></p>
       </div>
       <div id="tab-datenschutz" class="tab-panel legal-content">
         <h2>1. Datenschutz auf einen Blick</h2>
         <p>Hinweise zur Verarbeitung personenbezogener Daten bei Nutzung dieses Lizenzservers.</p>
         <h2>2. Verarbeitete Daten</h2>
-        <p>IP-Adresse, Hardware-ID-Hash, Lizenzschlüssel, Zeitstempel, Validierungsergebnis. Rechtsgrundlage: Art. 6 Abs. 1 lit. b + f DSGVO.</p>
+        <p>IP-Adresse, Hardware-ID-Hash, LizenzschlÃ¼ssel, Zeitstempel, Validierungsergebnis. Rechtsgrundlage: Art. 6 Abs. 1 lit. b + f DSGVO.</p>
         <h2>3. Cookies & LocalStorage</h2>
         <p>Wir verwenden folgende technisch notwendige Daten im LocalStorage Ihres Browsers:</p>
         <ul>
-          <li><strong>admin_token:</strong> Speichert Ihre Sitzung nach dem Login (notwendig für Admin-Funktionen).</li>
-          <li><strong>theme:</strong> Speichert Ihre Präferenz für den Dark/Light-Mode.</li>
+          <li><strong>admin_token:</strong> Speichert Ihre Sitzung nach dem Login (notwendig fÃ¼r Admin-Funktionen).</li>
+          <li><strong>theme:</strong> Speichert Ihre PrÃ¤ferenz fÃ¼r den Dark/Light-Mode.</li>
           <li><strong>cookie_consent:</strong> Speichert Ihre Cookie-Einwilligung.</li>
         </ul>
         <p>Zudem werden externe Ressourcen geladen:</p>
         <ul>
           <li><strong>Google Fonts:</strong> Zur Darstellung der Typografie (Laden von fonts.googleapis.com).</li>
-          <li><strong>jsdelivr:</strong> Zur Bereitstellung der Chart.js Bibliothek für Statistiken.</li>
+          <li><strong>jsdelivr:</strong> Zur Bereitstellung der Chart.js Bibliothek fÃ¼r Statistiken.</li>
         </ul>
         <h2>4. Aufbewahrungsfristen</h2>
         <ul>
           <li>Audit-Logs: 12 Monate</li>
           <li>Lizenzaktivierungsdaten: Vertragslaufzeit + 3 Jahre</li>
         </ul>
-        <h2>5. Aufsichtsbehörde</h2>
-        <p>Unabhängiges Landeszentrum für Datenschutz Schleswig-Holstein, Holstenstraße 98, 24103 Kiel</p>
+        <h2>5. AufsichtsbehÃ¶rde</h2>
+        <p>UnabhÃ¤ngiges Landeszentrum fÃ¼r Datenschutz Schleswig-Holstein, HolstenstraÃŸe 98, 24103 Kiel</p>
       </div>
     </section>
   </div>
@@ -1464,20 +1486,20 @@
           <input type="password" id="login-pass" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" autocomplete="current-password">
         </div>
         <button class="btn btn-primary" style="width:100%" onclick="doLogin()">Einloggen</button>
-        <div style="text-align:center;margin-top:1.5rem;font-size:.85rem;color:var(--text2)">
+        <div style="text-align:center;margin-top: var(--space-6);font-size: var(--text-sm);color:var(--text2)">
           <a href="login.html" style="color:var(--text2);text-decoration:none;">&larr; Zur Login-Seite</a>
         </div>
       </div>
       <div id="2fa-form-step" style="display:none">
         <div class="form-group">
-          <label>2FA-Bestätigungscode</label>
-          <p style="font-size:0.8rem; color:var(--text2); margin-bottom:0.8rem;">Bitte gib den 6-stelligen Code aus deiner Authenticator-App ein.</p>
-          <input type="text" id="login-2fa-code" placeholder="000000" maxlength="6" style="text-align:center; font-size:1.5rem; letter-spacing:0.5rem;">
+          <label>2FA-BestÃ¤tigungscode</label>
+          <p style="font-size: var(--text-sm); color:var(--text2); margin-bottom: var(--space-3);">Bitte gib den 6-stelligen Code aus deiner Authenticator-App ein.</p>
+          <input type="text" id="login-2fa-code" placeholder="000000" maxlength="6" style="text-align:center; font-size: var(--text-xl); letter-spacing:0.5rem;">
         </div>
         <button class="btn btn-primary" style="width:100%" onclick="doVerify2FA()">Code verifizieren</button>
-        <button class="btn btn-ghost" style="width:100%; margin-top:0.6rem" onclick="resetLogin()">Abbrechen</button>
+        <button class="btn btn-ghost" style="width:100%; margin-top: var(--space-2)" onclick="resetLogin()">Abbrechen</button>
       </div>
-      <button class="btn btn-ghost" id="login-back-btn" style="width:100%;margin-top:.6rem" onclick="closeAdmin()">&larr; Zurück</button>
+      <button class="btn btn-ghost" id="login-back-btn" style="width:100%;margin-top: var(--space-2)" onclick="closeAdmin()">&larr; ZurÃ¼ck</button>
     </div>
   </div>
 
@@ -1494,17 +1516,17 @@
       </div>
       <div class="sidebar-user" id="sb-user"></div>
       <ul class="sidebar-menu">
-        <li><a onclick="switchTab('overview')" id="tab-btn-overview" class="active"><i data-lucide="layout-dashboard"></i> <span>Übersicht</span></a></li>
+        <li><a onclick="switchTab('overview')" id="tab-btn-overview" class="active"><i data-lucide="layout-dashboard"></i> <span>Ãœbersicht</span></a></li>
         <li><a onclick="switchTab('licenses')" id="tab-btn-licenses"><i data-lucide="key"></i> <span>Lizenzen</span></a></li>
         <li><a onclick="switchTab('customers')" id="tab-btn-customers"><i data-lucide="users"></i> <span>Kunden</span></a></li>
         <li><a onclick="switchTab('invoices')" id="tab-btn-invoices"><i data-lucide="receipt"></i> <span>Rechnungen</span></a></li>
-        <li><a onclick="switchTab('devices')" id="tab-btn-devices"><i data-lucide="monitor"></i> <span>Geräte</span></a></li>
+        <li><a onclick="switchTab('devices')" id="tab-btn-devices"><i data-lucide="monitor"></i> <span>GerÃ¤te</span></a></li>
         <li><a onclick="switchTab('logs')" id="tab-btn-logs"><i data-lucide="scroll"></i> <span>Logs &amp; Historie</span></a></li>
         <hr class="sidebar-sep">
         <li><a onclick="switchTab('users')" id="tab-btn-users"><i data-lucide="user-cog"></i> <span>Admin-User</span></a></li>
         <li><a onclick="switchTab('smtp')" id="tab-btn-smtp"><i data-lucide="mail"></i> <span>SMTP</span></a></li>
         <li><a onclick="switchTab('webhooks')" id="tab-btn-webhooks"><i data-lucide="webhook"></i> <span>Webhooks</span></a></li>
-        <li><a onclick="switchTab('plans')" id="tab-btn-plans"><i data-lucide="tag"></i> <span>Pläne & Preise</span></a></li>
+        <li><a onclick="switchTab('plans')" id="tab-btn-plans"><i data-lucide="tag"></i> <span>PlÃ¤ne & Preise</span></a></li>
         <li><a onclick="switchTab('faq')" id="tab-btn-faq"><i data-lucide="help-circle"></i> <span>FAQ</span></a></li>
         <hr class="sidebar-sep">
         <li><a onclick="toggleTheme()"><i data-lucide="sun-moon"></i> <span>Theme wechseln</span></a></li>
@@ -1518,39 +1540,39 @@
         <div class="dash-header"><h2>Dashboard</h2></div>
         <div class="stats-row" id="stats-row"><div class="loading"><div class="spinner"></div></div></div>
         
-        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(400px, 1fr));gap:1.5rem;margin-top:1.5rem;">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(400px, 1fr));gap:1.5rem;margin-top: var(--space-6);">
           <div class="stat-card" style="grid-column: span 1.5;">
-            <h3 style="margin-bottom:1rem;font-size:0.95rem;color:var(--text)">📈 Lizenz-Validierungen (letzte 30 Tage)</h3>
+            <h3 style="margin-bottom: var(--space-4);font-size: var(--text-sm);color:var(--text)">ðŸ“ˆ Lizenz-Validierungen (letzte 30 Tage)</h3>
             <div style="height:300px;"><canvas id="validationsChart"></canvas></div>
           </div>
           <div class="stat-card">
-            <h3 style="margin-bottom:1rem;font-size:0.95rem;color:var(--text)">📊 Lizenz-Pläne</h3>
+            <h3 style="margin-bottom: var(--space-4);font-size: var(--text-sm);color:var(--text)">ðŸ“Š Lizenz-PlÃ¤ne</h3>
             <div style="height:300px;"><canvas id="typesChart"></canvas></div>
           </div>
         </div>
 
-        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));gap:1.5rem;margin-top:1.5rem;">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));gap:1.5rem;margin-top: var(--space-6);">
           <div class="stat-card">
-            <h3 style="margin-bottom:1rem;font-size:0.95rem;color:var(--text)">🛠 Feature-Nutzung</h3>
+            <h3 style="margin-bottom: var(--space-4);font-size: var(--text-sm);color:var(--text)">ðŸ›  Feature-Nutzung</h3>
             <div style="height:250px;"><canvas id="featuresChart"></canvas></div>
           </div>
           <div class="stat-card">
-            <h3 style="margin-bottom:1rem;font-size:0.95rem;color:var(--text)">🔘 Lizenz-Status</h3>
+            <h3 style="margin-bottom: var(--space-4);font-size: var(--text-sm);color:var(--text)">ðŸ”˜ Lizenz-Status</h3>
             <div style="height:250px;"><canvas id="statusChart"></canvas></div>
           </div>
           <div class="stat-card">
-            <h3 style="margin-bottom:1rem;font-size:0.95rem;color:var(--text)">🤝 Top Kunden</h3>
-            <div id="top-customers-list" style="font-size:0.85rem;"></div>
+            <h3 style="margin-bottom: var(--space-4);font-size: var(--text-sm);color:var(--text)">ðŸ¤ Top Kunden</h3>
+            <div id="top-customers-list" style="font-size: var(--text-sm);"></div>
           </div>
         </div>
 
-        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(400px, 1fr));gap:1.5rem;margin-top:1.5rem;">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(400px, 1fr));gap:1.5rem;margin-top: var(--space-6);">
           <div style="min-width:0;">
-            <h3 style="margin-bottom:.8rem;font-size:.95rem;color:var(--text)">🏆 Top 10 Lizenzen nach Nutzung</h3>
+            <h3 style="margin-bottom: var(--space-3);font-size: var(--text-sm);color:var(--text)">ðŸ† Top 10 Lizenzen nach Nutzung</h3>
             <div class="table-wrap" id="top-licenses"><div class="loading"><div class="spinner"></div></div></div>
           </div>
           <div style="min-width:0;">
-            <h3 style="margin-bottom:.8rem;font-size:.95rem;color:var(--text)">⚠️ Bald ablaufend (30 Tage)</h3>
+            <h3 style="margin-bottom: var(--space-3);font-size: var(--text-sm);color:var(--text)">âš ï¸ Bald ablaufend (30 Tage)</h3>
             <div class="table-wrap" id="expiring-licenses"><div class="loading"><div class="spinner"></div></div></div>
           </div>
         </div>
@@ -1576,8 +1598,8 @@
         <div class="dash-header">
           <h2>Kunden</h2>
           <div style="display:flex;gap:.6rem;align-items:center;flex-wrap:wrap">
-            <input type="text" id="cust-search" placeholder="Suche..." onkeyup="filterCustomers()" class="form-control" style="width:160px;margin:0;padding:.3rem .6rem;font-size:0.85rem">
-            <label style="font-size:.82rem;color:var(--text2);display:flex;align-items:center;gap:.4rem;cursor:pointer">
+            <input type="text" id="cust-search" placeholder="Suche..." onkeyup="filterCustomers()" class="form-control" style="width:160px;margin: 0;padding: var(--space-1) var(--space-2);font-size: var(--text-sm)">
+            <label style="font-size: var(--text-sm);color:var(--text2);display:flex;align-items:center;gap:.4rem;cursor:pointer">
               <input type="checkbox" id="cust-show-archived" onchange="loadCustomers()" style="width:auto"> Archivierte anzeigen
             </label>
             <button class="btn btn-ghost btn-sm" onclick="exportData('customers', 'csv')">Export</button>
@@ -1604,24 +1626,24 @@
           </div>
         </div>
         <div class="toolbar">
-          <input type="text" id="inv-search" placeholder="Suche nach Kundennamen, Rechnungsnr…" oninput="filterInvoices()">
-          <select id="inv-status-filter" onchange="filterInvoices()" style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:.45rem .8rem;color:var(--text);font-size:.88rem;outline:none;">
+          <input type="text" id="inv-search" placeholder="Suche nach Kundennamen, Rechnungsnrâ€¦" oninput="filterInvoices()">
+          <select id="inv-status-filter" onchange="filterInvoices()" style="background:var(--bg2);border:1px solid var(--border);border-radius: var(--radius-md);padding: var(--space-2) var(--space-3);color:var(--text);font-size: var(--text-sm);outline:none;">
             <option value="">Alle Status</option>
             <option value="draft">Entwurf</option>
             <option value="sent">Versendet</option>
             <option value="paid">Bezahlt</option>
-            <option value="overdue">Überfällig</option>
+            <option value="overdue">ÃœberfÃ¤llig</option>
             <option value="cancelled">Storniert</option>
           </select>
         </div>
         <div class="table-wrap" id="inv-table">
           <div class="empty-state">
-            <i data-lucide="receipt" style="width:40px;height:40px;color:var(--text3);margin-bottom:1rem;"></i>
-            <h3 style="color:var(--text);margin-bottom:.5rem;">Noch keine Rechnungen</h3>
-            <p style="color:var(--text2);font-size:.88rem;max-width:32ch;text-align:center;">
+            <i data-lucide="receipt" style="width:40px;height:40px;color:var(--text3);margin-bottom: var(--space-4);"></i>
+            <h3 style="color:var(--text);margin-bottom: var(--space-2);">Noch keine Rechnungen</h3>
+            <p style="color:var(--text2);font-size: var(--text-sm);max-width:32ch;text-align:center;">
               Erstelle deine erste Rechnung, um die Rechnungsverwaltung zu starten.
             </p>
-            <button class="btn btn-primary btn-sm" style="margin-top:1rem;" onclick="openNewInvoiceModal()">
+            <button class="btn btn-primary btn-sm" style="margin-top: var(--space-4);" onclick="openNewInvoiceModal()">
               + Erste Rechnung erstellen
             </button>
           </div>
@@ -1630,9 +1652,9 @@
 
       <div id="tab-devices" class="tab-panel">
         <div class="dash-header">
-          <h2>Geräte</h2>
+          <h2>GerÃ¤te</h2>
           <div style="display:flex;gap:.6rem;align-items:center;">
-            <input type="text" id="dev-search" placeholder="Suche..." onkeyup="filterDevices()" class="form-control" style="width:160px;margin:0;padding:.3rem .6rem;font-size:0.85rem">
+            <input type="text" id="dev-search" placeholder="Suche..." onkeyup="filterDevices()" class="form-control" style="width:160px;margin: 0;padding: var(--space-1) var(--space-2);font-size: var(--text-sm)">
             <button class="btn btn-ghost btn-sm" onclick="loadDevices()">Neu laden</button>
           </div>
         </div>
@@ -1653,18 +1675,18 @@
           <div id="login-log-list"><div class="loading"><div class="spinner"></div></div></div>
         </div>
         <div id="subtab-audit-log" class="subtab-panel">
-          <div class="toolbar" style="margin-bottom:.8rem">
+          <div class="toolbar" style="margin-bottom: var(--space-3)">
             <input type="text" id="audit-search" placeholder="Action filtern (z.B. license_created)&hellip;" style="max-width:300px">
             <button class="btn btn-ghost btn-sm" onclick="loadAudit()">Filtern</button>
           </div>
           <div id="audit-list"><div class="loading"><div class="spinner"></div></div></div>
         </div>
         <div id="subtab-purchase-history" class="subtab-panel">
-          <div class="toolbar" style="margin-bottom:.8rem">
+          <div class="toolbar" style="margin-bottom: var(--space-3)">
             <input type="text" id="ph-search-customer" placeholder="Kunden-ID oder Lizenz-Key&hellip;" style="max-width:340px">
             <button class="btn btn-ghost btn-sm" onclick="loadPurchaseHistory()">Filtern</button>
             <button class="btn btn-ghost btn-sm" onclick="exportData('purchase-history', 'csv')">Export</button>
-            <button class="btn btn-primary btn-sm" onclick="openModal('modal-new-ph')">+ Eintrag hinzufügen</button>
+            <button class="btn btn-primary btn-sm" onclick="openModal('modal-new-ph')">+ Eintrag hinzufÃ¼gen</button>
           </div>
           <div class="table-wrap" id="ph-table"><div class="loading"><div class="spinner"></div></div></div>
         </div>
@@ -1683,17 +1705,17 @@
         <div id="smtp-content"><div class="loading"><div class="spinner"></div></div></div>
       </div>
 
-      <!-- ── Pläne & Preise ──────────────────────────────────────────────── -->
+      <!-- â”€â”€ PlÃ¤ne & Preise â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
       <div id="tab-plans" class="tab-panel">
         <div class="dash-header">
-          <h2>Pläne &amp; Preise</h2>
+          <h2>PlÃ¤ne &amp; Preise</h2>
           <button class="btn btn-ghost btn-sm" onclick="loadAdminPlans()">&#128260; Aktualisieren</button>
         </div>
-        <p style="color:var(--text2);font-size:.85rem;margin-bottom:1.2rem;">Preise und Beschreibungen sind live — Änderungen werden sofort auf der Website und im Kunden-Portal übernommen.</p>
+        <p style="color:var(--text2);font-size: var(--text-sm);margin-bottom: var(--space-4);">Preise und Beschreibungen sind live â€” Ã„nderungen werden sofort auf der Website und im Kunden-Portal Ã¼bernommen.</p>
         <div id="admin-plans-content"><div class="loading"><div class="spinner"></div></div></div>
       </div>
 
-      <!-- ── FAQ ────────────────────────────────────────────────────────── -->
+      <!-- â”€â”€ FAQ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
       <div id="tab-faq" class="tab-panel">
         <div class="dash-header">
           <h2>FAQ</h2>
@@ -1722,12 +1744,12 @@
   </div>
   <div class="form-group"><label>Lizenztyp</label>
     <select id="nl-type"><option value="FREE">FREE</option><option value="BASIC">BASIC</option><option value="PRO" selected>PRO</option><option value="ENTERPRISE">ENTERPRISE</option></select>
-    <div id="nl-plan-info" style="font-size:.78rem;color:var(--text2);margin-top:.3rem"></div>
+    <div id="nl-plan-info" style="font-size: var(--text-xs);color:var(--text2);margin-top: var(--space-1)"></div>
   </div>
   <div class="form-group"><label>Kundenname</label><input type="text" id="nl-name" placeholder="Max Mustermann GmbH"></div>
   <div class="form-group"><label>Domain (z.B. meinrestaurant.de oder *)</label><input type="text" id="nl-domain" placeholder="meinrestaurant.de"></div>
   <div class="form-group"><label>Ablaufdatum (leer = Plan-Standard)</label><input type="datetime-local" id="nl-expires"></div>
-  <div class="form-group"><label>Max. Geräte (0 = unbegrenzt)</label><input type="number" id="nl-devices" value="0" min="0"></div>
+  <div class="form-group"><label>Max. GerÃ¤te (0 = unbegrenzt)</label><input type="number" id="nl-devices" value="0" min="0"></div>
   <div class="form-group"><label>Tags (kommagetrennt)</label><input type="text" id="nl-tags" placeholder="region-nord, reseller-xyz"></div>
   <div class="form-group"><label>Kunden-ID (optional)</label><input type="text" id="nl-customer-id" placeholder="UUID des Kunden"></div>
   <div class="form-group"><label>Betrag in EUR (optional)</label><input type="number" step="0.01" id="nl-amount" placeholder="49.99"></div>
@@ -1740,7 +1762,7 @@
 <div class="modal-overlay" id="modal-edit-license"><div class="modal">
   <h3>Lizenz bearbeiten</h3>
   <div id="modal-edit-license-content"></div>
-  <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('modal-edit-license')">Schließen</button></div>
+  <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('modal-edit-license')">SchlieÃŸen</button></div>
 </div></div>
 
 <div class="modal-overlay" id="modal-new-customer"><div class="modal">
@@ -1773,7 +1795,7 @@
     </select>
   </div>
   <div class="form-group"><label>Notizen</label><textarea id="ec-notes"></textarea></div>
-  <div id="ec-licenses-block" style="margin-top:1.5rem; border-top:1px solid var(--border); padding-top:1rem;"></div>
+  <div id="ec-licenses-block" style="margin-top: var(--space-6); border-top:1px solid var(--border); padding-top: var(--space-4);"></div>
   <div class="modal-footer">
     <button class="btn btn-ghost" onclick="closeModal('modal-edit-customer')">Abbrechen</button>
     <button class="btn btn-ghost" onclick="openCreateLicenseForCustomerFromEdit()">+ Lizenz erstellen</button>
@@ -1795,14 +1817,14 @@
 </div></div>
 
 <div class="modal-overlay" id="modal-change-password"><div class="modal">
-  <h3>Passwort ändern</h3>
+  <h3>Passwort Ã¤ndern</h3>
   <input type="hidden" id="cp-username">
   <div id="cp-alert"></div>
   <div class="form-group"><label>Neues Passwort * (min. 12 Zeichen)</label>
-    <input type="password" id="cp-pass" placeholder="••••••••••••">
+    <input type="password" id="cp-pass" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢">
   </div>
-  <div class="form-group"><label>Passwort bestätigen *</label>
-    <input type="password" id="cp-pass2" placeholder="••••••••••••">
+  <div class="form-group"><label>Passwort bestÃ¤tigen *</label>
+    <input type="password" id="cp-pass2" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢">
   </div>
   <div class="modal-footer">
     <button class="btn btn-ghost" onclick="closeModal('modal-change-password')">Abbrechen</button>
@@ -1843,13 +1865,13 @@
   <div class="form-group"><label>Kurzbeschreibung</label><input type="text" id="ep-description" placeholder="Kurze Beschreibung des Plans"></div>
   <div class="form-group">
     <label>Features <small style="color:var(--text2);font-weight:400">(eine pro Zeile)</small></label>
-    <textarea id="ep-features" rows="6" placeholder="150 Gerichte im Menü&#10;25 Tische&#10;Online-Reservierungen"></textarea>
+    <textarea id="ep-features" rows="6" placeholder="150 Gerichte im MenÃ¼&#10;25 Tische&#10;Online-Reservierungen"></textarea>
   </div>
   <div style="display:flex;gap:1rem;align-items:center;">
-    <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-size:.88rem;">
+    <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-size: var(--text-sm);">
       <input type="checkbox" id="ep-active" style="width:auto"> Im Shop anzeigen
     </label>
-    <div class="form-group" style="margin:0;flex:1"><label>Sortierung</label><input type="number" id="ep-sort" placeholder="0" style="width:80px"></div>
+    <div class="form-group" style="margin: 0;flex:1"><label>Sortierung</label><input type="number" id="ep-sort" placeholder="0" style="width:80px"></div>
   </div>
   <div class="modal-footer">
     <button class="btn btn-ghost" onclick="closeModal('modal-edit-plan')">Abbrechen</button>
@@ -1861,18 +1883,18 @@
 <div class="modal-overlay" id="modal-edit-faq"><div class="modal" style="max-width:560px;">
   <h3 id="faq-modal-title">Neue FAQ-Frage</h3>
   <input type="hidden" id="ef-id">
-  <div class="form-group"><label>Frage *</label><input type="text" id="ef-question" placeholder="Was bedeutet…?"></div>
-  <div class="form-group"><label>Antwort *</label><textarea id="ef-answer" rows="5" placeholder="Ausführliche Antwort…"></textarea></div>
+  <div class="form-group"><label>Frage *</label><input type="text" id="ef-question" placeholder="Was bedeutetâ€¦?"></div>
+  <div class="form-group"><label>Antwort *</label><textarea id="ef-answer" rows="5" placeholder="AusfÃ¼hrliche Antwortâ€¦"></textarea></div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
     <div class="form-group"><label>Kategorie</label>
       <select id="ef-category">
-        <option>Allgemein</option><option>Lizenz & Pläne</option><option>Abrechnung</option><option>Technik</option>
+        <option>Allgemein</option><option>Lizenz & PlÃ¤ne</option><option>Abrechnung</option><option>Technik</option>
       </select>
     </div>
     <div class="form-group"><label>Sortierung</label><input type="number" id="ef-sort" placeholder="0"></div>
   </div>
-  <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-size:.88rem;margin-bottom:1rem;">
-    <input type="checkbox" id="ef-active" checked style="width:auto"> Aktiv (öffentlich sichtbar)
+  <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-size: var(--text-sm);margin-bottom: var(--space-4);">
+    <input type="checkbox" id="ef-active" checked style="width:auto"> Aktiv (Ã¶ffentlich sichtbar)
   </label>
   <div class="modal-footer">
     <button class="btn btn-ghost" onclick="closeModal('modal-edit-faq')">Abbrechen</button>
@@ -1891,7 +1913,7 @@
 </div></div>
 
 <div class="modal-overlay" id="modal-new-ph"><div class="modal">
-  <h3>Kaufhistorie-Eintrag hinzufügen</h3>
+  <h3>Kaufhistorie-Eintrag hinzufÃ¼gen</h3>
   <div class="form-group"><label>Kunden-ID *</label><input type="text" id="ph-customer-id" placeholder="UUID des Kunden"></div>
   <div class="form-group"><label>Lizenz-Key *</label><input type="text" id="ph-license-key" placeholder="MERAKI-PRO-XXXX-2025"></div>
   <div class="form-group"><label>Plan *</label>
@@ -1900,14 +1922,14 @@
   <div class="form-group"><label>Aktion</label>
     <select id="ph-action">
       <option value="purchase">purchase &ndash; Kauf</option>
-      <option value="renewal">renewal &ndash; Verlängerung</option>
+      <option value="renewal">renewal &ndash; VerlÃ¤ngerung</option>
       <option value="upgrade">upgrade &ndash; Upgrade</option>
       <option value="downgrade">downgrade &ndash; Downgrade</option>
-      <option value="cancellation">cancellation &ndash; Kündigung</option>
+      <option value="cancellation">cancellation &ndash; KÃ¼ndigung</option>
     </select>
   </div>
   <div class="form-group"><label>Betrag in EUR (optional)</label><input type="number" step="0.01" id="ph-amount" placeholder="49.99"></div>
-  <div class="form-group"><label>Notiz</label><textarea id="ph-note" placeholder="z.B. Zahlung per Überweisung eingegangen"></textarea></div>
+  <div class="form-group"><label>Notiz</label><textarea id="ph-note" placeholder="z.B. Zahlung per Ãœberweisung eingegangen"></textarea></div>
   <div class="modal-footer">
     <button class="btn btn-ghost" onclick="closeModal('modal-new-ph')">Abbrechen</button>
     <button class="btn btn-primary" onclick="createPurchaseEntry()">Speichern</button>
@@ -1917,8 +1939,8 @@
 <div class="modal-overlay" id="modal-2fa-setup"><div class="modal">
   <h3>2-Faktor-Authentifizierung einrichten</h3>
   <div id="2fa-setup-content" style="text-align:center;">
-    <p style="font-size:0.9rem; margin-bottom:1rem; color:var(--text2);">Scanne diesen QR-Code mit einer App wie Google Authenticator oder Authy.</p>
-    <img id="2fa-qr-img" style="background:#fff; padding:10px; border-radius:8px; margin-bottom:1rem;">
+    <p style="font-size: var(--text-sm); margin-bottom: var(--space-4); color:var(--text2);">Scanne diesen QR-Code mit einer App wie Google Authenticator oder Authy.</p>
+    <img id="2fa-qr-img" style="background:#fff; padding: var(--space-3); border-radius: var(--radius-md); margin-bottom: var(--space-4);">
     <div class="form-group" style="text-align:left;">
       <label>Verifizierungscode eingeben</label>
       <input type="text" id="2fa-verify-code" placeholder="000000" maxlength="6">
@@ -1926,36 +1948,36 @@
     <div id="2fa-alert"></div>
   </div>
   <div class="modal-footer">
-    <button class="btn btn-ghost" onclick="closeModal('modal-2fa-setup')">Schließen</button>
+    <button class="btn btn-ghost" onclick="closeModal('modal-2fa-setup')">SchlieÃŸen</button>
     <button class="btn btn-primary" onclick="verify2FASetup()">Aktivieren</button>
   </div>
 </div></div>
 
-<!-- Modal für neue Rechnung -->
+<!-- Modal fÃ¼r neue Rechnung -->
 <div class="modal-overlay" id="modal-new-invoice"><div class="modal" style="max-width:560px;">
-  <h3>🧾 Neue Rechnung erstellen</h3>
+  <h3>ðŸ§¾ Neue Rechnung erstellen</h3>
   <div class="form-group"><label>Kunde *</label>
     <select id="ni-customer-id" onchange="onInvoiceCustomerChange()">
-      <option value="">-- Kunde auswählen --</option>
+      <option value="">-- Kunde auswÃ¤hlen --</option>
     </select>
   </div>
 
   <!-- Lizenzen als Checkboxen (erscheint nach Kunden-Auswahl) -->
   <div class="form-group" id="ni-licenses-group" style="display:none;">
-    <label>Lizenzen <small style="color:var(--text2);font-weight:400;">— alle die berechnet werden sollen auswählen</small></label>
-    <div id="ni-licenses-list" style="border:1px solid var(--border);border-radius:6px;max-height:180px;overflow-y:auto;padding:4px 0;background:var(--bg2);"></div>
+    <label>Lizenzen <small style="color:var(--text2);font-weight:400;">â€” alle die berechnet werden sollen auswÃ¤hlen</small></label>
+    <div id="ni-licenses-list" style="border:1px solid var(--border);border-radius: var(--radius-sm);max-height:180px;overflow-y:auto;padding: var(--space-1) 0;background:var(--bg2);"></div>
   </div>
-  <!-- Fallback: manuelle Eingabe wenn keine Lizenz verknüpft -->
+  <!-- Fallback: manuelle Eingabe wenn keine Lizenz verknÃ¼pft -->
   <div class="form-group" id="ni-no-license-group" style="display:none;">
     <label>Lizenz-Key <small style="color:var(--text2);font-weight:400;">(optional)</small></label>
     <input type="text" id="ni-license-key-manual" placeholder="MERAKI-PRO-XXXX-2025">
-    <small style="color:var(--yellow,#f59e0b);margin-top:3px;display:block;">⚠ Keine verknüpften Lizenzen gefunden. Key optional manuell eingeben.</small>
+    <small style="color:var(--yellow,#f59e0b);margin-top: var(--space-1);display:block;">âš  Keine verknÃ¼pften Lizenzen gefunden. Key optional manuell eingeben.</small>
   </div>
 
   <div class="form-group"><label>Betrag je Lizenz in EUR *</label>
     <input type="number" step="0.01" id="ni-amount" placeholder="99.00">
   </div>
-  <div class="form-group"><label>Fälligkeit</label>
+  <div class="form-group"><label>FÃ¤lligkeit</label>
     <select id="ni-due-days">
       <option value="31">31 Tage</option>
       <option value="90">90 Tage</option>
@@ -1970,7 +1992,7 @@
     </select>
   </div>
   <div class="form-group"><label>Notiz (optional)</label>
-    <textarea id="ni-note" placeholder="z.B. Lizenzgebühr Q1 2026"></textarea>
+    <textarea id="ni-note" placeholder="z.B. LizenzgebÃ¼hr Q1 2026"></textarea>
   </div>
   <div class="modal-footer">
     <button class="btn btn-ghost" onclick="closeModal('modal-new-invoice')">Abbrechen</button>
@@ -1978,52 +2000,52 @@
   </div>
 </div></div>
 
-<!-- Modal für Rechnungs-Details -->
+<!-- Modal fÃ¼r Rechnungs-Details -->
 <div class="modal-overlay" id="modal-view-invoice"><div class="modal" style="max-width: 700px;">
-  <h3>🧾 Rechnungs-Details</h3>
-  <div id="modal-view-invoice-content" style="max-height: 70vh; overflow-y: auto; padding-right: 5px;"></div>
+  <h3>ðŸ§¾ Rechnungs-Details</h3>
+  <div id="modal-view-invoice-content" style="max-height: 70vh; overflow-y: auto; padding-right: var(--space-1);"></div>
   <div class="modal-footer">
-    <button class="btn btn-ghost" onclick="closeModal('modal-view-invoice')">Schließen</button>
+    <button class="btn btn-ghost" onclick="closeModal('modal-view-invoice')">SchlieÃŸen</button>
   </div>
 </div></div>
 
-<!-- Modal für Rechnungs-Einstellungen -->
+<!-- Modal fÃ¼r Rechnungs-Einstellungen -->
 <div class="modal-overlay" id="modal-invoice-settings"><div class="modal" style="max-width:620px;">
-  <h3>⚙️ Rechnungs-Einstellungen</h3>
+  <h3>âš™ï¸ Rechnungs-Einstellungen</h3>
 
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
     <div class="form-group"><label>Firmenname *</label>
       <input type="text" id="is-company-name" placeholder="z.B. Meraki GmbH">
     </div>
-    <div class="form-group"><label>Rechnungspräfix</label>
+    <div class="form-group"><label>RechnungsprÃ¤fix</label>
       <input type="text" id="is-invoice-prefix" placeholder="INV" style="max-width:100px;">
     </div>
   </div>
 
   <div class="form-group"><label>Adresse *</label>
-    <textarea id="is-company-address" rows="3" placeholder="Musterstraße 1&#10;12345 Musterstadt&#10;Deutschland"></textarea>
+    <textarea id="is-company-address" rows="3" placeholder="MusterstraÃŸe 1&#10;12345 Musterstadt&#10;Deutschland"></textarea>
   </div>
 
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
     <div class="form-group"><label>Steuernummer / USt-IdNr.</label>
       <input type="text" id="is-company-tax-id" placeholder="DE123456789">
     </div>
-    <div class="form-group"><label>Fußzeilentext (optional)</label>
-      <input type="text" id="is-footer-text" placeholder="Vielen Dank für Ihr Vertrauen!">
+    <div class="form-group"><label>FuÃŸzeilentext (optional)</label>
+      <input type="text" id="is-footer-text" placeholder="Vielen Dank fÃ¼r Ihr Vertrauen!">
     </div>
   </div>
 
-  <fieldset style="border:1px solid var(--border);border-radius:8px;padding:12px 16px;margin:0.5rem 0 1rem;">
-    <legend style="font-size:.8rem;font-weight:600;color:var(--text2);padding:0 6px;">🏦 Bankverbindung</legend>
+  <fieldset style="border:1px solid var(--border);border-radius: var(--radius-md);padding: var(--space-3) var(--space-4);margin: var(--space-2) 0 var(--space-4);">
+    <legend style="font-size: var(--text-sm);font-weight: 500;color:var(--text2);padding: 0 var(--space-2);">ðŸ¦ Bankverbindung</legend>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-      <div class="form-group" style="margin-bottom:0.5rem;"><label>Bank / Institut</label>
+      <div class="form-group" style="margin-bottom: var(--space-2);"><label>Bank / Institut</label>
         <input type="text" id="is-company-bank-name" placeholder="z.B. Volksbank Muster">
       </div>
-      <div class="form-group" style="margin-bottom:0.5rem;"><label>IBAN</label>
+      <div class="form-group" style="margin-bottom: var(--space-2);"><label>IBAN</label>
         <input type="text" id="is-company-iban" placeholder="DE12 3456 7890 1234 5678 90">
       </div>
     </div>
-    <div class="form-group" style="margin-bottom:0;"><label>BIC / SWIFT</label>
+    <div class="form-group" style="margin-bottom: 0;"><label>BIC / SWIFT</label>
       <input type="text" id="is-company-bic" placeholder="GENODED1xxx" style="max-width:200px;">
     </div>
   </fieldset>
@@ -2085,7 +2107,7 @@ var invoices = [];
 var invoicesFiltered = [];
 
 function fmtDateOnly(d) {
-  if (!d) return '—';
+  if (!d) return 'â€”';
   var date = new Date(d);
   if (isNaN(date.getTime())) return String(d);
   return date.toLocaleDateString('de-DE');
@@ -2104,50 +2126,50 @@ function renderInvoicesTable(data) {
   invoicesFiltered = data;
   var el = document.getElementById('inv-table');
   if (!data || data.length === 0) {
-    el.innerHTML = '<div class="empty-state" style="padding:3rem;">' +
-      '<i data-lucide="receipt" style="width:40px;height:40px;color:var(--text3);margin-bottom:1rem;"></i>' +
-      '<h3 style="color:var(--text);margin-bottom:.5rem;">Noch keine Rechnungen</h3>' +
-      '<p style="color:var(--text2);font-size:.88rem;max-width:32ch;text-align:center;">Erstelle deine erste Rechnungen, um die Rechnungsverwaltung zu starten.</p>' +
-      '<button class="btn btn-primary btn-sm" style="margin-top:1rem;" onclick="openNewInvoiceModal()">+ Erste Rechnung erstellen</button>' +
+    el.innerHTML = '<div class="empty-state" style="padding: var(--space-12);">' +
+      '<i data-lucide="receipt" style="width:40px;height:40px;color:var(--text3);margin-bottom: var(--space-4);"></i>' +
+      '<h3 style="color:var(--text);margin-bottom: var(--space-2);">Noch keine Rechnungen</h3>' +
+      '<p style="color:var(--text2);font-size: var(--text-sm);max-width:32ch;text-align:center;">Erstelle deine erste Rechnungen, um die Rechnungsverwaltung zu starten.</p>' +
+      '<button class="btn btn-primary btn-sm" style="margin-top: var(--space-4);" onclick="openNewInvoiceModal()">+ Erste Rechnung erstellen</button>' +
       '</div>';
     if(window.lucide) window.lucide.createIcons();
     return;
   }
   var html = '<table class="data-table"><thead><tr>' +
-    '<th>Rechnungsnr.</th><th>Kunde</th><th>Betrag</th><th>Fälligkeitsdatum</th><th>Status</th><th>Aktionen</th>' +
+    '<th>Rechnungsnr.</th><th>Kunde</th><th>Betrag</th><th>FÃ¤lligkeitsdatum</th><th>Status</th><th>Aktionen</th>' +
     '</tr></thead><tbody>';
   
   var statusLabels = {
     draft: 'Entwurf',
     sent: 'Versendet',
     paid: 'Bezahlt',
-    overdue: 'Überfällig',
+    overdue: 'ÃœberfÃ¤llig',
     cancelled: 'Storniert'
   };
 
   data.forEach(function(inv) {
     var statusText = statusLabels[inv.status] || inv.status;
     var customerDisplay = esc(inv.customer_name || '') + 
-      (inv.customer_company ? ' <span style="font-size:0.75rem;color:var(--text2);">(' + esc(inv.customer_company) + ')</span>' : '');
+      (inv.customer_company ? ' <span style="font-size: var(--text-xs);color:var(--text2);">(' + esc(inv.customer_company) + ')</span>' : '');
     
-    var actionsHtml = '<button class="btn btn-ghost btn-xs" onclick="viewInvoiceDetail(\'' + inv.id + '\')" style="margin-right:0.3rem;"><i data-lucide="info" style="width:12px;height:12px;display:inline-block;vertical-align:middle;margin-right:2px;"></i> Details</button>';
+    var actionsHtml = '<button class="btn btn-ghost btn-xs" onclick="viewInvoiceDetail(\'' + inv.id + '\')" style="margin-right: var(--space-1);"><i data-lucide="info" style="width:12px;height:12px;display:inline-block;vertical-align:middle;margin-right: 2px;"></i> Details</button>';
     
     if (inv.status === 'draft') {
-      actionsHtml += '<button class="btn btn-ghost btn-xs text-primary" onclick="sendInvoice(\'' + inv.id + '\')" style="margin-right:0.3rem;" title="Rechnung senden"><i data-lucide="send" style="width:12px;height:12px;"></i></button>';
-      actionsHtml += '<button class="btn btn-ghost btn-xs text-danger" onclick="deleteInvoice(\'' + inv.id + '\')" title="Rechnung löschen"><i data-lucide="trash-2" style="width:12px;height:12px;"></i></button>';
+      actionsHtml += '<button class="btn btn-ghost btn-xs text-primary" onclick="sendInvoice(\'' + inv.id + '\')" style="margin-right: var(--space-1);" title="Rechnung senden"><i data-lucide="send" style="width:12px;height:12px;"></i></button>';
+      actionsHtml += '<button class="btn btn-ghost btn-xs text-danger" onclick="deleteInvoice(\'' + inv.id + '\')" title="Rechnung lÃ¶schen"><i data-lucide="trash-2" style="width:12px;height:12px;"></i></button>';
     } else {
       if (inv.status === 'sent' || inv.status === 'overdue') {
-        actionsHtml += '<button class="btn btn-ghost btn-xs text-success" onclick="markInvoicePaid(\'' + inv.id + '\')" style="margin-right:0.3rem;" title="Als bezahlt markieren"><i data-lucide="check-circle" style="width:12px;height:12px;"></i></button>';
+        actionsHtml += '<button class="btn btn-ghost btn-xs text-success" onclick="markInvoicePaid(\'' + inv.id + '\')" style="margin-right: var(--space-1);" title="Als bezahlt markieren"><i data-lucide="check-circle" style="width:12px;height:12px;"></i></button>';
       }
       if (inv.status !== 'cancelled') {
-        actionsHtml += '<button class="btn btn-ghost btn-xs" onclick="resendInvoice(\'' + inv.id + '\')" style="margin-right:0.3rem;" title="Erneut senden"><i data-lucide="mail" style="width:12px;height:12px;"></i></button>';
+        actionsHtml += '<button class="btn btn-ghost btn-xs" onclick="resendInvoice(\'' + inv.id + '\')" style="margin-right: var(--space-1);" title="Erneut senden"><i data-lucide="mail" style="width:12px;height:12px;"></i></button>';
       }
       actionsHtml += '<button class="btn btn-ghost btn-xs" onclick="downloadInvoicePDF(\'' + inv.id + '\', \'' + (inv.invoice_number || '') + '\')" title="PDF herunterladen"><i data-lucide="download" style="width:12px;height:12px;"></i></button>';
     }
 
-    html += '<tr><td><code>' + esc(inv.invoice_number || '–') + '</code></td>' +
+    html += '<tr><td><code>' + esc(inv.invoice_number || 'â€“') + '</code></td>' +
       '<td>' + customerDisplay + '</td>' +
-      '<td>' + (inv.amount_gross ? parseFloat(inv.amount_gross).toFixed(2) + ' €' : '–') + '</td>' +
+      '<td>' + (inv.amount_gross ? parseFloat(inv.amount_gross).toFixed(2) + ' â‚¬' : 'â€“') + '</td>' +
       '<td>' + fmtDateOnly(inv.due_date) + '</td>' +
       '<td><span class="badge badge-' + (inv.status || 'draft') + '">' + esc(statusText) + '</span></td>' +
       '<td><div style="display:flex;align-items:center;">' + actionsHtml + '</div></td>' +
@@ -2179,7 +2201,7 @@ function openNewInvoiceModal() {
     var customers = d.customers || [];
     _niCustomerMap = {};
     _niFoundLicenses = [];
-    var html = '<option value="">-- Kunde auswählen --</option>';
+    var html = '<option value="">-- Kunde auswÃ¤hlen --</option>';
     customers.forEach(function(c) {
       _niCustomerMap[c.id] = c;
       var displayName = c.name + (c.company ? ' (' + c.company + ')' : '');
@@ -2212,7 +2234,7 @@ function onInvoiceCustomerChange() {
 
   if (!customerId) return;
 
-  licensesList.innerHTML = '<div style="padding:8px 12px;color:var(--text2);font-size:.85rem;">Lädt…</div>';
+  licensesList.innerHTML = '<div style="padding: var(--space-2) var(--space-3);color:var(--text2);font-size: var(--text-sm);">LÃ¤dtâ€¦</div>';
   licensesGroup.style.display = '';
 
   var customer = _niCustomerMap[customerId] || {};
@@ -2221,7 +2243,7 @@ function onInvoiceCustomerChange() {
     .then(function(d) {
       var licenses = d.licenses || [];
       if (licenses.length > 0) return licenses;
-      // Fallback: Namenssuche wenn keine customer_id-Verknüpfung vorhanden
+      // Fallback: Namenssuche wenn keine customer_id-VerknÃ¼pfung vorhanden
       if (!customer.name) return [];
       return API('/admin/licenses?search=' + encodeURIComponent(customer.name) + '&limit=200')
         .then(function(d2) { return d2.licenses || []; });
@@ -2235,13 +2257,13 @@ function onInvoiceCustomerChange() {
       }
       var html = licenses.map(function(l) {
         var autoCheck = licenses.length === 1 ? ' checked' : '';
-        var domain    = l.associated_domain ? ' – <span style="color:var(--text2)">' + esc(l.associated_domain) + '</span>' : '';
-        var badge     = '<span style="font-size:.75rem;background:var(--bg3);border-radius:4px;padding:1px 5px;margin-left:4px;">' + esc(l.type) + '</span>';
-        return '<label style="display:flex;align-items:center;gap:8px;padding:7px 12px;cursor:pointer;" ' +
+        var domain    = l.associated_domain ? ' â€“ <span style="color:var(--text2)">' + esc(l.associated_domain) + '</span>' : '';
+        var badge     = '<span style="font-size: var(--text-xs);background:var(--bg3);border-radius: var(--radius-sm);padding: 1px var(--space-1);margin-left: var(--space-1);">' + esc(l.type) + '</span>';
+        return '<label style="display:flex;align-items:center;gap:8px;padding: var(--space-2) var(--space-3);cursor:pointer;" ' +
           'onmouseover="this.style.background=\'var(--hover)\'" onmouseout="this.style.background=\'\'">' +
           '<input type="checkbox" value="' + esc(l.license_key) + '" class="ni-lic-cb"' + autoCheck +
           ' style="accent-color:var(--primary);width:15px;height:15px;flex-shrink:0;">' +
-          '<span style="font-size:.83rem;font-family:var(--font-mono);">' + esc(l.license_key) + domain + badge + '</span>' +
+          '<span style="font-size: var(--text-sm);font-family:var(--font-mono);">' + esc(l.license_key) + domain + badge + '</span>' +
           '</label>';
       }).join('');
       licensesList.innerHTML = html;
@@ -2268,7 +2290,7 @@ function saveInvoice() {
     return;
   }
 
-  // Ausgewählte Lizenzen (Checkboxen)
+  // AusgewÃ¤hlte Lizenzen (Checkboxen)
   var checkedBoxes  = Array.from(document.querySelectorAll('.ni-lic-cb:checked'));
   var selectedKeys  = checkedBoxes.map(function(cb) { return cb.value; });
 
@@ -2280,23 +2302,23 @@ function saveInvoice() {
 
   var items;
   if (selectedKeys.length === 0) {
-    items = [{ description: note || 'Lizenzgebühr', quantity: 1, unit_price: amount }];
+    items = [{ description: note || 'LizenzgebÃ¼hr', quantity: 1, unit_price: amount }];
   } else {
     items = selectedKeys.map(function(key) {
       var lic  = _niFoundLicenses.find(function(l) { return l.license_key === key; });
-      var desc = 'Lizenzgebühr';
+      var desc = 'LizenzgebÃ¼hr';
       if (lic) {
-        desc = 'Lizenzgebühr ' + (lic.type || 'Lizenz');
-        if (lic.associated_domain) desc += ' – ' + lic.associated_domain;
+        desc = 'LizenzgebÃ¼hr ' + (lic.type || 'Lizenz');
+        if (lic.associated_domain) desc += ' â€“ ' + lic.associated_domain;
       } else if (key) {
-        desc = 'Lizenzgebühr – ' + key;
+        desc = 'LizenzgebÃ¼hr â€“ ' + key;
       }
       if (note) desc += ' (' + note + ')';
       return { description: desc, quantity: 1, unit_price: amount };
     });
   }
 
-  // Primärer Lizenz-Key für die Rechnung (nur wenn genau eine gewählt)
+  // PrimÃ¤rer Lizenz-Key fÃ¼r die Rechnung (nur wenn genau eine gewÃ¤hlt)
   var license_key = selectedKeys.length === 1 ? selectedKeys[0] : null;
 
   var body = {
@@ -2338,43 +2360,43 @@ function viewInvoiceDetail(id) {
       draft: 'Entwurf',
       sent: 'Versendet',
       paid: 'Bezahlt',
-      overdue: 'Überfällig',
+      overdue: 'ÃœberfÃ¤llig',
       cancelled: 'Storniert'
     };
 
-    var html = '<div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-bottom:1.5rem; text-align: left;">' +
+    var html = '<div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-bottom: var(--space-6); text-align: left;">' +
       '<div>' +
-        '<h4 style="margin-bottom:.5rem;color:var(--text2);text-transform:uppercase;font-size:.75rem;letter-spacing:0.05em;">Empfänger</h4>' +
-        '<p style="font-weight:600;margin:0;">' + esc(inv.customer_name || '–') + '</p>' +
-        (inv.customer_company ? '<p style="margin:0;color:var(--text2);">' + esc(inv.customer_company) + '</p>' : '') +
-        '<p style="margin:0;color:var(--text2);">' + esc(inv.customer_billing_street || '–') + '</p>' +
-        '<p style="margin:0;color:var(--text2);">' + esc(inv.customer_billing_zip || '') + ' ' + esc(inv.customer_billing_city || '') + '</p>' +
-        '<p style="margin:0;color:var(--text2);">' + esc(inv.customer_billing_country || '') + '</p>' +
-        (inv.customer_email ? '<p style="margin:.5rem 0 0 0;font-size:.85rem;color:var(--primary);">' + esc(inv.customer_email) + '</p>' : '') +
+        '<h4 style="margin-bottom: var(--space-2);color:var(--text2);text-transform:uppercase;font-size: var(--text-xs);letter-spacing: 0.08em;">EmpfÃ¤nger</h4>' +
+        '<p style="font-weight: 500;margin: 0;">' + esc(inv.customer_name || 'â€“') + '</p>' +
+        (inv.customer_company ? '<p style="margin: 0;color:var(--text2);">' + esc(inv.customer_company) + '</p>' : '') +
+        '<p style="margin: 0;color:var(--text2);">' + esc(inv.customer_billing_street || 'â€“') + '</p>' +
+        '<p style="margin: 0;color:var(--text2);">' + esc(inv.customer_billing_zip || '') + ' ' + esc(inv.customer_billing_city || '') + '</p>' +
+        '<p style="margin: 0;color:var(--text2);">' + esc(inv.customer_billing_country || '') + '</p>' +
+        (inv.customer_email ? '<p style="margin: var(--space-2) 0 0 0;font-size: var(--text-sm);color:var(--primary);">' + esc(inv.customer_email) + '</p>' : '') +
       '</div>' +
       '<div>' +
-        '<h4 style="margin-bottom:.5rem;color:var(--text2);text-transform:uppercase;font-size:.75rem;letter-spacing:0.05em;">Details</h4>' +
-        '<p style="margin:0;"><span style="color:var(--text2)">Rechnungsnummer:</span> <strong>' + esc(inv.invoice_number || '–') + '</strong></p>' +
-        '<p style="margin:0;"><span style="color:var(--text2)">Status:</span> <span class="badge badge-' + inv.status + '">' + esc(statusLabels[inv.status] || inv.status) + '</span></p>' +
-        '<p style="margin:0;"><span style="color:var(--text2)">Datum:</span> ' + fmtDateOnly(inv.created_at) + '</p>' +
-        '<p style="margin:0;"><span style="color:var(--text2)">Fällig am:</span> ' + fmtDateOnly(inv.due_date) + '</p>' +
-        (inv.paid_at ? '<p style="margin:0;"><span style="color:var(--text2)">Bezahlt am:</span> ' + fmtDateOnly(inv.paid_at) + '</p>' : '') +
-        (inv.license_key ? '<p style="margin:.5rem 0 0 0;font-size:.85rem;"><span style="color:var(--text2)">Lizenz-Key:</span> <code>' + esc(inv.license_key) + '</code></p>' : '') +
+        '<h4 style="margin-bottom: var(--space-2);color:var(--text2);text-transform:uppercase;font-size: var(--text-xs);letter-spacing: 0.08em;">Details</h4>' +
+        '<p style="margin: 0;"><span style="color:var(--text2)">Rechnungsnummer:</span> <strong>' + esc(inv.invoice_number || 'â€“') + '</strong></p>' +
+        '<p style="margin: 0;"><span style="color:var(--text2)">Status:</span> <span class="badge badge-' + inv.status + '">' + esc(statusLabels[inv.status] || inv.status) + '</span></p>' +
+        '<p style="margin: 0;"><span style="color:var(--text2)">Datum:</span> ' + fmtDateOnly(inv.created_at) + '</p>' +
+        '<p style="margin: 0;"><span style="color:var(--text2)">FÃ¤llig am:</span> ' + fmtDateOnly(inv.due_date) + '</p>' +
+        (inv.paid_at ? '<p style="margin: 0;"><span style="color:var(--text2)">Bezahlt am:</span> ' + fmtDateOnly(inv.paid_at) + '</p>' : '') +
+        (inv.license_key ? '<p style="margin: var(--space-2) 0 0 0;font-size: var(--text-sm);"><span style="color:var(--text2)">Lizenz-Key:</span> <code>' + esc(inv.license_key) + '</code></p>' : '') +
       '</div>' +
     '</div>';
 
-    html += '<h4 style="margin-bottom:.5rem;color:var(--text2);text-transform:uppercase;font-size:.75rem;letter-spacing:0.05em;text-align: left;">Positionen</h4>' +
-      '<table class="data-table" style="margin-bottom:1.5rem; width: 100%;">' +
+    html += '<h4 style="margin-bottom: var(--space-2);color:var(--text2);text-transform:uppercase;font-size: var(--text-xs);letter-spacing: 0.08em;text-align: left;">Positionen</h4>' +
+      '<table class="data-table" style="margin-bottom: var(--space-6); width: 100%;">' +
       '<thead><tr><th>Beschreibung</th><th style="text-align:right;">Menge</th><th style="text-align:right;">Einzelpreis</th><th style="text-align:right;">Gesamt</th></tr></thead>' +
       '<tbody>';
       
     if (inv.items && inv.items.length > 0) {
       inv.items.forEach(function(item) {
         html += '<tr>' +
-          '<td>' + esc(item.description || '–') + '</td>' +
+          '<td>' + esc(item.description || 'â€“') + '</td>' +
           '<td style="text-align:right;">' + parseFloat(item.quantity).toFixed(2) + '</td>' +
-          '<td style="text-align:right;">' + parseFloat(item.unit_price).toFixed(2) + ' €</td>' +
-          '<td style="text-align:right;">' + parseFloat(item.total).toFixed(2) + ' €</td>' +
+          '<td style="text-align:right;">' + parseFloat(item.unit_price).toFixed(2) + ' â‚¬</td>' +
+          '<td style="text-align:right;">' + parseFloat(item.total).toFixed(2) + ' â‚¬</td>' +
           '</tr>';
       });
     } else {
@@ -2383,34 +2405,34 @@ function viewInvoiceDetail(id) {
     
     html += '</tbody></table>';
 
-    html += '<div style="display:flex; justify-content:flex-end; margin-bottom:1.5rem;">' +
-      '<div style="width:250px; display:grid; grid-template-columns:1fr 1fr; gap:.5rem; font-size:.9rem; text-align: left;">' +
-        '<div style="color:var(--text2)">Netto-Summe:</div><div style="text-align:right;">' + parseFloat(inv.amount_net || 0).toFixed(2) + ' €</div>' +
-        '<div style="color:var(--text2)">MwSt. (' + parseFloat(inv.tax_rate || 0) + '%):</div><div style="text-align:right;">' + parseFloat(inv.amount_tax || 0).toFixed(2) + ' €</div>' +
-        '<div style="font-weight:bold; border-top:1px solid var(--border); padding-top:.5rem; margin-top:.25rem;">Brutto-Summe:</div>' +
-        '<div style="font-weight:bold; border-top:1px solid var(--border); padding-top:.5rem; margin-top:.25rem; text-align:right;">' + parseFloat(inv.amount_gross || 0).toFixed(2) + ' €</div>' +
+    html += '<div style="display:flex; justify-content:flex-end; margin-bottom: var(--space-6);">' +
+      '<div style="width:250px; display:grid; grid-template-columns:1fr 1fr; gap:.5rem; font-size: var(--text-sm); text-align: left;">' +
+        '<div style="color:var(--text2)">Netto-Summe:</div><div style="text-align:right;">' + parseFloat(inv.amount_net || 0).toFixed(2) + ' â‚¬</div>' +
+        '<div style="color:var(--text2)">MwSt. (' + parseFloat(inv.tax_rate || 0) + '%):</div><div style="text-align:right;">' + parseFloat(inv.amount_tax || 0).toFixed(2) + ' â‚¬</div>' +
+        '<div style="font-weight:bold; border-top:1px solid var(--border); padding-top: var(--space-2); margin-top: var(--space-1);">Brutto-Summe:</div>' +
+        '<div style="font-weight:bold; border-top:1px solid var(--border); padding-top: var(--space-2); margin-top: var(--space-1); text-align:right;">' + parseFloat(inv.amount_gross || 0).toFixed(2) + ' â‚¬</div>' +
       '</div>' +
     '</div>';
 
     if (inv.notes) {
-      html += '<div style="background:var(--bg3); padding:1rem; border-radius:8px; font-size:.85rem; color:var(--text2); margin-bottom:1.5rem; text-align: left;">' +
+      html += '<div style="background:var(--bg3); padding: var(--space-4); border-radius: var(--radius-md); font-size: var(--text-sm); color:var(--text2); margin-bottom: var(--space-6); text-align: left;">' +
         '<strong>Notiz:</strong> ' + esc(inv.notes) +
       '</div>';
     }
 
-    var actionsHtml = '<div style="display:flex; gap:.5rem; justify-content:flex-start; border-top: 1px solid var(--border); padding-top: 1rem;">';
+    var actionsHtml = '<div style="display:flex; gap:.5rem; justify-content:flex-start; border-top: 1px solid var(--border); padding-top: var(--space-4);">';
     
     if (inv.status === 'draft') {
-      actionsHtml += '<button class="btn btn-primary btn-sm" onclick="sendInvoice(\'' + inv.id + '\'); closeModal(\'modal-view-invoice\');"><i data-lucide="send" style="width:14px;height:14px;margin-right:4px;vertical-align:middle;"></i> Versenden</button>';
-      actionsHtml += '<button class="btn btn-danger btn-sm" onclick="deleteInvoice(\'' + inv.id + '\'); closeModal(\'modal-view-invoice\');"><i data-lucide="trash-2" style="width:14px;height:14px;margin-right:4px;vertical-align:middle;"></i> Löschen</button>';
+      actionsHtml += '<button class="btn btn-primary btn-sm" onclick="sendInvoice(\'' + inv.id + '\'); closeModal(\'modal-view-invoice\');"><i data-lucide="send" style="width:14px;height:14px;margin-right: var(--space-1);vertical-align:middle;"></i> Versenden</button>';
+      actionsHtml += '<button class="btn btn-danger btn-sm" onclick="deleteInvoice(\'' + inv.id + '\'); closeModal(\'modal-view-invoice\');"><i data-lucide="trash-2" style="width:14px;height:14px;margin-right: var(--space-1);vertical-align:middle;"></i> LÃ¶schen</button>';
     } else {
       if (inv.status !== 'cancelled') {
-        actionsHtml += '<button class="btn btn-ghost btn-sm" onclick="resendInvoice(\'' + inv.id + '\')"><i data-lucide="mail" style="width:14px;height:14px;margin-right:4px;vertical-align:middle;"></i> Erneut senden</button>';
+        actionsHtml += '<button class="btn btn-ghost btn-sm" onclick="resendInvoice(\'' + inv.id + '\')"><i data-lucide="mail" style="width:14px;height:14px;margin-right: var(--space-1);vertical-align:middle;"></i> Erneut senden</button>';
       }
       if (inv.status === 'sent' || inv.status === 'overdue') {
-        actionsHtml += '<button class="btn btn-success btn-sm" onclick="markInvoicePaid(\'' + inv.id + '\'); closeModal(\'modal-view-invoice\');"><i data-lucide="check-circle" style="width:14px;height:14px;margin-right:4px;vertical-align:middle;"></i> Als bezahlt markieren</button>';
+        actionsHtml += '<button class="btn btn-success btn-sm" onclick="markInvoicePaid(\'' + inv.id + '\'); closeModal(\'modal-view-invoice\');"><i data-lucide="check-circle" style="width:14px;height:14px;margin-right: var(--space-1);vertical-align:middle;"></i> Als bezahlt markieren</button>';
       }
-      actionsHtml += '<button class="btn btn-ghost btn-sm" onclick="downloadInvoicePDF(\'' + inv.id + '\', \'' + (inv.invoice_number || '') + '\')"><i data-lucide="download" style="width:14px;height:14px;margin-right:4px;vertical-align:middle;"></i> PDF</button>';
+      actionsHtml += '<button class="btn btn-ghost btn-sm" onclick="downloadInvoicePDF(\'' + inv.id + '\', \'' + (inv.invoice_number || '') + '\')"><i data-lucide="download" style="width:14px;height:14px;margin-right: var(--space-1);vertical-align:middle;"></i> PDF</button>';
     }
     
     actionsHtml += '</div>';
@@ -2448,7 +2470,7 @@ function sendInvoice(id) {
   API('/admin/invoices/' + id + '/send', { method: 'POST' })
     .then(function(d) {
       if (d && d.mail_error) {
-        showError('Rechnung als gesendet markiert, aber E-Mail fehlgeschlagen:\n' + d.mail_error + '\n\nBitte SMTP-Einstellungen unter ⚙ prüfen.');
+        showError('Rechnung als gesendet markiert, aber E-Mail fehlgeschlagen:\n' + d.mail_error + '\n\nBitte SMTP-Einstellungen unter âš™ prÃ¼fen.');
       }
       loadInvoices();
     })
@@ -2461,7 +2483,7 @@ function resendInvoice(id) {
   API('/admin/invoices/' + id + '/resend', { method: 'POST' })
     .then(function(d) {
       if (d && d.mail_error) {
-        showError('Rechnung als gesendet markiert, aber E-Mail fehlgeschlagen:\n' + d.mail_error + '\n\nBitte SMTP-Einstellungen unter ⚙ prüfen.');
+        showError('Rechnung als gesendet markiert, aber E-Mail fehlgeschlagen:\n' + d.mail_error + '\n\nBitte SMTP-Einstellungen unter âš™ prÃ¼fen.');
       } else {
         alert('Rechnung erfolgreich gesendet.');
       }
@@ -2483,13 +2505,13 @@ function markInvoicePaid(id) {
 }
 
 function deleteInvoice(id) {
-  showConfirm('Rechnung unwiderruflich löschen?', function() {
+  showConfirm('Rechnung unwiderruflich lÃ¶schen?', function() {
     API('/admin/invoices/' + id, { method: 'DELETE' })
       .then(function() {
         loadInvoices();
       })
       .catch(function(e) {
-        showError('Fehler beim Löschen der Rechnung: ' + (e.message || String(e)));
+        showError('Fehler beim LÃ¶schen der Rechnung: ' + (e.message || String(e)));
       });
   });
 }
@@ -2542,7 +2564,7 @@ function saveInvoiceSettings() {
 function previewInvoicePDF() {
   var token = TOKEN;
   var url = '/api/admin/invoice-settings/preview-pdf';
-  // PDF in neuem Tab öffnen (mit Auth-Header via fetch + Blob-URL)
+  // PDF in neuem Tab Ã¶ffnen (mit Auth-Header via fetch + Blob-URL)
   fetch(url, { headers: { 'Authorization': 'Bearer ' + token } })
     .then(function(r) {
       if (!r.ok) return r.json().then(function(d) { throw new Error(d.message || 'Fehler'); });
@@ -2623,7 +2645,8 @@ function renderCharts(ana) {
   const gridColor = isDark ? 'rgba(255, 255, 255, 0.07)' : 'rgba(0, 0, 0, 0.05)';
   const legendColor = getComputedStyle(document.documentElement).getPropertyValue('--text2').trim() || '#8b9099';
   const doughnutColors = ['#00bfa5', '#5fbf6a', '#e8af34', '#ff5d6c', '#8b9099'];
-  
+  Chart.defaults.font.family = "'Roboto', sans-serif";
+
   // 1. Validations Chart
   const ctxV = document.getElementById('validationsChart').getContext('2d');
   if (vChart) vChart.destroy();
@@ -2723,11 +2746,11 @@ function renderCharts(ana) {
 
   // 5. Top Customers List
   const custHtml = (ana.top_customers || []).map(function(c){
-    return '<div style="display:flex; justify-content:space-between; padding:0.6rem 0; border-bottom:1px solid var(--border);">' +
+    return '<div style="display:flex; justify-content:space-between; padding: var(--space-2) 0; border-bottom:1px solid var(--border);">' +
       '<span style="font-weight:500; color:var(--text);">' + esc(c.name) + '</span>' +
       '<span class="badge badge-purchase">' + c.lic_count + ' Lizenzen</span>' +
     '</div>';
-  }).join('') || '<div style="color:var(--text2); text-align:center; padding:2rem;">Keine Kundendaten</div>';
+  }).join('') || '<div style="color:var(--text2); text-align:center; padding: var(--space-8);">Keine Kundendaten</div>';
   document.getElementById('top-customers-list').innerHTML = custHtml;
 }
 
@@ -2772,11 +2795,11 @@ function openAdmin(){
   hide('cookie-banner');
   document.getElementById('page-admin').classList.add('active');
   if(TOKEN){
-    // Token kurz gegen den Server prüfen – bei 401 wird API() auto-logout
+    // Token kurz gegen den Server prÃ¼fen â€“ bei 401 wird API() auto-logout
     API('/admin/licenses?limit=1')
       .then(function(){showDashboard();})
       .catch(function(){
-        // Falls Token abgelaufen: API() hat bereits ausgeloggt → showLogin()
+        // Falls Token abgelaufen: API() hat bereits ausgeloggt â†’ showLogin()
         showLogin();
       });
   } else {
@@ -2848,7 +2871,7 @@ function doVerify2FA(){
       sessionStorage.setItem('admin_user',USER);
       resetLogin();
       showDashboard();
-    }).catch(function(e){ showAlert('login-alert', esc(e.message||'Ungültiger Code.')); });
+    }).catch(function(e){ showAlert('login-alert', esc(e.message||'UngÃ¼ltiger Code.')); });
 }
 
 function resetLogin(){
@@ -2880,7 +2903,7 @@ function verify2FASetup(){
 }
 
 function disable2FA(){
-  showConfirm('Möchtest du 2FA wirklich deaktivieren?', function(){
+  showConfirm('MÃ¶chtest du 2FA wirklich deaktivieren?', function(){
     API('/admin/2fa/disable', { method: 'POST' }).then(function(){
       showError('2FA wurde deaktiviert.', 'Information');
       loadUsers();
@@ -2968,9 +2991,9 @@ function loadOverview(){
         '<div class="stat-card"><div class="stat-label">Gesamt Lizenzen</div><div class="stat-value">'+(s.total||0)+'</div><div class="stat-trend">+'+(ana.growth.last_30d)+' mtl.</div></div>'+
         '<div class="stat-card"><div class="stat-label">Aktive Lizenzen</div><div class="stat-value" style="color:var(--success)">'+(s.active||0)+'</div></div>'+
         '<div class="stat-card"><div class="stat-label">Validierungen (30d)</div><div class="stat-value">'+val30d+'</div></div>'+
-        '<div class="stat-card"><div class="stat-label">Umsatz (30d)</div><div class="stat-value" style="color:var(--primary)">'+fmtEur(rev.last_30d)+'</div><div class="stat-trend">+'+(ana.growth.last_7d)+' neue Verkäufe (7d)</div></div>'+
+        '<div class="stat-card"><div class="stat-label">Umsatz (30d)</div><div class="stat-value" style="color:var(--primary)">'+fmtEur(rev.last_30d)+'</div><div class="stat-trend">+'+(ana.growth.last_7d)+' neue VerkÃ¤ufe (7d)</div></div>'+
         '<div class="stat-card"><div class="stat-label">Umsatz (Gesamt)</div><div class="stat-value" style="color:var(--warning)">'+fmtEur(rev.total)+'</div></div>'+
-        '<div class="stat-card"><div class="stat-label">Geräte</div><div class="stat-value">'+(ana.devices.total)+'</div><div class="stat-trend">'+ana.devices.active+' aktiv</div></div>';
+        '<div class="stat-card"><div class="stat-label">GerÃ¤te</div><div class="stat-value">'+(ana.devices.total)+'</div><div class="stat-trend">'+ana.devices.active+' aktiv</div></div>';
       
       var top=ana.top_licenses||[];
       document.getElementById('top-licenses').innerHTML=top.length?
@@ -2986,8 +3009,8 @@ function loadOverview(){
           '<table class="data-table"><thead><tr><th>Key</th><th>Kunde</th><th>Typ</th><th>Ablaufdatum</th><th>Tage</th><th>Aktionen</th></tr></thead><tbody>'+
           list.map(function(l){
             var d=daysLeft(l.expires_at);
-            return '<tr><td><code>'+esc((l.license_key||'').slice(0,12))+'&hellip;</code></td><td>'+esc(l.customer_name||'\u2014')+'</td><td>'+typeBadge(l.type)+'</td><td>'+fmtDate(l.expires_at)+'</td><td style="color:var(--warning)">noch '+d+'d</td><td><button class="btn btn-success btn-xs" onclick="renewLicense(\''+esc(l.license_key)+'\')" >Verlängern</button></td></tr>';
-          }).join('')+'</tbody></table>':'<div class="loading">Aktuell keine ablaufenenden Lizenzen in den nächsten 30 Tagen.</div>';
+            return '<tr><td><code>'+esc((l.license_key||'').slice(0,12))+'&hellip;</code></td><td>'+esc(l.customer_name||'\u2014')+'</td><td>'+typeBadge(l.type)+'</td><td>'+fmtDate(l.expires_at)+'</td><td style="color:var(--warning)">noch '+d+'d</td><td><button class="btn btn-success btn-xs" onclick="renewLicense(\''+esc(l.license_key)+'\')" >VerlÃ¤ngern</button></td></tr>';
+          }).join('')+'</tbody></table>':'<div class="loading">Aktuell keine ablaufenenden Lizenzen in den nÃ¤chsten 30 Tagen.</div>';
       });
     });
   }).catch(function(e){document.getElementById('stats-row').innerHTML='<div class="alert alert-error">'+esc(e.message||'Fehler')+'</div>';});
@@ -3000,7 +3023,7 @@ function loadLicenses(page){
   API(url).then(function(d){
     var licenses=d.licenses||[],pg=d.pagination||{};
     var html=licenses.length?
-      '<table class="data-table"><thead><tr><th>Key</th><th>Typ</th><th>Kunde</th><th>Tags</th><th>Status</th><th>Läuft ab</th><th>Aktionen</th></tr></thead><tbody>'+
+      '<table class="data-table"><thead><tr><th>Key</th><th>Typ</th><th>Kunde</th><th>Tags</th><th>Status</th><th>LÃ¤uft ab</th><th>Aktionen</th></tr></thead><tbody>'+
       licenses.map(function(l){
         var days=daysLeft(l.expires_at);
         var expClass=days<0?'color:var(--danger)':days<30?'color:var(--warning)':'';
@@ -3018,7 +3041,7 @@ function loadLicenses(page){
       '<div class="loading">Keine Lizenzen gefunden.</div>';
     document.getElementById('lic-table').innerHTML=html;
     if(window.lucide) window.lucide.createIcons();
-  }).catch(function(e){document.getElementById('lic-table').innerHTML='<div class="alert alert-error" style="margin:1rem">'+esc(e.message||'Fehler')+'</div>';});
+  }).catch(function(e){document.getElementById('lic-table').innerHTML='<div class="alert alert-error" style="margin: var(--space-4)">'+esc(e.message||'Fehler')+'</div>';});
 }
 function filterLic(){ clearTimeout(searchTimer); searchTimer=setTimeout(function(){ licSearch=document.getElementById('lic-search').value; licPage=1; loadLicenses(); },400); }
 
@@ -3045,7 +3068,7 @@ function viewLicense(key){
       '<div class="form-group"><label>Validierungen</label><input readonly value="'+esc(l.usage_count||0)+'"></div>'+
       '<div class="form-group"><label>Tags (kommagetrennt)</label><input id="edit-tags" value="'+esc(safeParse(l.tags, []).join(', '))+'"></div>'+
       '<div class="form-group"><label>Letzter Check</label><input readonly value="'+esc(fmtDate(l.last_validated))+'"></div>'+
-      '<div class="form-group"><label>Status ändern</label>'+
+      '<div class="form-group"><label>Status Ã¤ndern</label>'+
         '<select id="edit-status-sel">'+statuses.map(function(s){return'<option value="'+s+'"'+(s===l.status?' selected':'')+'>'+s+'</option>';}).join('')+'</select>'+
       '</div>'+
       '<button class="btn btn-primary btn-sm" onclick="saveStatus(\''+esc(l.license_key)+'\')" >Status speichern</button>';
@@ -3059,13 +3082,13 @@ function saveStatus(key){
     .catch(function(e){showError(e.message||String(e));});
 }
 function renewLicense(key){
-  showConfirm('Lizenz um 365 Tage verlängern?', function(){
+  showConfirm('Lizenz um 365 Tage verlÃ¤ngern?', function(){
     API('/admin/licenses/'+encodeURIComponent(key)+'/renew',{method:'POST',body:JSON.stringify({days:365})})
       .then(function(){loadLicenses();}).catch(function(e){showError(e.message||String(e));});
   });
 }
 function deleteLicense(key){
-  showConfirm('Lizenz '+key+' unwiderruflich löschen?', function(){
+  showConfirm('Lizenz '+key+' unwiderruflich lÃ¶schen?', function(){
     API('/admin/licenses/'+encodeURIComponent(key),{method:'DELETE'})
       .then(function(){loadLicenses();}).catch(function(e){showError(e.message||String(e));});
   });
@@ -3087,7 +3110,7 @@ function createLicense(){
     .catch(function(e){showError(e.message||String(e));});
 }
 
-// ── Customers ────────────────────────────────────────────────────────────────
+// â”€â”€ Customers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function loadCustomers(page){
   if(page!==undefined) custPage=page;
   var showArchived=document.getElementById('cust-show-archived')&&document.getElementById('cust-show-archived').checked;
@@ -3112,16 +3135,16 @@ function loadCustomers(page){
           '<td style="white-space:nowrap">'+
             '<button class="btn btn-ghost btn-xs" onclick="openEditCustomer('+idx+')">Bearbeiten</button> '+
             '<button class="btn btn-primary btn-xs" onclick="openCreateLicenseForCustomer(\'' + esc(c.id) + '\')" >+ Lizenz</button> '+
-            '<button class="btn btn-ghost btn-xs" onclick="filterPurchaseByCustomer(\''+esc(c.id)+'\')" >Käufe</button> '+
+            '<button class="btn btn-ghost btn-xs" onclick="filterPurchaseByCustomer(\''+esc(c.id)+'\')" >KÃ¤ufe</button> '+
             (isArchived
               ? '<button class="btn btn-success btn-xs" onclick="toggleArchiveCustomer(\''+esc(c.id)+'\',false)" >Reaktivieren</button>'
               : '<button class="btn btn-warning btn-xs" onclick="toggleArchiveCustomer(\''+esc(c.id)+'\',true)" >Archivieren</button>')+
-            ' <button class="btn btn-danger btn-xs" onclick="deleteCustomer(\''+esc(c.id)+'\')" >Löschen</button>'+
+            ' <button class="btn btn-danger btn-xs" onclick="deleteCustomer(\''+esc(c.id)+'\')" >LÃ¶schen</button>'+
           '</td></tr>';
       }).join('')+'</tbody></table>' + renderPagination(pag,'loadCustomers') :
       '<div class="loading">Keine Kunden gefunden.</div>';
     document.getElementById('cust-table').innerHTML=html;
-  }).catch(function(e){document.getElementById('cust-table').innerHTML='<div class="alert alert-error" style="margin:1rem">'+esc(e.message||'Fehler')+'</div>';});
+  }).catch(function(e){document.getElementById('cust-table').innerHTML='<div class="alert alert-error" style="margin: var(--space-4)">'+esc(e.message||'Fehler')+'</div>';});
 }
 
 function filterCustomers(){
@@ -3148,29 +3171,29 @@ function openEditCustomer(idx){
   
   var licBlock = document.getElementById('ec-licenses-block');
   if (licBlock) {
-    licBlock.innerHTML = '<div class="spinner" style="width:20px;height:20px;margin-bottom:10px;display:inline-block;vertical-align:middle"></div> <span style="font-size:.85rem;color:var(--text2);vertical-align:middle;margin-left:8px">Lade Lizenzen...</span>';
+    licBlock.innerHTML = '<div class="spinner" style="width:20px;height:20px;margin-bottom: var(--space-3);display:inline-block;vertical-align:middle"></div> <span style="font-size: var(--text-sm);color:var(--text2);vertical-align:middle;margin-left: var(--space-2)">Lade Lizenzen...</span>';
     API('/admin/licenses?customer_id=' + encodeURIComponent(c.id)).then(function(d){
       var myLics = d.licenses || [];
-      var html = '<div style="font-size:.8rem;font-weight:700;letter-spacing:.05em;color:var(--primary);text-transform:uppercase;margin-bottom:.5rem">Lizenzen</div>';
+      var html = '<div style="font-size: var(--text-sm);font-weight:700;letter-spacing: 0.08em;color:var(--primary);text-transform:uppercase;margin-bottom: var(--space-2)">Lizenzen</div>';
       if (myLics.length === 0) {
-        html += '<p style="color:var(--text2);font-size:.85rem">Keine Lizenzen vorhanden.</p>';
+        html += '<p style="color:var(--text2);font-size: var(--text-sm)">Keine Lizenzen vorhanden.</p>';
       } else {
-        html += '<table class="data-table" style="width:100%;font-size:.8rem;border-collapse:collapse;margin-bottom:.5rem">' +
-          '<thead><tr style="text-align:left;border-bottom:1px solid var(--border)"><th style="padding:.4rem 0">Key</th><th style="padding:.4rem 0">Typ</th><th style="padding:.4rem 0">Status</th><th style="padding:.4rem 0;text-align:right">Ablauf</th></tr></thead>' +
+        html += '<table class="data-table" style="width:100%;font-size: var(--text-sm);border-collapse:collapse;margin-bottom: var(--space-2)">' +
+          '<thead><tr style="text-align:left;border-bottom:1px solid var(--border)"><th style="padding: var(--space-2) 0">Key</th><th style="padding: var(--space-2) 0">Typ</th><th style="padding: var(--space-2) 0">Status</th><th style="padding: var(--space-2) 0;text-align:right">Ablauf</th></tr></thead>' +
           '<tbody>' +
           myLics.map(function(l){
             return '<tr style="border-bottom:1px solid var(--border)">' +
-              '<td style="padding:.4rem 0;font-family:var(--font-mono);color:var(--accent)"><code>'+esc(l.license_key)+'</code></td>' +
-              '<td style="padding:.4rem 0">'+esc(l.type)+'</td>' +
-              '<td style="padding:.4rem 0">'+statusBadge(l.status)+'</td>' +
-              '<td style="padding:.4rem 0;text-align:right">'+fmtDate(l.expires_at)+'</td>' +
+              '<td style="padding: var(--space-2) 0;font-family:var(--font-mono);color:var(--accent)"><code>'+esc(l.license_key)+'</code></td>' +
+              '<td style="padding: var(--space-2) 0">'+esc(l.type)+'</td>' +
+              '<td style="padding: var(--space-2) 0">'+statusBadge(l.status)+'</td>' +
+              '<td style="padding: var(--space-2) 0;text-align:right">'+fmtDate(l.expires_at)+'</td>' +
               '</tr>';
           }).join('') +
           '</tbody></table>';
       }
       licBlock.innerHTML = html;
     }).catch(function(){
-      licBlock.innerHTML = '<div class="alert alert-error" style="padding:.4rem;font-size:.8rem">Fehler beim Laden der Lizenzen.</div>';
+      licBlock.innerHTML = '<div class="alert alert-error" style="padding: var(--space-2);font-size: var(--text-sm)">Fehler beim Laden der Lizenzen.</div>';
     });
   }
   
@@ -3246,7 +3269,7 @@ function saveCustomer(){
 }
 
 function toggleArchiveCustomer(id,archive){
-  var msg=archive?'Kunden archivieren? Er wird nicht gelöscht, aber als inaktiv markiert.':'Kunden reaktivieren?';
+  var msg=archive?'Kunden archivieren? Er wird nicht gelÃ¶scht, aber als inaktiv markiert.':'Kunden reaktivieren?';
   showConfirm(msg, function(){
     API('/admin/customers/'+id,{method:'PATCH',body:JSON.stringify({archived:archive?1:0})})
       .then(function(){loadCustomers();})
@@ -3263,7 +3286,7 @@ function createCustomer(){
     .catch(function(e){showError(e.message||String(e));});
 }
 function deleteCustomer(id){
-  showConfirm('Kunden unwiderruflich löschen?', function(){
+  showConfirm('Kunden unwiderruflich lÃ¶schen?', function(){
     API('/admin/customers/'+id,{method:'DELETE'}).then(function(){loadCustomers();}).catch(function(e){showError(e.message||String(e));});
   });
 }
@@ -3297,10 +3320,10 @@ function loadDevices(page){
             '<button class="btn btn-danger btn-xs" onclick="deleteDevice(\''+esc(dv.id)+'\')" ><i data-lucide="trash-2" style="width:12px;height:12px;"></i></button>'+
           '</td></tr>';
       }).join('')+'</tbody></table>' + renderPagination(pg,'loadDevices') :
-      '<div class="loading">Keine Geräte gefunden.</div>';
+      '<div class="loading">Keine GerÃ¤te gefunden.</div>';
     document.getElementById('dev-table').innerHTML=html;
     if(window.lucide) window.lucide.createIcons();
-  }).catch(function(e){document.getElementById('dev-table').innerHTML='<div class="alert alert-error" style="margin:1rem">'+esc(e.message||'Fehler')+'</div>';});
+  }).catch(function(e){document.getElementById('dev-table').innerHTML='<div class="alert alert-error" style="margin: var(--space-4)">'+esc(e.message||'Fehler')+'</div>';});
 }
 function filterDevices(){
   clearTimeout(searchTimer);
@@ -3314,7 +3337,7 @@ function deactivateDevice(id){
   API('/admin/devices/'+id+'/deactivate',{method:'PATCH'}).then(function(){loadDevices();}).catch(function(e){showError(e.message||String(e));});
 }
 function deleteDevice(id){
-  showConfirm('Gerät löschen?', function(){
+  showConfirm('GerÃ¤t lÃ¶schen?', function(){
     API('/admin/devices/'+id,{method:'DELETE'}).then(function(){loadDevices();}).catch(function(e){showError(e.message||String(e));});
   });
 }
@@ -3331,7 +3354,7 @@ function loadLoginLog(){
         return '<tr><td>'+fmtDate(l.ts)+'</td><td><strong>'+esc(det.username||l.actor||'\u2014')+'</strong></td>'+
           '<td><span class="badge '+(isOk?'badge-active':'badge-revoked')+'">'+(isOk?'Login':'Fehlgeschlagen')+'</span></td>'+
           '<td><code>'+esc(det.ip||'\u2014')+'</code></td></tr>';
-      }).join('')+'</tbody></table></div>':'<div class="loading">Keine Login-Einträge gefunden.</div>';
+      }).join('')+'</tbody></table></div>':'<div class="loading">Keine Login-EintrÃ¤ge gefunden.</div>';
   }).catch(function(e){document.getElementById('login-log-list').innerHTML='<div class="alert alert-error">'+esc(e.message||'Fehler')+'</div>';});
 }
 
@@ -3357,13 +3380,13 @@ function loadAudit(){
         '<i data-lucide="'+iconName+'" class="log-icon"></i>'+
         '<div class="log-content">'+
           '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.4rem">'+
-            '<div><strong>'+esc(l.action)+'</strong> <span style="color:var(--text2);font-size:.78rem">von '+esc(l.actor||'system')+'</span></div>'+
+            '<div><strong>'+esc(l.action)+'</strong> <span style="color:var(--text2);font-size: var(--text-xs)">von '+esc(l.actor||'system')+'</span></div>'+
             '<div class="log-time">'+fmtDate(l.ts)+'</div>'+
           '</div>'+
-          '<div style="margin-top:.3rem;font-size:.8rem">'+details+'</div>'+
+          '<div style="margin-top: var(--space-1);font-size: var(--text-sm)">'+details+'</div>'+
         '</div>'+
       '</div>';
-    }).join(''):'<div class="loading">Keine Einträge gefunden.</div>';
+    }).join(''):'<div class="loading">Keine EintrÃ¤ge gefunden.</div>';
     if(window.lucide) window.lucide.createIcons();
   }).catch(function(e){document.getElementById('audit-list').innerHTML='<div class="alert alert-error">'+esc(e.message||'Fehler')+'</div>';});
 }
@@ -3381,16 +3404,16 @@ function loadPurchaseHistory(){
       history.map(function(h){
         return '<tr>'+
           '<td>'+fmtDate(h.created_at)+'</td>'+
-          '<td><strong>'+esc(h.customer_name||'\u2014')+'</strong><br><span style="font-size:.75rem;color:var(--text2)">'+esc(h.customer_email||'')+'</span></td>'+
+          '<td><strong>'+esc(h.customer_name||'\u2014')+'</strong><br><span style="font-size: var(--text-xs);color:var(--text2)">'+esc(h.customer_email||'')+'</span></td>'+
           '<td><code title="'+esc(h.license_key)+'">'+esc((h.license_key||'').slice(0,16))+'&hellip;</code></td>'+
           '<td>'+typeBadge(h.plan)+'</td>'+
           '<td><span class="badge badge-'+esc(h.action)+'">'+esc(h.action)+'</span></td>'+
           '<td style="font-weight:700;color:'+(h.amount?'var(--primary)':'var(--text2)')+'">'+ fmtEur(h.amount)+'</td>'+
-          '<td style="max-width:180px;font-size:.8rem">'+esc(h.note||'\u2014')+'</td>'+
-          '<td style="font-size:.78rem;color:var(--text2)">'+esc(h.created_by||'\u2014')+'</td>'+
+          '<td style="max-width:180px;font-size: var(--text-sm)">'+esc(h.note||'\u2014')+'</td>'+
+          '<td style="font-size: var(--text-xs);color:var(--text2)">'+esc(h.created_by||'\u2014')+'</td>'+
         '</tr>';
       }).join('')+'</tbody></table>':'<div class="loading">Keine Kaufhistorie gefunden.</div>';
-  }).catch(function(e){document.getElementById('ph-table').innerHTML='<div class="alert alert-error" style="margin:1rem">'+esc(e.message||'Fehler')+'</div>';});
+  }).catch(function(e){document.getElementById('ph-table').innerHTML='<div class="alert alert-error" style="margin: var(--space-4)">'+esc(e.message||'Fehler')+'</div>';});
 }
 function createPurchaseEntry(){
   var body={customer_id:document.getElementById('ph-customer-id').value,
@@ -3427,12 +3450,12 @@ function loadUsers(){
             (isSelf ? (u.two_factor_enabled ? 
               '<button class="btn btn-danger btn-xs" onclick="disable2FA()">2FA aus</button>' : 
               '<button class="btn btn-primary btn-xs" onclick="setup2FA()">2FA ein</button>') : '') +
-            (!isSelf?'<button class="btn btn-danger btn-xs" onclick="deleteUser(\''+esc(u.username)+'\')">Löschen</button>':'')+
+            (!isSelf?'<button class="btn btn-danger btn-xs" onclick="deleteUser(\''+esc(u.username)+'\')">LÃ¶schen</button>':'')+
           '</td>'+
         '</tr>';
       }).join('')+'</tbody></table>':'<div class="loading">Keine User gefunden.</div>';
   }).catch(function(e){
-    document.getElementById('users-table').innerHTML='<div class="alert alert-error" style="margin:1rem">'+esc(e.message||'Fehler')+'</div>';
+    document.getElementById('users-table').innerHTML='<div class="alert alert-error" style="margin: var(--space-4)">'+esc(e.message||'Fehler')+'</div>';
   });
 }
 function createAdminUser(){
@@ -3442,7 +3465,7 @@ function createAdminUser(){
     .catch(function(e){showError(e.message||String(e));});
 }
 function deleteUser(username){
-  showConfirm('Admin-User '+username+' löschen?', function(){
+  showConfirm('Admin-User '+username+' lÃ¶schen?', function(){
     API('/admin/users/'+username,{method:'DELETE'}).then(function(){loadUsers();}).catch(function(e){showError(e.message||String(e));});
   });
 }
@@ -3460,7 +3483,7 @@ function savePassword(){
   var pass=document.getElementById('cp-pass').value;
   var pass2=document.getElementById('cp-pass2').value;
   if(pass.length<12){showAlert('cp-alert','Passwort muss mindestens 12 Zeichen lang sein.','error');return;}
-  if(pass!==pass2){showAlert('cp-alert','Passwörter stimmen nicht überein.','error');return;}
+  if(pass!==pass2){showAlert('cp-alert','PasswÃ¶rter stimmen nicht Ã¼berein.','error');return;}
   API('/admin/users/'+encodeURIComponent(username)+'/password',{method:'PATCH',body:JSON.stringify({password:pass})})
     .then(function(){closeModal('modal-change-password');showAlert('users-table','','success');loadUsers();})
     .catch(function(e){showAlert('cp-alert',esc(e.message||'Fehler beim Speichern.'),'error');});
@@ -3483,14 +3506,14 @@ function saveUserEdit(){
     .catch(function(e){showAlert('eu-alert',esc(e.message||'Fehler beim Speichern.'),'error');});
 }
 
-// ── SMTP ─────────────────────────────────────────────────────────────────────
+// â”€â”€ SMTP â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function loadSmtp(){
   API('/admin/smtp').then(function(d){
     var s=d.smtp||{};
     document.getElementById('smtp-content').innerHTML=
-      '<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;max-width:520px">'+
+      '<div style="background:var(--card);border:1px solid var(--border);border-radius: var(--radius);padding: var(--space-6);max-width:520px">'+
         '<div id="smtp-alert"></div>'+
-        '<div class="alert alert-'+(s.configured?'success':'info')+'" style="margin-bottom:1rem">'+(s.configured?'SMTP konfiguriert':'SMTP noch nicht konfiguriert')+'</div>'+
+        '<div class="alert alert-'+(s.configured?'success':'info')+'" style="margin-bottom: var(--space-4)">'+(s.configured?'SMTP konfiguriert':'SMTP noch nicht konfiguriert')+'</div>'+
         '<div class="form-group"><label>Host *</label><input type="text" id="smtp-host" value="'+esc(s.host||'')+'"></div>'+
         '<div class="form-group"><label>Port</label><input type="number" id="smtp-port" value="'+esc(s.port||'587')+'"></div>'+
         '<div class="form-group"><label>Verbindungstyp</label>'+
@@ -3500,20 +3523,20 @@ function loadSmtp(){
           '</select>'+
         '</div>'+
         '<div class="form-group"><label>Benutzer (E-Mail-Adresse) *</label><input type="text" id="smtp-user" value="'+esc(s.user||'')+'"></div>'+
-        '<div class="form-group"><label>Passwort * <span style="font-size:.78rem;color:var(--text2)">(Pflichtfeld beim ersten Speichern, danach nur bei Änderung)</span></label>'+
+        '<div class="form-group"><label>Passwort * <span style="font-size: var(--text-xs);color:var(--text2)">(Pflichtfeld beim ersten Speichern, danach nur bei Ã„nderung)</span></label>'+
           '<input type="password" id="smtp-pass" placeholder="Passwort eingeben"></div>'+
         '<div class="form-group"><label>Absender-Adresse</label><input type="email" id="smtp-from" value="'+esc(s.from||'')+'"></div>'+
-        '<div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:.8rem;align-items:flex-end">'+
-          '<button class="btn btn-primary" onclick="saveSmtp()">Speichern &amp; Verbindung prüfen</button>'+
+        '<div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top: var(--space-3);align-items:flex-end">'+
+          '<button class="btn btn-primary" onclick="saveSmtp()">Speichern &amp; Verbindung prÃ¼fen</button>'+
         '</div>'+
         (s.configured?
-          '<div style="margin-top:1.2rem;padding-top:1rem;border-top:1px solid var(--border)">'+
-            '<p style="font-size:.85rem;color:var(--text2);margin-bottom:.6rem">Test-E-Mail senden:</p>'+
+          '<div style="margin-top: var(--space-4);padding-top: var(--space-4);border-top:1px solid var(--border)">'+
+            '<p style="font-size: var(--text-sm);color:var(--text2);margin-bottom: var(--space-2)">Test-E-Mail senden:</p>'+
             '<div style="display:flex;gap:.6rem;align-items:center;flex-wrap:wrap">'+
-              '<input type="email" id="smtp-test-to" placeholder="empfaenger@mail.de" style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:.45rem .8rem;color:var(--text);font-size:.88rem;outline:none;min-width:220px">'+
+              '<input type="email" id="smtp-test-to" placeholder="empfaenger@mail.de" style="background:var(--bg2);border:1px solid var(--border);border-radius: var(--radius-md);padding: var(--space-2) var(--space-3);color:var(--text);font-size: var(--text-sm);outline:none;min-width:220px">'+
               '<button class="btn btn-ghost" onclick="testSmtp()">Test senden</button>'+
             '</div>'+
-            '<div id="smtp-test-alert" style="margin-top:.6rem"></div>'+
+            '<div id="smtp-test-alert" style="margin-top: var(--space-2)"></div>'+
           '</div>':'')+
       '</div>';
   }).catch(function(e){
@@ -3549,7 +3572,7 @@ function saveSmtp(){
 
 function testSmtp(){
   var to=document.getElementById('smtp-test-to')?document.getElementById('smtp-test-to').value.trim():'';
-  if(!to){showAlert('smtp-test-alert','Bitte Empfänger-E-Mail eingeben.','error');return;}
+  if(!to){showAlert('smtp-test-alert','Bitte EmpfÃ¤nger-E-Mail eingeben.','error');return;}
   showAlert('smtp-test-alert','Sende Test-E-Mail an '+esc(to)+'&hellip;','info');
   API('/admin/smtp/test',{method:'POST',body:JSON.stringify({to:to})})
     .then(function(d){
@@ -3572,10 +3595,10 @@ function loadWebhooks(){
           '<td>'+esc(h.events||'*')+'</td>'+
           '<td><span class="badge '+(h.active?'badge-active':'badge-revoked')+'">'+(h.active?'ja':'nein')+'</span></td>'+
           '<td>'+fmtDate(h.created_at)+'</td>'+
-          '<td><button class="btn btn-danger btn-sm" onclick="deleteWebhook('+h.id+')" >Löschen</button></td>'+
+          '<td><button class="btn btn-danger btn-sm" onclick="deleteWebhook('+h.id+')" >LÃ¶schen</button></td>'+
         '</tr>';
       }).join('')+'</tbody></table>':'<div class="loading">Keine Webhooks konfiguriert.</div>';
-  }).catch(function(e){document.getElementById('webhooks-table').innerHTML='<div class="alert alert-error" style="margin:1rem">'+esc(e.message||'Fehler')+'</div>';});
+  }).catch(function(e){document.getElementById('webhooks-table').innerHTML='<div class="alert alert-error" style="margin: var(--space-4)">'+esc(e.message||'Fehler')+'</div>';});
 }
 function createWebhook(){
   var body={url:document.getElementById('nw-url').value,secret:document.getElementById('nw-secret').value||null};
@@ -3584,37 +3607,37 @@ function createWebhook(){
     .catch(function(e){showError(e.message||String(e));});
 }
 function deleteWebhook(id){
-  showConfirm('Webhook löschen?', function(){
+  showConfirm('Webhook lÃ¶schen?', function(){
     API('/admin/webhooks/'+id,{method:'DELETE'}).then(function(){loadWebhooks();}).catch(function(e){showError(e.message||String(e));});
   });
 }
 
 document.addEventListener('DOMContentLoaded',function(){if(TOKEN)openAdmin();});
 
-// ── Pläne & Preise (Admin) ────────────────────────────────────────────────────
+// â”€â”€ PlÃ¤ne & Preise (Admin) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function loadAdminPlans() {
   var el = document.getElementById('admin-plans-content');
   el.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
   API('/admin/plan-pricing').then(function(d) {
     var plans = d.plans || [];
-    if (!plans.length) { el.innerHTML = '<p style="color:var(--text2)">Keine Pläne gefunden.</p>'; return; }
+    if (!plans.length) { el.innerHTML = '<p style="color:var(--text2)">Keine PlÃ¤ne gefunden.</p>'; return; }
     el.innerHTML = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;">' +
       plans.map(function(p) {
         var feats = [];
         try { feats = JSON.parse(p.features || '[]'); } catch(e) {}
         return '<div class="card" style="position:relative;">' +
-          '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.5rem;">' +
+          '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom: var(--space-2);">' +
             '<div>' +
-              '<span style="font-weight:700;font-size:1rem;">' + esc(p.label) + '</span>' +
-              ' <code style="font-size:.72rem;background:var(--bg3);padding:.1rem .4rem;border-radius:4px;">' + esc(p.plan_id) + '</code>' +
+              '<span style="font-weight:700;font-size: var(--text-base);">' + esc(p.label) + '</span>' +
+              ' <code style="font-size: var(--text-xs);background:var(--bg3);padding: .1rem var(--space-2);border-radius: var(--radius-sm);">' + esc(p.plan_id) + '</code>' +
             '</div>' +
-            '<span style="font-size:.75rem;padding:.15rem .5rem;border-radius:20px;background:' + (p.active ? 'rgba(109,170,69,.15)' : 'rgba(121,120,118,.15)') + ';color:' + (p.active ? 'var(--accent3)' : 'var(--text2)') + ';">' + (p.active ? 'Aktiv' : 'Versteckt') + '</span>' +
+            '<span style="font-size: var(--text-xs);padding: .15rem var(--space-2);border-radius: var(--radius-xl);background:' + (p.active ? 'rgba(109,170,69,.15)' : 'rgba(121,120,118,.15)') + ';color:' + (p.active ? 'var(--accent3)' : 'var(--text2)') + ';">' + (p.active ? 'Aktiv' : 'Versteckt') + '</span>' +
           '</div>' +
-          '<div style="font-size:1.4rem;font-weight:800;color:var(--accent);margin:.3rem 0;">' + (p.price > 0 ? p.price.toFixed(2) + ' €/J.' : 'Kostenlos') + '</div>' +
-          '<p style="color:var(--text2);font-size:.8rem;margin-bottom:.6rem;">' + esc(p.description || '') + '</p>' +
-          '<ul style="list-style:none;font-size:.78rem;color:var(--text2);margin-bottom:.8rem;">' +
-            feats.slice(0, 4).map(function(f) { return '<li style="padding:.1rem 0;">✓ ' + esc(f) + '</li>'; }).join('') +
-            (feats.length > 4 ? '<li style="color:var(--text2);">+ ' + (feats.length - 4) + ' weitere…</li>' : '') +
+          '<div style="font-size: var(--text-lg);font-weight: 700;color:var(--accent);margin: var(--space-1) 0;">' + (p.price > 0 ? p.price.toFixed(2) + ' â‚¬/J.' : 'Kostenlos') + '</div>' +
+          '<p style="color:var(--text2);font-size: var(--text-sm);margin-bottom: var(--space-2);">' + esc(p.description || '') + '</p>' +
+          '<ul style="list-style:none;font-size: var(--text-xs);color:var(--text2);margin-bottom: var(--space-3);">' +
+            feats.slice(0, 4).map(function(f) { return '<li style="padding: .1rem 0;">âœ“ ' + esc(f) + '</li>'; }).join('') +
+            (feats.length > 4 ? '<li style="color:var(--text2);">+ ' + (feats.length - 4) + ' weitereâ€¦</li>' : '') +
           '</ul>' +
           '<button class="btn btn-ghost btn-sm" onclick="openPlanModal(' + JSON.stringify(p).replace(/"/g,'&quot;') + ')">&#9998; Bearbeiten</button>' +
         '</div>';
@@ -3652,28 +3675,28 @@ function savePlan() {
     .catch(function(e) { showError(e.message || 'Fehler beim Speichern.'); });
 }
 
-// ── FAQ (Admin) ───────────────────────────────────────────────────────────────
+// â”€â”€ FAQ (Admin) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function loadAdminFaq() {
   var el = document.getElementById('admin-faq-content');
   el.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
   API('/admin/faq').then(function(d) {
     var faqs = d.faq || [];
-    if (!faqs.length) { el.innerHTML = '<p style="color:var(--text2)">Noch keine FAQ-Einträge. Klicke "+ Neue Frage".</p>'; return; }
+    if (!faqs.length) { el.innerHTML = '<p style="color:var(--text2)">Noch keine FAQ-EintrÃ¤ge. Klicke "+ Neue Frage".</p>'; return; }
     var byCategory = {};
     faqs.forEach(function(f) { (byCategory[f.category] = byCategory[f.category] || []).push(f); });
     el.innerHTML = Object.entries(byCategory).map(function(entry) {
       var cat = entry[0], items = entry[1];
-      return '<div style="margin-bottom:1.5rem;">' +
-        '<h4 style="font-size:.78rem;font-weight:700;letter-spacing:.08em;color:var(--accent);text-transform:uppercase;margin-bottom:.7rem;">' + esc(cat) + '</h4>' +
+      return '<div style="margin-bottom: var(--space-6);">' +
+        '<h4 style="font-size: var(--text-xs);font-weight:700;letter-spacing:.08em;color:var(--accent);text-transform:uppercase;margin-bottom: var(--space-3);">' + esc(cat) + '</h4>' +
         items.map(function(f) {
-          return '<div class="card" style="margin-bottom:.6rem;padding:1rem 1.2rem;">' +
+          return '<div class="card" style="margin-bottom: var(--space-2);padding: var(--space-4) var(--space-4);">' +
             '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;">' +
               '<div style="flex:1;">' +
-                '<div style="font-weight:600;margin-bottom:.3rem;">' + esc(f.question) + '</div>' +
-                '<div style="color:var(--text2);font-size:.83rem;line-height:1.5;">' + esc(f.answer).slice(0, 120) + (f.answer.length > 120 ? '…' : '') + '</div>' +
+                '<div style="font-weight: 500;margin-bottom: var(--space-1);">' + esc(f.question) + '</div>' +
+                '<div style="color:var(--text2);font-size: var(--text-sm);line-height:1.5;">' + esc(f.answer).slice(0, 120) + (f.answer.length > 120 ? 'â€¦' : '') + '</div>' +
               '</div>' +
               '<div style="display:flex;gap:.4rem;flex-shrink:0;">' +
-                '<span style="font-size:.72rem;padding:.15rem .5rem;border-radius:20px;background:' + (f.active ? 'rgba(109,170,69,.15)' : 'rgba(121,120,118,.15)') + ';color:' + (f.active ? 'var(--accent3)' : 'var(--text2)') + ';">' + (f.active ? 'Aktiv' : 'Versteckt') + '</span>' +
+                '<span style="font-size: var(--text-xs);padding: .15rem var(--space-2);border-radius: var(--radius-xl);background:' + (f.active ? 'rgba(109,170,69,.15)' : 'rgba(121,120,118,.15)') + ';color:' + (f.active ? 'var(--accent3)' : 'var(--text2)') + ';">' + (f.active ? 'Aktiv' : 'Versteckt') + '</span>' +
                 '<button class="btn btn-ghost btn-sm" onclick="openFaqModal(' + JSON.stringify(f).replace(/"/g,'&quot;') + ')">&#9998;</button>' +
                 '<button class="btn btn-danger btn-sm" onclick="deleteFaq(\'' + esc(f.id) + '\')">&#128465;</button>' +
               '</div>' +
@@ -3724,36 +3747,36 @@ function saveFaq() {
 }
 
 function deleteFaq(id) {
-  showConfirm('FAQ-Eintrag löschen?', function() {
+  showConfirm('FAQ-Eintrag lÃ¶schen?', function() {
     API('/admin/faq/' + encodeURIComponent(id), { method: 'DELETE' })
       .then(function() { loadAdminFaq(); })
       .catch(function(e) { showError(e.message || String(e)); });
   });
 }
 
-// ── Landing Page: Preise + FAQ laden ─────────────────────────────────────────
+// â”€â”€ Landing Page: Preise + FAQ laden â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function loadPublicPricing() {
   var el = document.getElementById('pub-plan-grid');
   if (!el) return;
   fetch('/api/v1/plans').then(function(r){ return r.json(); }).then(function(d) {
     var plans = d.plans || [];
-    if (!plans.length) { el.innerHTML = '<p style="color:var(--text2);text-align:center">Keine Pläne verfügbar.</p>'; return; }
+    if (!plans.length) { el.innerHTML = '<p style="color:var(--text2);text-align:center">Keine PlÃ¤ne verfÃ¼gbar.</p>'; return; }
     var popularId = plans.find(function(p){return p.plan_id==='PRO';}) ? 'PRO' : (plans[Math.floor(plans.length/2)]||{}).plan_id;
     el.innerHTML = plans.map(function(p) {
       var feats = p.features || [];
       var isP = p.plan_id === popularId;
-      return '<div style="background:var(--card);border:2px solid ' + (isP ? 'var(--accent)' : 'var(--border)') + ';border-radius:12px;padding:1.8rem 1.5rem;display:flex;flex-direction:column;position:relative;">' +
-        (isP ? '<div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;font-size:.72rem;font-weight:700;padding:.2rem .9rem;border-radius:20px;">&#11088; Beliebt</div>' : '') +
-        '<div style="font-family:var(--font-display);font-size:1.15rem;font-weight:800;margin-bottom:.3rem;">' + esc(p.label) + '</div>' +
-        '<div style="color:var(--text2);font-size:.82rem;margin-bottom:1rem;flex:1;">' + esc(p.description || '') + '</div>' +
-        '<div style="font-family:var(--font-display);font-size:2.2rem;font-weight:800;color:var(--accent);line-height:1;margin-bottom:.3rem;">' +
-          (p.price > 0 ? p.price.toFixed(0) + ' €' : 'Kostenlos') +
-          (p.price > 0 ? '<span style="font-size:.85rem;font-weight:400;color:var(--text2);"> / Jahr</span>' : '') +
+      return '<div style="background:var(--card);border:2px solid ' + (isP ? 'var(--accent)' : 'var(--border)') + ';border-radius: var(--radius-lg);padding: var(--space-8) var(--space-6);display:flex;flex-direction:column;position:relative;">' +
+        (isP ? '<div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;font-size: var(--text-xs);font-weight:700;padding: var(--space-1) var(--space-4);border-radius: var(--radius-xl);">&#11088; Beliebt</div>' : '') +
+        '<div style="font-family:var(--font-display);font-size: var(--text-lg);font-weight: 700;margin-bottom: var(--space-1);">' + esc(p.label) + '</div>' +
+        '<div style="color:var(--text2);font-size: var(--text-sm);margin-bottom: var(--space-4);flex:1;">' + esc(p.description || '') + '</div>' +
+        '<div style="font-family:var(--font-display);font-size: var(--text-2xl);font-weight: 700;color:var(--accent);line-height:1;margin-bottom: var(--space-1);">' +
+          (p.price > 0 ? p.price.toFixed(0) + ' â‚¬' : 'Kostenlos') +
+          (p.price > 0 ? '<span style="font-size: var(--text-sm);font-weight:400;color:var(--text2);"> / Jahr</span>' : '') +
         '</div>' +
-        '<ul style="list-style:none;margin:.9rem 0 1.4rem;font-size:.83rem;display:flex;flex-direction:column;gap:.35rem;">' +
-          feats.map(function(f){ return '<li><span style="color:var(--accent3);font-weight:700;">✓</span> ' + esc(f) + '</li>'; }).join('') +
+        '<ul style="list-style:none;margin: var(--space-4) 0 var(--space-6);font-size: var(--text-sm);display:flex;flex-direction:column;gap:.35rem;">' +
+          feats.map(function(f){ return '<li><span style="color:var(--accent3);font-weight:700;">âœ“</span> ' + esc(f) + '</li>'; }).join('') +
         '</ul>' +
-        '<a href="login.html#register" style="display:block;text-align:center;background:' + (isP ? 'var(--accent)' : 'transparent') + ';color:' + (isP ? '#fff' : 'var(--accent)') + ';border:2px solid var(--accent);border-radius:8px;padding:.65rem;font-weight:700;text-decoration:none;font-size:.9rem;">' +
+        '<a href="login.html#register" style="display:block;text-align:center;background:' + (isP ? 'var(--accent)' : 'transparent') + ';color:' + (isP ? '#fff' : 'var(--accent)') + ';border:2px solid var(--accent);border-radius: var(--radius-md);padding: var(--space-3);font-weight:700;text-decoration:none;font-size: var(--text-sm);">' +
           (p.price === 0 ? 'Kostenlos starten' : 'Jetzt bestellen') +
         '</a>' +
       '</div>';
@@ -3766,19 +3789,19 @@ function loadPublicFaq() {
   if (!el) return;
   fetch('/api/v1/faq').then(function(r){ return r.json(); }).then(function(d) {
     var faqs = d.faq || [];
-    if (!faqs.length) { el.innerHTML = '<p style="text-align:center;color:var(--text2)">Noch keine FAQ-Einträge.</p>'; return; }
+    if (!faqs.length) { el.innerHTML = '<p style="text-align:center;color:var(--text2)">Noch keine FAQ-EintrÃ¤ge.</p>'; return; }
     var byCategory = {};
     faqs.forEach(function(f) { (byCategory[f.category] = byCategory[f.category] || []).push(f); });
     el.innerHTML = Object.entries(byCategory).map(function(entry) {
-      return '<div style="margin-bottom:2rem;">' +
-        '<h3 style="font-size:.78rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:1rem;">' + esc(entry[0]) + '</h3>' +
+      return '<div style="margin-bottom: var(--space-8);">' +
+        '<h3 style="font-size: var(--text-xs);font-weight:700;letter-spacing: 0.08em;text-transform:uppercase;color:var(--accent);margin-bottom: var(--space-4);">' + esc(entry[0]) + '</h3>' +
         entry[1].map(function(f) {
           var uid = 'faq-' + Math.random().toString(36).slice(2);
-          return '<details style="border:1px solid var(--border);border-radius:10px;margin-bottom:.6rem;overflow:hidden;">' +
-            '<summary style="padding:1rem 1.2rem;cursor:pointer;font-weight:600;list-style:none;display:flex;justify-content:space-between;align-items:center;">' +
-              esc(f.question) + ' <span style="color:var(--accent);font-size:1.2rem;transition:transform .2s;">+</span>' +
+          return '<details style="border:1px solid var(--border);border-radius: var(--radius-lg);margin-bottom: var(--space-2);overflow:hidden;">' +
+            '<summary style="padding: var(--space-4) var(--space-4);cursor:pointer;font-weight: 500;list-style:none;display:flex;justify-content:space-between;align-items:center;">' +
+              esc(f.question) + ' <span style="color:var(--accent);font-size: var(--text-lg);transition:transform .2s;">+</span>' +
             '</summary>' +
-            '<div style="padding:.1rem 1.2rem 1.1rem;color:var(--text2);font-size:.9rem;line-height:1.7;border-top:1px solid var(--border);">' + esc(f.answer) + '</div>' +
+            '<div style="padding: .1rem var(--space-4) var(--space-4);color:var(--text2);font-size: var(--text-sm);line-height:1.7;border-top:1px solid var(--border);">' + esc(f.answer) + '</div>' +
           '</details>';
         }).join('') +
       '</div>';
@@ -3794,7 +3817,7 @@ function showError(msg, title) {
 
 var confirmCallback = null;
 function showConfirm(msg, callback, title) {
-  document.getElementById('modal-confirm-title').textContent = title || 'Bestätigung';
+  document.getElementById('modal-confirm-title').textContent = title || 'BestÃ¤tigung';
   document.getElementById('modal-confirm-msg').textContent = msg || 'Bist du sicher?';
   confirmCallback = callback;
   document.getElementById('modal-confirm-btn').onclick = function() {
@@ -3805,19 +3828,19 @@ function showConfirm(msg, callback, title) {
 }
 </script>
 
-<!-- ── DSGVO Cookie-Banner ──────────────────────────────────────────── -->
+<!-- â”€â”€ DSGVO Cookie-Banner â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
 <div id="cookie-banner" style="
   display:none;position:fixed;bottom:1.5rem;left:1.5rem;right:1.5rem;z-index:9999;
-  background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);
-  padding:1.5rem;flex-direction:column;gap:1.2rem;max-width:550px;
+  background:var(--bg2);border:1px solid var(--border);border-radius: var(--radius);
+  padding: var(--space-6);flex-direction:column;gap:1.2rem;max-width:550px;
   box-shadow:var(--shadow-lg);">
   
   <div style="display:flex;align-items:center;gap:0.8rem;">
-    <span style="font-size:1.5rem;">🍪</span>
+    <span style="font-size: var(--text-xl);">ðŸª</span>
     <div style="flex:1;">
-      <strong style="font-size:1.1rem;font-family:var(--font-display);color:var(--text)">Privatsphäre-Einstellungen</strong>
-      <p style="font-size:.85rem;color:var(--text2);margin-top:0.2rem;">
-        Wir nutzen Cookies, um die bestmögliche Erfahrung zu bieten. Wählen Sie aus, welche Kategorien Sie zulassen möchten.
+      <strong style="font-size: var(--text-base);font-family:var(--font-display);color:var(--text)">PrivatsphÃ¤re-Einstellungen</strong>
+      <p style="font-size: var(--text-sm);color:var(--text2);margin-top: var(--space-1);">
+        Wir nutzen Cookies, um die bestmÃ¶gliche Erfahrung zu bieten. WÃ¤hlen Sie aus, welche Kategorien Sie zulassen mÃ¶chten.
       </p>
     </div>
   </div>
@@ -3826,7 +3849,7 @@ function showConfirm(msg, callback, title) {
     <div class="cookie-option">
       <div class="cookie-info">
         <span class="cookie-name">Essenziell <span class="cookie-badge">Immer aktiv</span></span>
-        <span class="cookie-desc">Notwendig für Kernfunktionen wie Login, Sicherheit und Design-Präferenzen.</span>
+        <span class="cookie-desc">Notwendig fÃ¼r Kernfunktionen wie Login, Sicherheit und Design-PrÃ¤ferenzen.</span>
       </div>
       <label class="switch"><input type="checkbox" checked disabled><span class="slider"></span></label>
     </div>
@@ -3834,7 +3857,7 @@ function showConfirm(msg, callback, title) {
     <div class="cookie-option">
       <div class="cookie-info">
         <span class="cookie-name">Funktionell</span>
-        <span class="cookie-desc">Ermöglicht das Laden externer Ressourcen wie Schriften (Google Fonts) und Programm-Bibliotheken (CDNs).</span>
+        <span class="cookie-desc">ErmÃ¶glicht das Laden externer Ressourcen wie Schriften (Google Fonts) und Programm-Bibliotheken (CDNs).</span>
       </div>
       <label class="switch"><input type="checkbox" id="consent-func" checked><span class="slider"></span></label>
     </div>
@@ -3842,14 +3865,14 @@ function showConfirm(msg, callback, title) {
     <div class="cookie-option" style="opacity:0.6;">
       <div class="cookie-info">
         <span class="cookie-name">Analyse & Marketing</span>
-        <span class="cookie-desc">Aktuell nicht genutzt. Würde helfen zu verstehen, wie die Seite genutzt wird.</span>
+        <span class="cookie-desc">Aktuell nicht genutzt. WÃ¼rde helfen zu verstehen, wie die Seite genutzt wird.</span>
       </div>
       <label class="switch"><input type="checkbox" id="consent-analytics"><span class="slider"></span></label>
     </div>
   </div>
 
-  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;margin-top:0.5rem;padding-top:1rem;border-top:1px solid var(--border);">
-    <div style="display:flex;gap:0.8rem;font-size:0.8rem;">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;margin-top: var(--space-2);padding-top: var(--space-4);border-top:1px solid var(--border);">
+    <div style="display:flex;gap:0.8rem;font-size: var(--text-sm);">
       <a onclick="showPublicPage('legal');showLegalTab('impressum')" style="color:var(--text2);cursor:pointer;text-decoration:underline;">Impressum</a>
       <a onclick="showPublicPage('legal');showLegalTab('datenschutz')" style="color:var(--text2);cursor:pointer;text-decoration:underline;">Datenschutz</a>
     </div>
@@ -3918,21 +3941,21 @@ function applyConsent(consent) {
 <!-- Fehler-Modal -->
 <div class="modal-overlay" id="modal-error">
   <div class="modal" style="max-width:420px; text-align:center;">
-    <div style="font-size:2rem; margin-bottom:.8rem;">⚠️</div>
-    <h3 id="modal-error-title" style="margin-bottom:.6rem;">Fehler</h3>
-    <p id="modal-error-msg" style="color:var(--text2); font-size:.9rem; margin-bottom:1.4rem;"></p>
+    <div style="font-size: var(--text-xl); margin-bottom: var(--space-3);">âš ï¸</div>
+    <h3 id="modal-error-title" style="margin-bottom: var(--space-2);">Fehler</h3>
+    <p id="modal-error-msg" style="color:var(--text2); font-size: var(--text-sm); margin-bottom: var(--space-6);"></p>
     <div class="modal-footer" style="justify-content:center;">
       <button class="btn btn-primary" onclick="closeModal('modal-error')">OK</button>
     </div>
   </div>
 </div>
 
-<!-- Bestätigungs-Modal -->
+<!-- BestÃ¤tigungs-Modal -->
 <div class="modal-overlay" id="modal-confirm">
   <div class="modal" style="max-width:420px; text-align:center;">
-    <div style="font-size:2rem; margin-bottom:.8rem;">❓</div>
-    <h3 id="modal-confirm-title" style="margin-bottom:.6rem;">Bestätigung</h3>
-    <p id="modal-confirm-msg" style="color:var(--text2); font-size:.9rem; margin-bottom:1.4rem;"></p>
+    <div style="font-size: var(--text-xl); margin-bottom: var(--space-3);">â“</div>
+    <h3 id="modal-confirm-title" style="margin-bottom: var(--space-2);">BestÃ¤tigung</h3>
+    <p id="modal-confirm-msg" style="color:var(--text2); font-size: var(--text-sm); margin-bottom: var(--space-6);"></p>
     <div class="modal-footer" style="justify-content:center;">
       <button class="btn btn-ghost" onclick="closeModal('modal-confirm')">Abbrechen</button>
       <button class="btn btn-primary" id="modal-confirm-btn">Ja</button>

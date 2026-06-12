@@ -6,7 +6,7 @@
   <title>Meraki &ndash; Setup</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;0,900;1,300;1,400&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
     :root,[data-theme="dark"]{
@@ -15,13 +15,30 @@
       --text:#e8eaed;--text2:#8b9099;
       --accent:#00bfa5;--accent-hover:#00a892;
       --accent2:#ff5d6c;--accent3:#5fbf6a;
-      --card:#131619;--radius:12px;
+      --card:#131619;--radius: var(--radius-lg);
       --shadow:0 8px 32px rgba(0,0,0,.5);
       --nav-bg:rgba(13,15,18,0.92);
       --accent-dim:rgba(0,191,165,0.12);
       --grid-line:rgba(255,255,255,0.03);
-      --font-body:'Inter','Segoe UI',system-ui,sans-serif;
-      --font-mono:'JetBrains Mono',monospace;
+      --font-body: 'Roboto', sans-serif;
+      --font-display: 'Roboto', sans-serif;
+      --font-mono: 'Roboto Mono', monospace;
+      /* Type scale */
+      --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+      --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+      --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+      --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+      --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+      --text-2xl: clamp(2rem, 1.2rem + 2.5vw, 3.5rem);
+      /* Spacing (4px base) */
+      --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem;
+      --space-4: 1rem; --space-6: 1.5rem; --space-8: 2rem;
+      --space-10: 2.5rem; --space-12: 3rem; --space-16: 4rem;
+      /* Border radius */
+      --radius-sm: 0.375rem; --radius-md: 0.5rem;
+      --radius-lg: 0.75rem; --radius-xl: 1rem;
+      /* Transitions */
+      --transition-interactive: 180ms cubic-bezier(0.16, 1, 0.3, 1);
     }
     [data-theme="light"]{
       --bg:#f5f5f0;--bg2:#ffffff;--bg3:#f0f0eb;
@@ -35,76 +52,80 @@
       --accent-dim:rgba(0,137,123,0.10);
       --grid-line:rgba(0,0,0,0.04);
     }
-    *{box-sizing:border-box;margin:0;padding:0;}
+    *{box-sizing:border-box;margin: 0;padding: 0;}
     body{background:var(--bg);color:var(--text);font-family:var(--font-body);line-height:1.6;min-height:100vh;display:flex;flex-direction:column;transition:background .3s,color .3s;}
-    h1,h2,h3{letter-spacing:-.02em;font-weight:700;}
+    h1,h2,h3,h4,h5,h6{font-family:var(--font-display);letter-spacing:-0.02em;line-height:1.2;}
+    h1,h2{font-weight:700;}h3,h4{font-weight:500;}
+    input,button,select,textarea{font-family:var(--font-body);}
+    button,label{line-height:1.4;letter-spacing:0.01em;}
+    button{font-weight:500;}
     .lucide{width:1.05em;height:1.05em;vertical-align:-0.18em;stroke-width:2;flex-shrink:0;}
 
-    nav{position:sticky;top:0;z-index:100;background:var(--nav-bg);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:60px;}
-    .nav-logo{display:inline-flex;align-items:center;gap:.45rem;font-size:1.1rem;font-weight:800;color:var(--accent);}
+    nav{position:sticky;top:0;z-index:100;background:var(--nav-bg);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding: 0 var(--space-8);display:flex;align-items:center;justify-content:space-between;height:60px;}
+    .nav-logo{display:inline-flex;align-items:center;gap:.45rem;font-size: var(--text-base);font-weight: 700;color:var(--accent);}
     .nav-logo .lucide{width:1.15em;height:1.15em;}
-    .theme-toggle{display:inline-flex;align-items:center;justify-content:center;background:transparent;border:1px solid var(--border);color:var(--text2);border-radius:8px;width:34px;height:34px;cursor:pointer;transition:all .2s;}
+    .theme-toggle{display:inline-flex;align-items:center;justify-content:center;background:transparent;border:1px solid var(--border);color:var(--text2);border-radius: var(--radius-md);width:34px;height:34px;cursor:pointer;transition:all .2s;}
     .theme-toggle:hover{border-color:var(--accent);color:var(--accent);}
 
-    .center-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:2rem;background-image:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(0,191,165,.1),transparent),linear-gradient(var(--grid-line) 1px,transparent 1px),linear-gradient(90deg,var(--grid-line) 1px,transparent 1px);background-size:100% 100%,40px 40px,40px 40px;}
+    .center-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding: var(--space-8);background-image:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(0,191,165,.1),transparent),linear-gradient(var(--grid-line) 1px,transparent 1px),linear-gradient(90deg,var(--grid-line) 1px,transparent 1px);background-size:100% 100%,40px 40px,40px 40px;}
 
-    .setup-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);width:100%;max-width:460px;box-shadow:var(--shadow);overflow:hidden;}
-    .card-header{padding:1.6rem 2rem 1.25rem;border-bottom:1px solid var(--border);}
+    .setup-card{background:var(--card);border:1px solid var(--border);border-radius: var(--radius);width:100%;max-width:460px;box-shadow:var(--shadow);overflow:hidden;}
+    .card-header{padding: var(--space-6) var(--space-8) var(--space-6);border-bottom:1px solid var(--border);}
     .card-header-row{display:flex;align-items:center;gap:.7rem;}
-    .card-icon{width:38px;height:38px;border-radius:10px;background:var(--accent-dim);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .card-icon{width:38px;height:38px;border-radius: var(--radius-lg);background:var(--accent-dim);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
     .card-icon .lucide{color:var(--accent);width:1.2em;height:1.2em;}
-    .card-title{font-size:1.2rem;font-weight:800;}
-    .card-sub{color:var(--text2);font-size:.83rem;margin-top:.1rem;}
+    .card-title{font-size: var(--text-lg);font-weight: 700;}
+    .card-sub{color:var(--text2);font-size: var(--text-sm);margin-top: .1rem;}
 
-    .card-body{padding:1.5rem 2rem 2rem;}
+    .card-body{padding: var(--space-6) var(--space-8) var(--space-8);}
 
-    .step-indicator{display:flex;align-items:center;gap:.4rem;margin-bottom:1.5rem;}
-    .step-dot{width:8px;height:8px;border-radius:50%;background:var(--border);transition:background .3s;}
+    .step-indicator{display:flex;align-items:center;gap:.4rem;margin-bottom: var(--space-6);}
+    .step-dot{width:8px;height:8px;border-radius: 50%;background:var(--border);transition:background .3s;}
     .step-dot.active{background:var(--accent);}
     .step-dot.done{background:var(--accent3);}
-    .step-label{font-size:.78rem;color:var(--text2);margin-left:.25rem;}
+    .step-label{font-size: var(--text-xs);color:var(--text2);margin-left: var(--space-1);}
 
-    .form-group{margin-bottom:.95rem;}
-    .form-group label{display:block;font-size:.82rem;color:var(--text2);margin-bottom:.35rem;font-weight:500;}
-    .form-group input{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:.62rem .9rem;color:var(--text);font-size:.9rem;outline:none;transition:border-color .2s;font-family:var(--font-body);}
+    .form-group{margin-bottom: var(--space-4);}
+    .form-group label{display:block;font-size: var(--text-sm);color:var(--text2);margin-bottom: var(--space-1);font-weight:500;}
+    .form-group input{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius: var(--radius-md);padding: var(--space-2) var(--space-4);color:var(--text);font-size: var(--text-sm);outline:none;transition:border-color .2s;font-family:var(--font-body);}
     .form-group input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim);}
 
-    .pw-strength{height:3px;border-radius:2px;margin-top:.4rem;background:var(--border);overflow:hidden;}
-    .pw-strength-bar{height:100%;width:0;border-radius:2px;transition:width .3s,background .3s;}
-    .pw-hint{font-size:.76rem;color:var(--text2);margin-top:.35rem;min-height:1.1em;}
+    .pw-strength{height:3px;border-radius: 2px;margin-top: var(--space-2);background:var(--border);overflow:hidden;}
+    .pw-strength-bar{height:100%;width:0;border-radius: 2px;transition:width .3s,background .3s;}
+    .pw-hint{font-size: var(--text-xs);color:var(--text2);margin-top: var(--space-1);min-height:1.1em;}
 
-    .btn{display:inline-flex;justify-content:center;align-items:center;gap:.4rem;padding:.65rem 1.2rem;border-radius:8px;border:none;cursor:pointer;font-size:.9rem;font-weight:600;transition:all 180ms;text-decoration:none;width:100%;font-family:var(--font-body);margin-top:.35rem;}
+    .btn{display:inline-flex;justify-content:center;align-items:center;gap:.4rem;padding: var(--space-3) var(--space-4);border-radius: var(--radius-md);border:none;cursor:pointer;font-size: var(--text-sm);font-weight: 500;transition: all var(--transition-interactive);text-decoration:none;width:100%;font-family:var(--font-body);margin-top: var(--space-1);}
     .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover:not(:disabled){background:var(--accent-hover);}
     .btn-primary:disabled{opacity:.5;cursor:not-allowed;}
 
-    .alert{display:flex;align-items:flex-start;gap:.45rem;padding:.65rem .9rem;border-radius:8px;font-size:.84rem;margin-bottom:.9rem;line-height:1.5;}
-    .alert .lucide{flex-shrink:0;margin-top:.05em;}
+    .alert{display:flex;align-items:flex-start;gap:.45rem;padding: var(--space-3) var(--space-4);border-radius: var(--radius-md);font-size: var(--text-sm);margin-bottom: var(--space-4);line-height:1.5;}
+    .alert .lucide{flex-shrink:0;margin-top: .05em;}
     .alert-error{background:rgba(255,93,108,.1);border:1px solid rgba(255,93,108,.25);color:var(--accent2);}
     .alert-success{background:rgba(95,191,106,.1);border:1px solid rgba(95,191,106,.25);color:var(--accent3);}
     .alert-info{background:var(--accent-dim);border:1px solid rgba(0,191,165,.25);color:var(--accent);}
     .alert-warn{background:rgba(255,190,60,.1);border:1px solid rgba(255,190,60,.25);color:#fbbf24;}
 
-    .checklist{list-style:none;display:flex;flex-direction:column;gap:.5rem;margin-bottom:1.25rem;}
-    .checklist li{display:flex;align-items:center;gap:.55rem;font-size:.85rem;color:var(--text2);}
+    .checklist{list-style:none;display:flex;flex-direction:column;gap:.5rem;margin-bottom: var(--space-6);}
+    .checklist li{display:flex;align-items:center;gap:.55rem;font-size: var(--text-sm);color:var(--text2);}
     .checklist li .lucide{color:var(--accent3);width:.95em;height:.95em;flex-shrink:0;}
 
-    .divider{border:none;border-top:1px solid var(--border);margin:.8rem 0 1.1rem;}
+    .divider{border:none;border-top:1px solid var(--border);margin: var(--space-3) 0 var(--space-4);}
 
-    .success-icon{width:56px;height:56px;border-radius:50%;background:rgba(95,191,106,.15);border:2px solid rgba(95,191,106,.3);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;}
+    .success-icon{width:56px;height:56px;border-radius: 50%;background:rgba(95,191,106,.15);border:2px solid rgba(95,191,106,.3);display:flex;align-items:center;justify-content:center;margin: 0 auto var(--space-6);}
     .success-icon .lucide{color:var(--accent3);width:1.6em;height:1.6em;}
-    .success-title{text-align:center;font-size:1.25rem;font-weight:800;margin-bottom:.35rem;}
-    .success-sub{text-align:center;font-size:.84rem;color:var(--text2);margin-bottom:1.5rem;}
-    .countdown{text-align:center;font-size:.8rem;color:var(--text2);margin-top:.6rem;}
+    .success-title{text-align:center;font-size: var(--text-lg);font-weight: 700;margin-bottom: var(--space-1);}
+    .success-sub{text-align:center;font-size: var(--text-sm);color:var(--text2);margin-bottom: var(--space-6);}
+    .countdown{text-align:center;font-size: var(--text-sm);color:var(--text2);margin-top: var(--space-2);}
     .countdown span{color:var(--accent);font-weight:700;}
 
-    .spinner{display:inline-block;width:1em;height:1em;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:-.15em;}
+    .spinner{display:inline-block;width:1em;height:1em;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius: 50%;animation:spin .6s linear infinite;vertical-align:-.15em;}
     @keyframes spin{to{transform:rotate(360deg)}}
 
-    .done-card{text-align:center;padding:2.5rem 2rem;}
-    .done-card .done-icon{width:52px;height:52px;border-radius:50%;background:var(--accent-dim);border:2px solid rgba(0,191,165,.3);display:flex;align-items:center;justify-content:center;margin:0 auto .9rem;}
+    .done-card{text-align:center;padding: var(--space-10) var(--space-8);}
+    .done-card .done-icon{width:52px;height:52px;border-radius: 50%;background:var(--accent-dim);border:2px solid rgba(0,191,165,.3);display:flex;align-items:center;justify-content:center;margin: 0 auto var(--space-4);}
     .done-card .done-icon .lucide{color:var(--accent);width:1.5em;height:1.5em;}
-    .done-title{font-size:1.1rem;font-weight:800;margin-bottom:.4rem;}
-    .done-sub{color:var(--text2);font-size:.84rem;margin-bottom:1.25rem;}
+    .done-title{font-size: var(--text-base);font-weight: 700;margin-bottom: var(--space-2);}
+    .done-sub{color:var(--text2);font-size: var(--text-sm);margin-bottom: var(--space-6);}
   </style>
 </head>
 <body>
@@ -118,9 +139,9 @@
   <div class="setup-card">
 
     <!-- Loading -->
-    <div id="view-loading" class="card-body" style="text-align:center;padding:3rem 2rem;">
-      <div style="width:38px;height:38px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 1rem;"></div>
-      <div style="color:var(--text2);font-size:.88rem;">Setup-Status wird geprüft…</div>
+    <div id="view-loading" class="card-body" style="text-align:center;padding: var(--space-12) var(--space-8);">
+      <div style="width:38px;height:38px;border:3px solid var(--border);border-top-color:var(--accent);border-radius: 50%;animation:spin .8s linear infinite;margin: 0 auto var(--space-4);"></div>
+      <div style="color:var(--text2);font-size: var(--text-sm);">Setup-Status wird geprÃ¼ftâ€¦</div>
     </div>
 
     <!-- Already done -->
@@ -128,7 +149,7 @@
       <div class="done-icon"><i data-lucide="check-circle-2"></i></div>
       <div class="done-title">Setup bereits abgeschlossen</div>
       <div class="done-sub">Der Admin-Account existiert bereits.<br>Du kannst dich jetzt einloggen.</div>
-      <a href="/" class="btn btn-primary" style="display:inline-flex;width:auto;padding:.65rem 1.8rem;"><i data-lucide="log-in"></i> Zum Admin-Panel</a>
+      <a href="/" class="btn btn-primary" style="display:inline-flex;width:auto;padding: var(--space-3) var(--space-8);"><i data-lucide="log-in"></i> Zum Admin-Panel</a>
     </div>
 
     <!-- Wizard -->
@@ -146,25 +167,25 @@
         <div class="step-indicator">
           <div class="step-dot active" id="sdot-1"></div>
           <div class="step-dot" id="sdot-2"></div>
-          <span class="step-label" id="step-label">Überblick</span>
+          <span class="step-label" id="step-label">Ãœberblick</span>
         </div>
 
         <!-- Step 1 -->
         <div id="step-1">
-          <div class="alert alert-success" style="margin-bottom:1rem;">
+          <div class="alert alert-success" style="margin-bottom: var(--space-4);">
             <i data-lucide="check-circle-2"></i>
-            <div><strong>Automatisch konfiguriert</strong><br>Alle Secrets wurden generiert und in <code style="font-family:var(--font-mono);font-size:.82em">.env</code> gespeichert.</div>
+            <div><strong>Automatisch konfiguriert</strong><br>Alle Secrets wurden generiert und in <code style="font-family:var(--font-mono);font-size: var(--text-sm)">.env</code> gespeichert.</div>
           </div>
           <ul class="checklist">
             <li><i data-lucide="check"></i> ADMIN_SECRET generiert (HS256 / RS256)</li>
             <li><i data-lucide="check"></i> HMAC_SECRET generiert (Offline-Token Signing)</li>
             <li><i data-lucide="check"></i> PORTAL_SECRET generiert (Kunden-Portal JWT)</li>
-            <li><i data-lucide="check"></i> RSA-Schlüsselpaar generiert (2048-bit)</li>
-            <li><i data-lucide="check"></i> Datenbank-Migrationen ausgeführt</li>
+            <li><i data-lucide="check"></i> RSA-SchlÃ¼sselpaar generiert (2048-bit)</li>
+            <li><i data-lucide="check"></i> Datenbank-Migrationen ausgefÃ¼hrt</li>
           </ul>
           <hr class="divider">
-          <div style="font-size:.84rem;color:var(--text2);margin-bottom:1.1rem;">
-            Im nächsten Schritt erstellst du deinen <strong>Superadmin-Account</strong>.
+          <div style="font-size: var(--text-sm);color:var(--text2);margin-bottom: var(--space-4);">
+            Im nÃ¤chsten Schritt erstellst du deinen <strong>Superadmin-Account</strong>.
           </div>
           <button class="btn btn-primary" onclick="goStep(2)">
             Weiter <i data-lucide="arrow-right"></i>
@@ -180,13 +201,13 @@
           </div>
           <div class="form-group">
             <label>Passwort <span style="color:var(--text2);font-weight:400;">(min. 12 Zeichen)</span></label>
-            <input type="password" id="inp-password" placeholder="••••••••••••" autocomplete="new-password" oninput="updateStrength()">
+            <input type="password" id="inp-password" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" autocomplete="new-password" oninput="updateStrength()">
             <div class="pw-strength"><div class="pw-strength-bar" id="pw-bar"></div></div>
             <div class="pw-hint" id="pw-hint"></div>
           </div>
           <div class="form-group">
-            <label>Passwort bestätigen</label>
-            <input type="password" id="inp-confirm" placeholder="••••••••••••" autocomplete="new-password">
+            <label>Passwort bestÃ¤tigen</label>
+            <input type="password" id="inp-confirm" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" autocomplete="new-password">
           </div>
           <button class="btn btn-primary" id="btn-create" onclick="createAdmin()">
             Admin-Account erstellen
@@ -239,7 +260,7 @@
     document.getElementById('step-num').textContent = n;
     document.getElementById('sdot-1').className = 'step-dot' + (n > 1 ? ' done' : ' active');
     document.getElementById('sdot-2').className = 'step-dot' + (n === 2 ? ' active' : '');
-    const labels = ['', 'Überblick', 'Admin erstellen'];
+    const labels = ['', 'Ãœberblick', 'Admin erstellen'];
     document.getElementById('step-label').textContent = labels[n] || '';
     if (n === 2) setTimeout(() => document.getElementById('inp-username').focus(), 50);
     lucide.createIcons();
@@ -277,11 +298,11 @@
 
     if (!username)            { setAlert('error', 'Benutzername ist ein Pflichtfeld.'); return; }
     if (password.length < 12) { setAlert('error', 'Passwort muss mindestens 12 Zeichen haben.'); return; }
-    if (password !== confirm)  { setAlert('error', 'Passwörter stimmen nicht überein.'); return; }
+    if (password !== confirm)  { setAlert('error', 'PasswÃ¶rter stimmen nicht Ã¼berein.'); return; }
 
     const btn = document.getElementById('btn-create');
     btn.disabled  = true;
-    btn.innerHTML = '<span class="spinner"></span> Wird erstellt…';
+    btn.innerHTML = '<span class="spinner"></span> Wird erstelltâ€¦';
 
     try {
       const res  = await fetch('/api/v1/setup', {
@@ -307,7 +328,7 @@
         btn.innerHTML = 'Admin-Account erstellen';
       }
     } catch {
-      setAlert('error', 'Netzwerkfehler – ist der Server erreichbar?');
+      setAlert('error', 'Netzwerkfehler â€“ ist der Server erreichbar?');
       btn.disabled  = false;
       btn.innerHTML = 'Admin-Account erstellen';
     }
@@ -333,7 +354,7 @@
     } catch {
       show('view-wizard');
       document.getElementById('wizard-alert').innerHTML =
-        `<div class="alert alert-warn"><i data-lucide="alert-triangle"></i><div>Server nicht erreichbar. Stelle sicher, dass <code style="font-family:var(--font-mono)">npm start</code> läuft.</div></div>`;
+        `<div class="alert alert-warn"><i data-lucide="alert-triangle"></i><div>Server nicht erreichbar. Stelle sicher, dass <code style="font-family:var(--font-mono)">npm start</code> lÃ¤uft.</div></div>`;
       goStep(1);
     }
     lucide.createIcons();

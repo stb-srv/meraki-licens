@@ -6,80 +6,100 @@
   <title>Meraki &ndash; Kunden-Portal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;0,900;1,300;1,400&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
-    :root,[data-theme="dark"]{--bg:#0d0f12;--bg2:#131619;--bg3:#181c20;--border:rgba(255,255,255,0.07);--text:#e8eaed;--text2:#8b9099;--text3:#5a5f66;--accent:#00bfa5;--accent-hover:#00a892;--accent2:#ff5d6c;--accent3:#5fbf6a;--gold:#e8af34;--card:#131619;--radius:10px;--shadow:0 4px 24px rgba(0,0,0,.4);--nav-bg:rgba(13,15,18,0.92);--accent-dim:rgba(0,191,165,0.12);--font-body:'Inter','Segoe UI',system-ui,sans-serif;--font-display:'Inter',sans-serif;--font-mono:'JetBrains Mono',monospace;}
-    [data-theme="light"]{--bg:#f5f5f0;--bg2:#ffffff;--bg3:#f0f0eb;--border:rgba(0,0,0,0.09);--text:#1a1c20;--text2:#6b7280;--text3:#9aa0a6;--accent:#00897b;--accent-hover:#00796b;--accent2:#d64550;--accent3:#3a8a3a;--gold:#c79100;--card:#fff;--radius:10px;--shadow:0 4px 24px rgba(0,0,0,.08);--nav-bg:rgba(245,245,240,0.92);--accent-dim:rgba(0,137,123,0.10);}
-    *{box-sizing:border-box;margin:0;padding:0;}
+    :root,[data-theme="dark"]{--bg:#0d0f12;--bg2:#131619;--bg3:#181c20;--border:rgba(255,255,255,0.07);--text:#e8eaed;--text2:#8b9099;--text3:#5a5f66;--accent:#00bfa5;--accent-hover:#00a892;--accent2:#ff5d6c;--accent3:#5fbf6a;--gold:#e8af34;--card:#131619;--radius: var(--radius-lg);--shadow:0 4px 24px rgba(0,0,0,.4);--nav-bg:rgba(13,15,18,0.92);--accent-dim:rgba(0,191,165,0.12);--font-body: 'Roboto', sans-serif;--font-display: 'Roboto', sans-serif;--font-mono: 'Roboto Mono', monospace;
+      /* Type scale */
+      --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+      --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+      --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+      --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+      --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+      --text-2xl: clamp(2rem, 1.2rem + 2.5vw, 3.5rem);
+      /* Spacing (4px base) */
+      --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem;
+      --space-4: 1rem; --space-6: 1.5rem; --space-8: 2rem;
+      --space-10: 2.5rem; --space-12: 3rem; --space-16: 4rem;
+      /* Border radius */
+      --radius-sm: 0.375rem; --radius-md: 0.5rem;
+      --radius-lg: 0.75rem; --radius-xl: 1rem;
+      /* Transitions */
+      --transition-interactive: 180ms cubic-bezier(0.16, 1, 0.3, 1);}
+    [data-theme="light"]{--bg:#f5f5f0;--bg2:#ffffff;--bg3:#f0f0eb;--border:rgba(0,0,0,0.09);--text:#1a1c20;--text2:#6b7280;--text3:#9aa0a6;--accent:#00897b;--accent-hover:#00796b;--accent2:#d64550;--accent3:#3a8a3a;--gold:#c79100;--card:#fff;--radius: var(--radius-lg);--shadow:0 4px 24px rgba(0,0,0,.08);--nav-bg:rgba(245,245,240,0.92);--accent-dim:rgba(0,137,123,0.10);}
+    *{box-sizing:border-box;margin: 0;padding: 0;}
     body{background:var(--bg);color:var(--text);font-family:var(--font-body);line-height:1.6;min-height:100vh;transition:background .3s, color .3s;}
-    h1,h2,h3,h4{font-family:var(--font-display);letter-spacing:-0.02em;font-weight:700;}
+    h1,h2,h3,h4,h5,h6{font-family:var(--font-display);letter-spacing:-0.02em;line-height:1.2;}
+    h1,h2{font-weight:700;}h3,h4{font-weight:500;}
+    input,button,select,textarea{font-family:var(--font-body);}
+    button,label{line-height:1.4;letter-spacing:0.01em;}
+    button{font-weight:500;}
     .lucide{width:1.05em;height:1.05em;vertical-align:-0.18em;stroke-width:2;flex-shrink:0;}
-    nav{position:sticky;top:0;z-index:100;background:var(--nav-bg);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:60px;}
-    .nav-logo{display:inline-flex;align-items:center;gap:.4rem;font-size:1.15rem;font-weight:800;color:var(--accent);font-family:var(--font-display);}
+    nav{position:sticky;top:0;z-index:100;background:var(--nav-bg);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding: 0 var(--space-8);display:flex;align-items:center;justify-content:space-between;height:60px;}
+    .nav-logo{display:inline-flex;align-items:center;gap:.4rem;font-size: var(--text-lg);font-weight: 700;color:var(--accent);font-family:var(--font-display);}
     .nav-logo .lucide{width:1.15em;height:1.15em;}
     .nav-right{display:flex;gap:.8rem;align-items:center;}
-    .btn{display:inline-flex;align-items:center;gap:.4rem;padding:.45rem 1.1rem;border-radius:8px;border:none;cursor:pointer;font-size:.88rem;font-weight:600;transition:all 180ms cubic-bezier(0.16,1,0.3,1);text-decoration:none;font-family:var(--font-body);}
+    .btn{display:inline-flex;align-items:center;gap:.4rem;padding: var(--space-2) var(--space-4);border-radius: var(--radius-md);border:none;cursor:pointer;font-size: var(--text-sm);font-weight: 500;transition:all var(--transition-interactive);text-decoration:none;font-family:var(--font-body);}
     .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:var(--accent-hover);}
     .btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border);}.btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
     .btn-danger{background:var(--accent2);color:#fff;}.btn-danger:hover{opacity:.85;}
-    .btn-sm{padding:.3rem .7rem;font-size:.8rem;}
+    .btn-sm{padding: var(--space-1) var(--space-3);font-size: var(--text-sm);}
     .btn-success{background:var(--accent3);color:#fff;}.btn-success:hover{opacity:.85;}
     .page{display:none;}.page.active{display:block;}
     /* Login & Setup */
-    .center-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem;background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(0,191,165,.1),transparent);}
-    .auth-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:2.5rem 2rem;width:100%;max-width:400px;box-shadow:var(--shadow);}
-    .auth-card h2{display:flex;align-items:center;justify-content:center;gap:.45rem;text-align:center;margin-bottom:.4rem;font-size:1.3rem;}
+    .center-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding: var(--space-8);background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(0,191,165,.1),transparent);}
+    .auth-card{background:var(--card);border:1px solid var(--border);border-radius: var(--radius);padding: var(--space-10) var(--space-8);width:100%;max-width:400px;box-shadow:var(--shadow);}
+    .auth-card h2{display:flex;align-items:center;justify-content:center;gap:.45rem;text-align:center;margin-bottom: var(--space-2);font-size: var(--text-lg);}
     .auth-card h2 .lucide{color:var(--accent);}
-    .auth-card .sub{text-align:center;color:var(--text2);font-size:.85rem;margin-bottom:1.5rem;}
-    .form-group{margin-bottom:1rem;}
-    .form-group label{display:block;font-size:.85rem;color:var(--text2);margin-bottom:.4rem;}
-    .form-group input{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:.6rem .9rem;color:var(--text);font-size:.9rem;outline:none;transition:border-color .2s;font-family:var(--font-body);}
+    .auth-card .sub{text-align:center;color:var(--text2);font-size: var(--text-sm);margin-bottom: var(--space-6);}
+    .form-group{margin-bottom: var(--space-4);}
+    .form-group label{display:block;font-size: var(--text-sm);color:var(--text2);margin-bottom: var(--space-2);}
+    .form-group input{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius: var(--radius-md);padding: var(--space-2) var(--space-4);color:var(--text);font-size: var(--text-sm);outline:none;transition:border-color .2s;font-family:var(--font-body);}
     .form-group input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim);}
-    .alert{padding:.7rem 1rem;border-radius:8px;font-size:.88rem;margin-bottom:1rem;}
+    .alert{padding: var(--space-3) var(--space-4);border-radius: var(--radius-md);font-size: var(--text-sm);margin-bottom: var(--space-4);}
     .alert .lucide{color:inherit;}
     .alert-error{background:rgba(255,93,108,.1);border:1px solid rgba(255,93,108,.25);color:var(--accent2);}
     .alert-success{background:rgba(95,191,106,.1);border:1px solid rgba(95,191,106,.25);color:var(--accent3);}
     .alert-info{background:var(--accent-dim);border:1px solid rgba(0,191,165,.25);color:var(--accent);}
     /* Dashboard */
     .dashboard{display:flex;min-height:calc(100vh - 60px);}
-    .sidebar{width:210px;background:var(--bg2);border-right:1px solid var(--border);padding:1rem 0;flex-shrink:0;}
-    .sidebar-brand{display:flex;align-items:center;gap:.4rem;padding:.8rem 1.2rem 1rem;font-size:.9rem;font-weight:700;color:var(--accent);border-bottom:1px solid var(--border);margin-bottom:.5rem;font-family:var(--font-display);}
-    .sidebar-user{padding:.4rem 1.2rem .8rem;font-size:.78rem;color:var(--text2);}
+    .sidebar{width:210px;background:var(--bg2);border-right:1px solid var(--border);padding: var(--space-4) 0;flex-shrink:0;}
+    .sidebar-brand{display:flex;align-items:center;gap:.4rem;padding: var(--space-3) var(--space-4) var(--space-4);font-size: var(--text-sm);font-weight:700;color:var(--accent);border-bottom:1px solid var(--border);margin-bottom: var(--space-2);font-family:var(--font-display);}
+    .sidebar-user{padding: var(--space-2) var(--space-4) var(--space-3);font-size: var(--text-xs);color:var(--text2);}
     .sidebar-menu{list-style:none;}
-    .sidebar-menu li a{display:flex;align-items:center;gap:.6rem;padding:.6rem 1.2rem;color:var(--text2);text-decoration:none;font-size:.88rem;cursor:pointer;transition:all .15s;}
+    .sidebar-menu li a{display:flex;align-items:center;gap:.6rem;padding: var(--space-2) var(--space-4);color:var(--text2);text-decoration:none;font-size: var(--text-sm);cursor:pointer;transition:all .15s;}
     .sidebar-menu li a:hover,.sidebar-menu li a.active{background:var(--accent-dim);color:var(--text);}
     .sidebar-menu li a.active{border-left:3px solid var(--accent);}
-    .main-area{flex:1;overflow-y:auto;padding:1.8rem 2rem;}
+    .main-area{flex:1;overflow-y:auto;padding: var(--space-8) var(--space-8);}
     .tab-panel{display:none;}.tab-panel.active{display:block;}
-    .dash-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;}
-    .dash-header h2{display:inline-flex;align-items:center;gap:.45rem;font-size:1.15rem;}
+    .dash-header{display:flex;align-items:center;justify-content:space-between;margin-bottom: var(--space-6);}
+    .dash-header h2{display:inline-flex;align-items:center;gap:.45rem;font-size: var(--text-lg);}
     .dash-header h2 .lucide{color:var(--accent);}
     /* Cards */
-    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1rem;}
-    .card-title{display:flex;align-items:center;gap:.4rem;font-size:.8rem;font-weight:700;letter-spacing:.08em;color:var(--accent);text-transform:uppercase;margin-bottom:.8rem;}
+    .card{background:var(--card);border:1px solid var(--border);border-radius: var(--radius);padding: var(--space-6);margin-bottom: var(--space-4);}
+    .card-title{display:flex;align-items:center;gap:.4rem;font-size: var(--text-sm);font-weight:700;letter-spacing:.08em;color:var(--accent);text-transform:uppercase;margin-bottom: var(--space-3);}
     /* License cards */
-    .lic-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.4rem 1.6rem;margin-bottom:1rem;transition:border-color .2s;}
+    .lic-card{background:var(--card);border:1px solid var(--border);border-radius: var(--radius);padding: var(--space-6) var(--space-6);margin-bottom: var(--space-4);transition:border-color .2s;}
     .lic-card:hover{border-color:var(--accent);}
-    .lic-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.6rem;margin-bottom:1rem;}
-    .lic-key{font-family:var(--font-mono);font-size:.88rem;background:var(--bg3);padding:.3rem .7rem;border-radius:6px;color:var(--accent);letter-spacing:.04em;cursor:pointer;user-select:all;position:relative;}
-    .lic-key:hover::after{content:'Kopiert!';position:absolute;top:-24px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;font-size:.7rem;padding:.1rem .5rem;border-radius:4px;white-space:nowrap;pointer-events:none;}
-    .lic-meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.8rem;margin-bottom:1rem;}
-    .lic-meta-item .lmi-label{font-size:.75rem;color:var(--text2);}
-    .lic-meta-item .lmi-value{font-size:.92rem;font-weight:600;}
-    .domain-form{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;margin-top:.8rem;padding-top:.8rem;border-top:1px solid var(--border);}
-    .domain-form input{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:.45rem .8rem;color:var(--text);font-size:.88rem;outline:none;flex:1;min-width:180px;font-family:var(--font-body);}
+    .lic-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.6rem;margin-bottom: var(--space-4);}
+    .lic-key{font-family:var(--font-mono);font-size: var(--text-sm);background:var(--bg3);padding: var(--space-1) var(--space-3);border-radius: var(--radius-sm);color:var(--accent);letter-spacing: 0.08em;cursor:pointer;user-select:all;position:relative;}
+    .lic-key:hover::after{content:'Kopiert!';position:absolute;top:-24px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;font-size: var(--text-xs);padding: .1rem var(--space-2);border-radius: var(--radius-sm);white-space:nowrap;pointer-events:none;}
+    .lic-meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.8rem;margin-bottom: var(--space-4);}
+    .lic-meta-item .lmi-label{font-size: var(--text-xs);color:var(--text2);}
+    .lic-meta-item .lmi-value{font-size: var(--text-sm);font-weight: 500;}
+    .domain-form{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;margin-top: var(--space-3);padding-top: var(--space-3);border-top:1px solid var(--border);}
+    .domain-form input{background:var(--bg2);border:1px solid var(--border);border-radius: var(--radius-md);padding: var(--space-2) var(--space-3);color:var(--text);font-size: var(--text-sm);outline:none;flex:1;min-width:180px;font-family:var(--font-body);}
     .domain-form input:focus{border-color:var(--accent);}
-    .domain-msg{font-size:.8rem;margin-top:.4rem;}
+    .domain-msg{font-size: var(--text-sm);margin-top: var(--space-2);}
     /* Table */
-    .table-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:auto;}
-    table.data-table{width:100%;border-collapse:collapse;font-size:.85rem;}
-    table.data-table th{background:var(--bg3);padding:.65rem 1rem;text-align:left;color:var(--text2);font-weight:600;white-space:nowrap;}
-    table.data-table td{padding:.6rem 1rem;border-bottom:1px solid var(--border);vertical-align:middle;}
+    .table-wrap{background:var(--card);border:1px solid var(--border);border-radius: var(--radius);overflow:auto;}
+    table.data-table{width:100%;border-collapse:collapse;font-size: var(--text-sm);}
+    table.data-table th{background:var(--bg3);padding: var(--space-3) var(--space-4);text-align:left;color:var(--text2);font-weight: 500;white-space:nowrap;}
+    table.data-table td{padding: var(--space-2) var(--space-4);border-bottom:1px solid var(--border);vertical-align:middle;}
     table.data-table tr:last-child td{border:none;}
     table.data-table tr:hover td{background:var(--bg3);}
     table.data-table code{font-family:var(--font-mono);}
-    .badge{display:inline-block;padding:.15rem .55rem;border-radius:999px;font-size:.72rem;font-weight:700;}
+    .badge{display:inline-block;padding: .15rem var(--space-2);border-radius: 999px;font-size: var(--text-xs);font-weight:700;}
     .badge-active{background:rgba(95,191,106,.15);color:var(--accent3);}
     .badge-revoked,.badge-cancelled,.badge-suspended,.badge-expired{background:rgba(255,93,108,.15);color:var(--accent2);}
     .badge-FREE{background:rgba(139,144,153,.15);color:var(--text2);}
@@ -90,33 +110,33 @@
     .badge-renewal{background:rgba(0,191,165,.15);color:var(--accent);}
     .badge-upgrade{background:rgba(232,175,52,.15);color:var(--gold);}
     .badge-downgrade,.badge-cancellation{background:rgba(255,93,108,.15);color:var(--accent2);}
-    .loading{text-align:center;padding:3rem;color:var(--text2);}
-    .spinner{display:inline-block;width:24px;height:24px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;}
+    .loading{text-align:center;padding: var(--space-12);color:var(--text2);}
+    .spinner{display:inline-block;width:24px;height:24px;border:3px solid var(--border);border-top-color:var(--accent);border-radius: 50%;animation:spin .7s linear infinite;}
     @keyframes spin{to{transform:rotate(360deg);}}
-    .theme-toggle{display:inline-flex;align-items:center;justify-content:center;background:transparent;border:1px solid var(--border);color:var(--text2);border-radius:8px;width:32px;height:32px;cursor:pointer;transition:all .2s;}
+    .theme-toggle{display:inline-flex;align-items:center;justify-content:center;background:transparent;border:1px solid var(--border);color:var(--text2);border-radius: var(--radius-md);width:32px;height:32px;cursor:pointer;transition:all .2s;}
     .theme-toggle:hover{border-color:var(--accent);color:var(--accent);}
-    @media(max-width:650px){.sidebar{width:46px;}.sidebar-brand span,.sidebar-user,.sidebar-menu li a span{display:none;}.sidebar-menu li a{justify-content:center;padding:.7rem;}.main-area{padding:1rem;}}
+    @media(max-width:650px){.sidebar{width:46px;}.sidebar-brand span,.sidebar-user,.sidebar-menu li a span{display:none;}.sidebar-menu li a{justify-content:center;padding: var(--space-3);}.main-area{padding: var(--space-4);}}
     /* Shop / Plan-Cards */
-    .plan-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1.2rem;margin-top:1rem;}
-    .plan-card{background:var(--card);border:2px solid var(--border);border-radius:var(--radius);padding:1.5rem 1.4rem;display:flex;flex-direction:column;transition:border-color .2s,box-shadow .2s;position:relative;}
+    .plan-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1.2rem;margin-top: var(--space-4);}
+    .plan-card{background:var(--card);border:2px solid var(--border);border-radius: var(--radius);padding: var(--space-6) var(--space-6);display:flex;flex-direction:column;transition:border-color .2s,box-shadow .2s;position:relative;}
     .plan-card:hover{border-color:var(--accent);box-shadow:0 4px 18px rgba(0,191,165,.15);}
     .plan-card.popular{border-color:var(--accent);}
-    .plan-popular-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;font-size:.72rem;font-weight:700;padding:.2rem .8rem;border-radius:20px;white-space:nowrap;display:inline-flex;align-items:center;gap:.25rem;}
-    .plan-name{font-family:var(--font-display);font-size:1.1rem;font-weight:800;margin-bottom:.3rem;}
-    .plan-desc{color:var(--text2);font-size:.8rem;margin-bottom:1rem;line-height:1.5;flex:1;}
-    .plan-price{font-family:var(--font-display);font-size:2rem;font-weight:800;color:var(--accent);line-height:1;}
-    .plan-price span{font-size:.85rem;font-weight:400;color:var(--text2);}
-    .plan-features{list-style:none;margin:.9rem 0 1.2rem;font-size:.82rem;display:flex;flex-direction:column;gap:.4rem;}
-    .plan-features li::before{content:'✓ ';color:var(--accent3);font-weight:700;}
-    .plan-features li.no::before{content:'✗ ';color:var(--text2);}
+    .plan-popular-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;font-size: var(--text-xs);font-weight:700;padding: var(--space-1) var(--space-3);border-radius: var(--radius-xl);white-space:nowrap;display:inline-flex;align-items:center;gap:.25rem;}
+    .plan-name{font-family:var(--font-display);font-size: var(--text-base);font-weight: 700;margin-bottom: var(--space-1);}
+    .plan-desc{color:var(--text2);font-size: var(--text-sm);margin-bottom: var(--space-4);line-height:1.5;flex:1;}
+    .plan-price{font-family:var(--font-display);font-size: var(--text-xl);font-weight: 700;color:var(--accent);line-height:1;}
+    .plan-price span{font-size: var(--text-sm);font-weight:400;color:var(--text2);}
+    .plan-features{list-style:none;margin: var(--space-4) 0 var(--space-4);font-size: var(--text-sm);display:flex;flex-direction:column;gap:.4rem;}
+    .plan-features li::before{content:'âœ“ ';color:var(--accent3);font-weight:700;}
+    .plan-features li.no::before{content:'âœ— ';color:var(--text2);}
     .plan-features li.no{color:var(--text2);}
     /* Order modal */
     .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(2px);z-index:200;align-items:center;justify-content:center;}
     .modal-overlay.open{display:flex;}
-    .modal-box{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:2rem;width:100%;max-width:420px;box-shadow:0 8px 32px rgba(0,0,0,.4);}
-    .modal-box h3{display:flex;align-items:center;gap:.45rem;font-family:var(--font-display);margin-bottom:1rem;}
+    .modal-box{background:var(--card);border:1px solid var(--border);border-radius: var(--radius);padding: var(--space-8);width:100%;max-width:420px;box-shadow:0 8px 32px rgba(0,0,0,.4);}
+    .modal-box h3{display:flex;align-items:center;gap:.45rem;font-family:var(--font-display);margin-bottom: var(--space-4);}
     .modal-box h3 .lucide{color:var(--accent);}
-    .modal-footer{display:flex;gap:.7rem;justify-content:flex-end;margin-top:1.5rem;}
+    .modal-footer{display:flex;gap:.7rem;justify-content:flex-end;margin-top: var(--space-6);}
     code{font-family:var(--font-mono);}
   </style>
 </head>
@@ -126,7 +146,7 @@
   <span class="nav-logo" onclick="window.location.href='/'" style="cursor:pointer" title="Zur Startseite"><i data-lucide="zap"></i> Meraki &mdash; Kunden-Portal</span>
   <div class="nav-right">
     <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn" title="Theme wechseln"><i data-lucide="sun"></i></button>
-    <span id="nav-customer-name" style="font-size:.85rem;color:var(--text2)"></span>
+    <span id="nav-customer-name" style="font-size: var(--text-sm);color:var(--text2)"></span>
     <button class="btn btn-ghost btn-sm" onclick="doLogout()"><i data-lucide="log-out"></i> Logout</button>
   </div>
 </nav>
@@ -135,14 +155,14 @@
 <div id="page-login" class="page active">
   <div class="center-wrap">
     <div class="auth-card" style="text-align:center">
-      <div class="spinner" style="margin:0 auto 1.5rem"></div>
-      <p style="color:var(--text2);font-size:.9rem">Du wirst zum Login weitergeleitet&hellip;</p>
-      <p style="margin-top:1rem"><a href="login.html" style="color:var(--accent);font-weight:600">Zur Login-Seite &rarr;</a></p>
-      <div style="text-align:center;margin-top:1rem;font-size:.85rem;color:var(--text2)">
+      <div class="spinner" style="margin: 0 auto var(--space-6)"></div>
+      <p style="color:var(--text2);font-size: var(--text-sm)">Du wirst zum Login weitergeleitet&hellip;</p>
+      <p style="margin-top: var(--space-4)"><a href="login.html" style="color:var(--accent);font-weight: 500">Zur Login-Seite &rarr;</a></p>
+      <div style="text-align:center;margin-top: var(--space-4);font-size: var(--text-sm);color:var(--text2)">
         Noch kein Account?
         <a href="login.html#register" style="color:var(--accent)">Jetzt registrieren</a>
       </div>
-      <div style="text-align:center;margin-top:.5rem;font-size:.82rem">
+      <div style="text-align:center;margin-top: var(--space-2);font-size: var(--text-sm)">
         <a href="login.html#forgot" style="color:var(--text2);text-decoration:none;">Passwort vergessen?</a>
       </div>
     </div>
@@ -154,13 +174,13 @@
   <div class="center-wrap">
     <div class="auth-card">
       <h2><i data-lucide="lock"></i> Passwort setzen</h2>
-      <p class="sub" id="setup-name-hint">Willkommen! Bitte setze ein Passwort für dein Konto.</p>
+      <p class="sub" id="setup-name-hint">Willkommen! Bitte setze ein Passwort fÃ¼r dein Konto.</p>
       <div id="setup-alert"></div>
-      <div class="form-group"><label>Neues Passwort <span style="color:var(--text2);font-size:.78rem">(min. 10 Zeichen)</span></label><input type="password" id="setup-pass" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"></div>
+      <div class="form-group"><label>Neues Passwort <span style="color:var(--text2);font-size: var(--text-xs)">(min. 10 Zeichen)</span></label><input type="password" id="setup-pass" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"></div>
       <div class="form-group"><label>Passwort wiederholen</label><input type="password" id="setup-pass2" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"></div>
       <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="doSetupPassword()">Passwort setzen &amp; einloggen</button>
-      <div style="text-align:center;margin-top:1.5rem;font-size:.85rem;color:var(--text2)">
-        <a href="login.html" style="color:var(--text2);text-decoration:none;">&larr; Zurück zum Login</a>
+      <div style="text-align:center;margin-top: var(--space-6);font-size: var(--text-sm);color:var(--text2)">
+        <a href="login.html" style="color:var(--text2);text-decoration:none;">&larr; ZurÃ¼ck zum Login</a>
       </div>
     </div>
   </div>
@@ -170,14 +190,14 @@
 <div id="page-change-password" class="page">
   <div class="center-wrap">
     <div class="auth-card">
-      <h2><i data-lucide="key-round"></i> Passwort ändern</h2>
-      <p class="sub">Dein Passwort muss aus Sicherheitsgründen geändert werden.</p>
+      <h2><i data-lucide="key-round"></i> Passwort Ã¤ndern</h2>
+      <p class="sub">Dein Passwort muss aus SicherheitsgrÃ¼nden geÃ¤ndert werden.</p>
       <div id="change-pass-alert"></div>
       <div class="form-group"><label>Aktuelles Passwort</label><input type="password" id="change-pass-curr"></div>
-      <div class="form-group"><label>Neues Passwort <span style="color:var(--text2);font-size:.78rem">(min. 10 Zeichen)</span></label><input type="password" id="change-pass-new"></div>
+      <div class="form-group"><label>Neues Passwort <span style="color:var(--text2);font-size: var(--text-xs)">(min. 10 Zeichen)</span></label><input type="password" id="change-pass-new"></div>
       <div class="form-group"><label>Neues Passwort wiederholen</label><input type="password" id="change-pass-new2"></div>
-      <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="doChangePasswordForced()">Passwort ändern</button>
-      <div style="text-align:center;margin-top:1.5rem;font-size:.85rem;color:var(--text2)">
+      <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="doChangePasswordForced()">Passwort Ã¤ndern</button>
+      <div style="text-align:center;margin-top: var(--space-6);font-size: var(--text-sm);color:var(--text2)">
         <a href="#" onclick="doLogout()" style="color:var(--text2);text-decoration:none;">&larr; Abbrechen &amp; Logout</a>
       </div>
     </div>
@@ -188,12 +208,12 @@
 <div id="page-verify" class="page">
   <div class="center-wrap">
     <div class="auth-card" style="text-align:center">
-      <div id="verify-spinner" class="spinner" style="margin:0 auto 1.5rem"></div>
-      <h2 id="verify-title"><i data-lucide="mail"></i> E-Mail-Bestätigung</h2>
-      <div id="verify-alert" style="margin-top: 1rem;"></div>
-      <p id="verify-text" style="color:var(--text2);font-size:.9rem;margin-top:1rem">Deine E-Mail-Adresse wird verifiziert...</p>
-      <div id="verify-login-link" style="text-align:center;margin-top:1.5rem;font-size:.85rem;color:var(--text2);display:none;">
-        <a href="login.html" style="color:var(--text2);text-decoration:none;">&larr; Zurück zum Login</a>
+      <div id="verify-spinner" class="spinner" style="margin: 0 auto var(--space-6)"></div>
+      <h2 id="verify-title"><i data-lucide="mail"></i> E-Mail-BestÃ¤tigung</h2>
+      <div id="verify-alert" style="margin-top: var(--space-4);"></div>
+      <p id="verify-text" style="color:var(--text2);font-size: var(--text-sm);margin-top: var(--space-4)">Deine E-Mail-Adresse wird verifiziert...</p>
+      <div id="verify-login-link" style="text-align:center;margin-top: var(--space-6);font-size: var(--text-sm);color:var(--text2);display:none;">
+        <a href="login.html" style="color:var(--text2);text-decoration:none;">&larr; ZurÃ¼ck zum Login</a>
       </div>
     </div>
   </div>
@@ -211,7 +231,7 @@
         <li><a onclick="switchTab('invoices')" id="stab-invoices"><i data-lucide="receipt"></i> <span>Rechnungen</span></a></li>
         <li><a onclick="switchTab('history')" id="stab-history"><i data-lucide="shopping-bag"></i> <span>Kaufhistorie</span></a></li>
         <li><a onclick="switchTab('account')" id="stab-account"><i data-lucide="user"></i> <span>Mein Konto</span></a></li>
-        <hr style="border:none;border-top:1px solid var(--border);margin:.5rem 0">
+        <hr style="border:none;border-top:1px solid var(--border);margin: var(--space-2) 0">
         <li><a onclick="doLogout()"><i data-lucide="log-out"></i> <span>Logout</span></a></li>
       </ul>
     </aside>
@@ -220,19 +240,19 @@
         <div class="dash-header"><h2><i data-lucide="key-round"></i> Meine Lizenzen</h2><button class="btn btn-ghost btn-sm" onclick="loadLicenses()"><i data-lucide="refresh-cw"></i> Aktualisieren</button></div>
         <div id="lic-list"><div class="loading"><div class="spinner"></div></div></div>
       </div>
-      <!-- ── Shop ─────────────────────────────────────────────────── -->
+      <!-- â”€â”€ Shop â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
       <div id="tab-shop" class="tab-panel">
         <div class="dash-header">
           <h2><i data-lucide="shopping-cart"></i> Lizenz kaufen</h2>
           <button class="btn btn-ghost btn-sm" onclick="loadShop()"><i data-lucide="refresh-cw"></i> Aktualisieren</button>
         </div>
-        <p style="color:var(--text2);font-size:.88rem;margin-bottom:1rem;">
-          Wähle einen Plan und gib deine Domain an. Nach Bestelleingang erhältst du eine Rechnung &mdash; deine Lizenz wird nach Zahlungseingang aktiviert.
+        <p style="color:var(--text2);font-size: var(--text-sm);margin-bottom: var(--space-4);">
+          WÃ¤hle einen Plan und gib deine Domain an. Nach Bestelleingang erhÃ¤ltst du eine Rechnung &mdash; deine Lizenz wird nach Zahlungseingang aktiviert.
         </p>
         <div id="shop-content"><div class="loading"><div class="spinner"></div></div></div>
       </div>
 
-      <!-- ── Rechnungen ────────────────────────────────────────────── -->
+      <!-- â”€â”€ Rechnungen â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
       <div id="tab-invoices" class="tab-panel">
         <div class="dash-header"><h2><i data-lucide="receipt"></i> Meine Rechnungen</h2><button class="btn btn-ghost btn-sm" onclick="loadPortalInvoices()"><i data-lucide="refresh-cw"></i> Aktualisieren</button></div>
         <div id="portal-inv-list"><div class="loading"><div class="spinner"></div></div></div>
@@ -250,17 +270,17 @@
   </div>
 </div>
 
-<!-- ── Bestell-Modal ─────────────────────────────────────────────────────── -->
+<!-- â”€â”€ Bestell-Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
 <div class="modal-overlay" id="order-modal">
   <div class="modal-box">
     <h3><i data-lucide="shopping-cart"></i> Lizenz bestellen</h3>
-    <div id="order-plan-info" style="background:var(--bg2);border-radius:8px;padding:.9rem 1rem;margin-bottom:1rem;font-size:.88rem;"></div>
+    <div id="order-plan-info" style="background:var(--bg2);border-radius: var(--radius-md);padding: var(--space-4) var(--space-4);margin-bottom: var(--space-4);font-size: var(--text-sm);"></div>
     <div class="form-group">
-      <label style="font-size:.85rem;color:var(--text2);display:block;margin-bottom:.35rem;">Domain für diese Lizenz *</label>
-      <input type="text" id="order-domain" placeholder="z.B. meinrestaurant.de" style="width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:.6rem .9rem;color:var(--text);font-size:.9rem;outline:none;font-family:var(--font-body);" oninput="this.style.borderColor=''">
-      <div style="font-size:.78rem;color:var(--text2);margin-top:.35rem;">Nur die Domain ohne https:// eingeben.</div>
+      <label style="font-size: var(--text-sm);color:var(--text2);display:block;margin-bottom: var(--space-1);">Domain fÃ¼r diese Lizenz *</label>
+      <input type="text" id="order-domain" placeholder="z.B. meinrestaurant.de" style="width:100%;background:var(--bg2);border:1px solid var(--border);border-radius: var(--radius-md);padding: var(--space-2) var(--space-4);color:var(--text);font-size: var(--text-sm);outline:none;font-family:var(--font-body);" oninput="this.style.borderColor=''">
+      <div style="font-size: var(--text-xs);color:var(--text2);margin-top: var(--space-1);">Nur die Domain ohne https:// eingeben.</div>
     </div>
-    <div id="order-alert" style="margin-top:.5rem;"></div>
+    <div id="order-alert" style="margin-top: var(--space-2);"></div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeOrderModal()">Abbrechen</button>
       <button class="btn btn-primary" id="order-confirm-btn" onclick="confirmOrder()"><i data-lucide="check"></i> Verbindlich bestellen</button>
@@ -316,10 +336,10 @@ function API(path,opts){
 }
 
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function fmtDate(d){return d?new Date(d).toLocaleString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):'—';}
-function fmtDateShort(d){return d?new Date(d).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'}):'—';}
+function fmtDate(d){return d?new Date(d).toLocaleString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):'â€”';}
+function fmtDateShort(d){return d?new Date(d).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'}):'â€”';}
 function daysLeft(d){return Math.ceil((new Date(d)-Date.now())/86400000);}
-function fmtEur(v){return v!=null&&v!==''?parseFloat(v).toFixed(2)+' €':'—';}
+function fmtEur(v){return v!=null&&v!==''?parseFloat(v).toFixed(2)+' â‚¬':'â€”';}
 
 function showAlert(elId,msg,type){
   var el=document.getElementById(elId);
@@ -345,11 +365,11 @@ function switchTab(name){
   else if(name==='account')loadAccount();
 }
 
-// ── Startup: invite token prüfen ──────────────────────────────────────────────
+// â”€â”€ Startup: invite token prÃ¼fen â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function init(){
   var params=new URLSearchParams(window.location.search);
 
-  // E-Mail-Verifizierung über Hash oder Query
+  // E-Mail-Verifizierung Ã¼ber Hash oder Query
   var verifyToken = '';
   if (window.location.hash && window.location.hash.indexOf('#verify') === 0) {
     var hashQuery = window.location.hash.split('?')[1];
@@ -371,7 +391,7 @@ function init(){
       .then(function(d) {
         document.getElementById('verify-spinner').style.display = 'none';
         showAlert('verify-alert', '<i data-lucide="check-circle"></i> ' + esc(d.message || 'E-Mail erfolgreich verifiziert!'), 'success');
-        document.getElementById('verify-text').innerHTML = 'Du wirst in Kürze zum Login weitergeleitet...';
+        document.getElementById('verify-text').innerHTML = 'Du wirst in KÃ¼rze zum Login weitergeleitet...';
         document.getElementById('verify-login-link').style.display = 'block';
         setTimeout(function() {
           window.location.href = 'login.html';
@@ -380,7 +400,7 @@ function init(){
       .catch(function(e) {
         document.getElementById('verify-spinner').style.display = 'none';
         showAlert('verify-alert', esc(e.message || 'Verifizierung fehlgeschlagen.'), 'error');
-        document.getElementById('verify-text').innerHTML = 'Der Bestätigungslink ist ungültig oder abgelaufen.';
+        document.getElementById('verify-text').innerHTML = 'Der BestÃ¤tigungslink ist ungÃ¼ltig oder abgelaufen.';
         document.getElementById('verify-login-link').style.display = 'block';
         setTimeout(function() {
           window.location.href = 'login.html';
@@ -397,7 +417,7 @@ function init(){
       .then(function(r){return r.json();})
       .then(function(d){
         if(d.success){
-          document.getElementById('setup-name-hint').textContent='Willkommen, '+d.name+'! Bitte setze ein Passwort für '+d.email+'.';
+          document.getElementById('setup-name-hint').textContent='Willkommen, '+d.name+'! Bitte setze ein Passwort fÃ¼r '+d.email+'.';
         } else {
           showAlert('setup-alert',esc(d.message),'error');
         }
@@ -406,7 +426,7 @@ function init(){
     return;
   }
   if(TOKEN){
-    // Token noch gültig?
+    // Token noch gÃ¼ltig?
     API('/me').then(function(d){
       CUSTOMER=d.customer;
       showDashboard();
@@ -439,14 +459,14 @@ function showDashboard(){
   loadLicenses();
 }
 
-// ── Login (removed — handled by login.html) ──────────────────────────────────
+// â”€â”€ Login (removed â€” handled by login.html) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-// ── Setup Password ────────────────────────────────────────────────────────────
+// â”€â”€ Setup Password â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function doSetupPassword(){
   var pass=document.getElementById('setup-pass').value;
   var pass2=document.getElementById('setup-pass2').value;
   if(pass.length<10){showAlert('setup-alert','Passwort muss mindestens 10 Zeichen haben.','error');return;}
-  if(pass!==pass2){showAlert('setup-alert','Passwörter stimmen nicht überein.','error');return;}
+  if(pass!==pass2){showAlert('setup-alert','PasswÃ¶rter stimmen nicht Ã¼berein.','error');return;}
   showAlert('setup-alert','Passwort wird gesetzt&hellip;','info');
   fetch('/api/portal/setup-password',{
     method:'POST',
@@ -470,18 +490,18 @@ function doChangePasswordForced(){
   var curr = document.getElementById('change-pass-curr').value;
   var newp = document.getElementById('change-pass-new').value;
   var newp2 = document.getElementById('change-pass-new2').value;
-  if(!curr || !newp || !newp2) { showAlert('change-pass-alert', 'Bitte alle Felder ausfüllen.', 'error'); return; }
+  if(!curr || !newp || !newp2) { showAlert('change-pass-alert', 'Bitte alle Felder ausfÃ¼llen.', 'error'); return; }
   if(newp.length < 10) { showAlert('change-pass-alert', 'Das neue Passwort muss mindestens 10 Zeichen haben.', 'error'); return; }
-  if(newp !== newp2) { showAlert('change-pass-alert', 'Die neuen Passwörter stimmen nicht überein.', 'error'); return; }
+  if(newp !== newp2) { showAlert('change-pass-alert', 'Die neuen PasswÃ¶rter stimmen nicht Ã¼berein.', 'error'); return; }
   if(curr === newp) { showAlert('change-pass-alert', 'Das neue Passwort muss sich vom aktuellen unterscheiden.', 'error'); return; }
 
-  showAlert('change-pass-alert', 'Passwort wird geändert...', 'info');
+  showAlert('change-pass-alert', 'Passwort wird geÃ¤ndert...', 'info');
 
   API('/change-password', {
     method: 'POST',
     body: JSON.stringify({ current_password: curr, new_password: newp })
   }).then(function(d) {
-    showAlert('change-pass-alert', '<i data-lucide="check-circle"></i> Passwort geändert! Du wirst eingeloggt...', 'success');
+    showAlert('change-pass-alert', '<i data-lucide="check-circle"></i> Passwort geÃ¤ndert! Du wirst eingeloggt...', 'success');
     setTimeout(function() {
       document.getElementById('change-pass-curr').value = '';
       document.getElementById('change-pass-new').value = '';
@@ -489,11 +509,11 @@ function doChangePasswordForced(){
       init();
     }, 2000);
   }).catch(function(e) {
-    showAlert('change-pass-alert', esc(e.message || 'Fehler beim Passwort-Ändern.'), 'error');
+    showAlert('change-pass-alert', esc(e.message || 'Fehler beim Passwort-Ã„ndern.'), 'error');
   });
 }
 
-// ── Logout ────────────────────────────────────────────────────────────────────
+// â”€â”€ Logout â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function doLogout(){
   if(TOKEN){
     API('/logout',{method:'POST'}).catch(function(){});
@@ -504,7 +524,7 @@ function doLogout(){
   showPage('login');
 }
 
-// ── Lizenzen ──────────────────────────────────────────────────────────────────
+// â”€â”€ Lizenzen â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function loadLicenses(){
   document.getElementById('lic-list').innerHTML='<div class="loading"><div class="spinner"></div></div>';
   API('/licenses').then(function(d){
@@ -519,12 +539,12 @@ function loadLicenses(){
       var statusBadge='<span class="badge badge-'+esc(l.status)+'">'+esc(l.status)+'</span>';
       var typeBadge='<span class="badge badge-'+esc(l.type)+'">'+esc(l.type)+'</span>';
       var warnHtml = (days > 0 && days <= 30)
-        ? '<div style="background:var(--accent-dim);color:var(--gold);border-radius:6px;padding:.4rem .7rem;font-size:.8rem;margin-bottom:1rem"><i data-lucide="alert-triangle"></i> Läuft in '+days+' Tagen ab</div>'
-        : (days <= 0 ? '<div style="background:rgba(255,93,108,.1);color:var(--accent2);border-radius:6px;padding:.4rem .7rem;font-size:.8rem;margin-bottom:1rem"><i data-lucide="x-circle"></i> Abgelaufen</div>' : '');
+        ? '<div style="background:var(--accent-dim);color:var(--gold);border-radius: var(--radius-sm);padding: var(--space-2) var(--space-3);font-size: var(--text-sm);margin-bottom: var(--space-4)"><i data-lucide="alert-triangle"></i> LÃ¤uft in '+days+' Tagen ab</div>'
+        : (days <= 0 ? '<div style="background:rgba(255,93,108,.1);color:var(--accent2);border-radius: var(--radius-sm);padding: var(--space-2) var(--space-3);font-size: var(--text-sm);margin-bottom: var(--space-4)"><i data-lucide="x-circle"></i> Abgelaufen</div>' : '');
       return '<div class="lic-card">'+
         '<div class="lic-header" style="margin-bottom:'+(warnHtml?'.5rem':'1rem')+'">'+
           '<div>'+
-            '<div style="font-size:.75rem;color:var(--text2);margin-bottom:.2rem">Lizenzschlüssel (klicken zum Kopieren)</div>'+
+            '<div style="font-size: var(--text-xs);color:var(--text2);margin-bottom: var(--space-1)">LizenzschlÃ¼ssel (klicken zum Kopieren)</div>'+
             '<div class="lic-key" onclick="copyKey(this,\''+esc(l.license_key)+'\')" title="Klicken zum Kopieren">'+esc(l.license_key)+'</div>'+
           '</div>'+
           '<div style="display:flex;gap:.5rem;align-items:center">'+typeBadge+statusBadge+'</div>'+
@@ -537,7 +557,7 @@ function loadLicenses(){
           '<div class="lic-meta-item"><div class="lmi-label">Validierungen</div><div class="lmi-value">'+esc(l.usage_count||0)+'</div></div>'+
         '</div>'+
         '<div class="domain-form">'+
-          '<span style="font-size:.82rem;color:var(--text2);white-space:nowrap"><i data-lucide="globe"></i> Domain binden:</span>'+
+          '<span style="font-size: var(--text-sm);color:var(--text2);white-space:nowrap"><i data-lucide="globe"></i> Domain binden:</span>'+
           '<input type="text" placeholder="meinrestaurant.de" id="dom-'+esc(l.license_key)+'" value="'+(l.associated_domain&&l.associated_domain!=='*'?esc(l.associated_domain):'')+'" style="max-width:280px">'+
           '<button class="btn btn-primary btn-sm" onclick="saveDomain(\''+esc(l.license_key)+'\')" >Speichern</button>'+
           '<span class="domain-msg" id="dom-msg-'+esc(l.license_key)+'"></span>'+
@@ -552,7 +572,7 @@ function loadLicenses(){
 function copyKey(el, key){
   navigator.clipboard.writeText(key).then(function(){
     var orig=el.textContent;
-    el.textContent='✓ Kopiert!';
+    el.textContent='âœ“ Kopiert!';
     setTimeout(function(){el.textContent=orig;},1500);
   }).catch(function(){});
 }
@@ -562,26 +582,26 @@ function saveDomain(key){
   var msg=document.getElementById('dom-msg-'+key);
   var domain=input?input.value.trim():'';
   if(!domain){msg.style.color='var(--accent2)';msg.textContent='Bitte Domain eingeben.';return;}
-  msg.style.color='var(--text2)';msg.textContent='Speichert…';
+  msg.style.color='var(--text2)';msg.textContent='Speichertâ€¦';
   API('/licenses/'+encodeURIComponent(key)+'/domain',{method:'PATCH',body:JSON.stringify({domain:domain})})
     .then(function(d){
-      msg.style.color='var(--accent3)';msg.textContent='✓ '+esc(d.domain)+' gespeichert.';
+      msg.style.color='var(--accent3)';msg.textContent='âœ“ '+esc(d.domain)+' gespeichert.';
     })
     .catch(function(e){
-      msg.style.color='var(--accent2)';msg.textContent='✗ '+esc(e.message||'Fehler');
+      msg.style.color='var(--accent2)';msg.textContent='âœ— '+esc(e.message||'Fehler');
     });
 }
 
-// ── Shop ──────────────────────────────────────────────────────────────────────
+// â”€â”€ Shop â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 var _selectedPlan = null;
-var _shopPlansMap = {};   // plan_id → plan object, sicherer als JSON.stringify im onclick
+var _shopPlansMap = {};   // plan_id â†’ plan object, sicherer als JSON.stringify im onclick
 
 function loadShop(){
   var el=document.getElementById('shop-content');
   el.innerHTML='<div class="loading"><div class="spinner"></div></div>';
   API('/plans').then(function(d){
     var plans=(d.plans||[]);
-    if(!plans.length){el.innerHTML='<p style="color:var(--text2)">Keine Pläne verfügbar.</p>';return;}
+    if(!plans.length){el.innerHTML='<p style="color:var(--text2)">Keine PlÃ¤ne verfÃ¼gbar.</p>';return;}
     _shopPlansMap={};
     plans.forEach(function(p){ _shopPlansMap[p.plan_id]=p; });
     el.innerHTML='<div class="plan-grid">'+plans.map(function(p){
@@ -591,14 +611,14 @@ function loadShop(){
       var price=parseFloat(p.price)||0;
       var priceHtml=price===0
         ?'<div class="plan-price">Kostenlos</div>'
-        :'<div class="plan-price">'+price.toFixed(0)+' €<span> / Jahr</span></div>';
+        :'<div class="plan-price">'+price.toFixed(0)+' â‚¬<span> / Jahr</span></div>';
       return '<div class="plan-card'+(isPopular?' popular':'')+'">'+
         (isPopular?'<div class="plan-popular-badge"><i data-lucide="star"></i> Beliebt</div>':'')+
         '<div class="plan-name">'+esc(p.label)+'</div>'+
         '<div class="plan-desc">'+esc(p.description||'')+'</div>'+
         priceHtml+
         '<ul class="plan-features">'+feats.map(function(f){return '<li>'+esc(f)+'</li>';}).join('')+'</ul>'+
-        '<button class="btn btn-primary" style="margin-top:auto;justify-content:center" onclick="openOrderModalById(\''+esc(p.plan_id)+'\')">'+
+        '<button class="btn btn-primary" style="margin-top: auto;justify-content:center" onclick="openOrderModalById(\''+esc(p.plan_id)+'\')">'+
           (price===0?'Kostenlos starten':'Jetzt bestellen')+
         '</button>'+
       '</div>';
@@ -619,7 +639,7 @@ function openOrderModal(plan){
   document.getElementById('order-plan-info').innerHTML=
     '<strong>'+esc(plan.label)+'</strong> &mdash; '+
     (price===0?'<span style="color:var(--accent3)">Kostenlos</span>':
-     '<span style="color:var(--accent);font-weight:700">'+price.toFixed(2)+' € / Jahr</span>')+
+     '<span style="color:var(--accent);font-weight:700">'+price.toFixed(2)+' â‚¬ / Jahr</span>')+
     '<br><span style="color:var(--text2)">'+esc(plan.description||'')+'</span>';
   document.getElementById('order-domain').value='';
   document.getElementById('order-alert').innerHTML='';
@@ -638,36 +658,36 @@ function confirmOrder(){
   var domain=document.getElementById('order-domain').value.trim();
   if(!domain){
     document.getElementById('order-domain').style.borderColor='var(--accent2)';
-    document.getElementById('order-alert').innerHTML='<div style="color:var(--accent2);font-size:.85rem;">Bitte Domain eingeben.</div>';
+    document.getElementById('order-alert').innerHTML='<div style="color:var(--accent2);font-size: var(--text-sm);">Bitte Domain eingeben.</div>';
     return;
   }
   var btn=document.getElementById('order-confirm-btn');
-  btn.disabled=true;btn.textContent='Wird übermittelt…';
+  btn.disabled=true;btn.textContent='Wird Ã¼bermitteltâ€¦';
   API('/licenses/book',{method:'POST',body:JSON.stringify({plan_id:_selectedPlan.plan_id,domain:domain})})
     .then(function(d){
       closeOrderModal();
       document.getElementById('shop-content').innerHTML=
-        '<div style="background:rgba(95,191,106,.1);border:1px solid rgba(95,191,106,.3);border-radius:10px;padding:1.5rem;max-width:480px;">'+
-        '<h3 style="color:var(--accent3);margin-bottom:.5rem;display:flex;align-items:center;gap:.45rem"><i data-lucide="check-circle"></i> Bestellung eingegangen!</h3>'+
-        '<p style="color:var(--text);margin-bottom:.7rem;">Deine Lizenz wurde reserviert. Du erhältst in Kürze eine Rechnung per E-Mail.</p>'+
-        '<p style="font-size:.85rem;color:var(--text2);">Lizenz-Key: <code style="background:var(--bg3);padding:.1rem .4rem;border-radius:4px;">'+esc(d.license_key)+'</code></p>'+
-        '<p style="font-size:.83rem;color:var(--text2);margin-top:.5rem;">Die Lizenz wird nach Zahlungseingang aktiviert.</p>'+
-        '<button class="btn btn-ghost btn-sm" style="margin-top:1rem" onclick="switchTab(\'licenses\')"><i data-lucide="key-round"></i> Zu meinen Lizenzen</button>'+
+        '<div style="background:rgba(95,191,106,.1);border:1px solid rgba(95,191,106,.3);border-radius: var(--radius-lg);padding: var(--space-6);max-width:480px;">'+
+        '<h3 style="color:var(--accent3);margin-bottom: var(--space-2);display:flex;align-items:center;gap:.45rem"><i data-lucide="check-circle"></i> Bestellung eingegangen!</h3>'+
+        '<p style="color:var(--text);margin-bottom: var(--space-3);">Deine Lizenz wurde reserviert. Du erhÃ¤ltst in KÃ¼rze eine Rechnung per E-Mail.</p>'+
+        '<p style="font-size: var(--text-sm);color:var(--text2);">Lizenz-Key: <code style="background:var(--bg3);padding: .1rem var(--space-2);border-radius: var(--radius-sm);">'+esc(d.license_key)+'</code></p>'+
+        '<p style="font-size: var(--text-sm);color:var(--text2);margin-top: var(--space-2);">Die Lizenz wird nach Zahlungseingang aktiviert.</p>'+
+        '<button class="btn btn-ghost btn-sm" style="margin-top: var(--space-4)" onclick="switchTab(\'licenses\')"><i data-lucide="key-round"></i> Zu meinen Lizenzen</button>'+
         '</div>';
     })
     .catch(function(e){
       btn.disabled=false;btn.innerHTML='<i data-lucide="check"></i> Verbindlich bestellen';
-      document.getElementById('order-alert').innerHTML='<div style="color:var(--accent2);font-size:.85rem;margin-top:.5rem;">'+esc(e.message||'Fehler beim Bestellen.')+'</div>';
+      document.getElementById('order-alert').innerHTML='<div style="color:var(--accent2);font-size: var(--text-sm);margin-top: var(--space-2);">'+esc(e.message||'Fehler beim Bestellen.')+'</div>';
     });
 }
 
-// Klick außerhalb modal schließt es
+// Klick auÃŸerhalb modal schlieÃŸt es
 document.addEventListener('click',function(e){
   var modal=document.getElementById('order-modal');
   if(modal&&modal.classList.contains('open')&&e.target===modal)closeOrderModal();
 });
 
-// ── Portal-Rechnungen ─────────────────────────────────────────────────────────
+// â”€â”€ Portal-Rechnungen â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function loadPortalInvoices(){
   var el=document.getElementById('portal-inv-list');
   el.innerHTML='<div class="loading"><div class="spinner"></div></div>';
@@ -678,17 +698,17 @@ function loadPortalInvoices(){
       return;
     }
     el.innerHTML='<div class="table-wrap"><table class="data-table"><thead><tr>'+
-      '<th>Nummer</th><th>Datum</th><th>Betrag</th><th>Fällig</th><th>Status</th><th></th>'+
+      '<th>Nummer</th><th>Datum</th><th>Betrag</th><th>FÃ¤llig</th><th>Status</th><th></th>'+
       '</tr></thead><tbody>'+
       invs.map(function(inv){
         var statusColor={draft:'var(--text2)',sent:'var(--accent)',overdue:'var(--accent2)',paid:'var(--accent3)',cancelled:'var(--text2)'}[inv.status]||'var(--text2)';
-        var statusLabel={draft:'Entwurf',sent:'Offen',overdue:'Überfällig',paid:'Bezahlt',cancelled:'Storniert'}[inv.status]||inv.status;
+        var statusLabel={draft:'Entwurf',sent:'Offen',overdue:'ÃœberfÃ¤llig',paid:'Bezahlt',cancelled:'Storniert'}[inv.status]||inv.status;
         return '<tr>'+
-          '<td><strong>'+esc(inv.invoice_number||'–')+'</strong></td>'+
+          '<td><strong>'+esc(inv.invoice_number||'â€“')+'</strong></td>'+
           '<td>'+fmtDateShort(inv.created_at)+'</td>'+
-          '<td><strong>'+(parseFloat(inv.amount_gross)||0).toFixed(2)+' €</strong></td>'+
-          '<td>'+(inv.due_date?fmtDateShort(inv.due_date):'–')+'</td>'+
-          '<td><span style="color:'+statusColor+';font-weight:600;font-size:.82rem;">'+esc(statusLabel)+'</span></td>'+
+          '<td><strong>'+(parseFloat(inv.amount_gross)||0).toFixed(2)+' â‚¬</strong></td>'+
+          '<td>'+(inv.due_date?fmtDateShort(inv.due_date):'â€“')+'</td>'+
+          '<td><span style="color:'+statusColor+';font-weight: 500;font-size: var(--text-sm);">'+esc(statusLabel)+'</span></td>'+
           '<td>'+(inv.pdf_path||inv.id?'<button class="btn btn-ghost btn-sm" onclick="downloadInv(\''+esc(inv.id)+'\',\''+esc(inv.invoice_number||inv.id)+'\')"><i data-lucide="file-text"></i> PDF</button>':'')+'</td>'+
         '</tr>';
       }).join('')+
@@ -700,7 +720,7 @@ function loadPortalInvoices(){
 
 function downloadInv(id,num){
   fetch('/api/portal/invoices/'+encodeURIComponent(id)+'/pdf',{headers:{'Authorization':'Bearer '+TOKEN}})
-    .then(function(r){if(!r.ok)throw new Error('PDF nicht verfügbar');return r.blob();})
+    .then(function(r){if(!r.ok)throw new Error('PDF nicht verfÃ¼gbar');return r.blob();})
     .then(function(b){
       var u=URL.createObjectURL(b);
       var a=document.createElement('a');a.href=u;a.download='Rechnung-'+num+'.pdf';
@@ -709,7 +729,7 @@ function downloadInv(id,num){
     }).catch(function(e){alert(e.message);});
 }
 
-// ── Kaufhistorie ──────────────────────────────────────────────────────────────
+// â”€â”€ Kaufhistorie â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function loadHistory(){
   document.getElementById('hist-table').innerHTML='<div class="loading"><div class="spinner"></div></div>';
   API('/history').then(function(d){
@@ -719,37 +739,37 @@ function loadHistory(){
       hist.map(function(h){
         return '<tr>'+
           '<td>'+fmtDate(h.created_at)+'</td>'+
-          '<td><code style="font-size:.8rem">'+esc((h.license_key||'').slice(0,18))+'&hellip;</code></td>'+
+          '<td><code style="font-size: var(--text-sm)">'+esc((h.license_key||'').slice(0,18))+'&hellip;</code></td>'+
           '<td><span class="badge badge-'+esc(h.plan)+'">'+esc(h.plan)+'</span></td>'+
           '<td><span class="badge badge-'+esc(h.action)+'">'+esc(h.action)+'</span></td>'+
-          '<td style="font-weight:600;color:'+(h.amount?'var(--accent3)':'var(--text2)')+'">'+ fmtEur(h.amount)+'</td>'+
-          '<td style="font-size:.82rem;max-width:180px">'+esc(h.note||'—')+'</td>'+
+          '<td style="font-weight: 500;color:'+(h.amount?'var(--accent3)':'var(--text2)')+'">'+ fmtEur(h.amount)+'</td>'+
+          '<td style="font-size: var(--text-sm);max-width:180px">'+esc(h.note||'â€”')+'</td>'+
         '</tr>';
-      }).join('')+'</tbody></table>':'<div class="loading" style="padding:2rem">Keine Einträge.</div>';
+      }).join('')+'</tbody></table>':'<div class="loading" style="padding: var(--space-8)">Keine EintrÃ¤ge.</div>';
   }).catch(function(e){
-    document.getElementById('hist-table').innerHTML='<div class="alert alert-error" style="margin:1rem">'+esc(e.message||'Fehler')+'</div>';
+    document.getElementById('hist-table').innerHTML='<div class="alert alert-error" style="margin: var(--space-4)">'+esc(e.message||'Fehler')+'</div>';
   });
 }
 
-// ── Konto ─────────────────────────────────────────────────────────────────────
+// â”€â”€ Konto â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function loadAccount(){
   API('/me').then(function(d){
     var c=d.customer;
     document.getElementById('account-content').innerHTML=
       '<div class="card">'+
         '<div class="card-title"><i data-lucide="user"></i> Kontodaten</div>'+
-        '<table style="width:100%;border-collapse:collapse;font-size:.9rem">'+
-          '<tr><td style="padding:.5rem 0;color:var(--text2);width:140px">Name</td><td style="padding:.5rem 0;font-weight:600">'+esc(c.name)+'</td></tr>'+
-          '<tr><td style="padding:.5rem 0;color:var(--text2)">E-Mail</td><td style="padding:.5rem 0">'+esc(c.email)+'</td></tr>'+
-          (c.company?'<tr><td style="padding:.5rem 0;color:var(--text2)">Firma</td><td style="padding:.5rem 0">'+esc(c.company)+'</td></tr>':'')+
-          (c.phone?'<tr><td style="padding:.5rem 0;color:var(--text2)">Telefon</td><td style="padding:.5rem 0">'+esc(c.phone)+'</td></tr>':'')+
-          '<tr><td style="padding:.5rem 0;color:var(--text2)">Zahlungsstatus</td><td style="padding:.5rem 0"><span class="badge badge-'+(c.payment_status==='paid'?'active':'revoked')+'">'+esc(c.payment_status)+'</span></td></tr>'+
-          '<tr><td style="padding:.5rem 0;color:var(--text2)">Kunde seit</td><td style="padding:.5rem 0">'+fmtDateShort(c.created_at)+'</td></tr>'+
+        '<table style="width:100%;border-collapse:collapse;font-size: var(--text-sm)">'+
+          '<tr><td style="padding: var(--space-2) 0;color:var(--text2);width:140px">Name</td><td style="padding: var(--space-2) 0;font-weight: 500">'+esc(c.name)+'</td></tr>'+
+          '<tr><td style="padding: var(--space-2) 0;color:var(--text2)">E-Mail</td><td style="padding: var(--space-2) 0">'+esc(c.email)+'</td></tr>'+
+          (c.company?'<tr><td style="padding: var(--space-2) 0;color:var(--text2)">Firma</td><td style="padding: var(--space-2) 0">'+esc(c.company)+'</td></tr>':'')+
+          (c.phone?'<tr><td style="padding: var(--space-2) 0;color:var(--text2)">Telefon</td><td style="padding: var(--space-2) 0">'+esc(c.phone)+'</td></tr>':'')+
+          '<tr><td style="padding: var(--space-2) 0;color:var(--text2)">Zahlungsstatus</td><td style="padding: var(--space-2) 0"><span class="badge badge-'+(c.payment_status==='paid'?'active':'revoked')+'">'+esc(c.payment_status)+'</span></td></tr>'+
+          '<tr><td style="padding: var(--space-2) 0;color:var(--text2)">Kunde seit</td><td style="padding: var(--space-2) 0">'+fmtDateShort(c.created_at)+'</td></tr>'+
         '</table>'+
-        '<p style="margin-top:1rem;font-size:.82rem;color:var(--text2)">Möchtest du deine Daten ändern? Bitte kontaktiere uns direkt.</p>'+
+        '<p style="margin-top: var(--space-4);font-size: var(--text-sm);color:var(--text2)">MÃ¶chtest du deine Daten Ã¤ndern? Bitte kontaktiere uns direkt.</p>'+
       '</div>' +
-      '<div class="card" style="margin-top:1rem">'+
-        '<div class="card-title"><i data-lucide="key-round"></i> Passwort ändern</div>'+
+      '<div class="card" style="margin-top: var(--space-4)">'+
+        '<div class="card-title"><i data-lucide="key-round"></i> Passwort Ã¤ndern</div>'+
         '<div id="account-pass-alert"></div>'+
         '<div class="form-group"><label>Aktuelles Passwort</label><input type="password" id="acc-pass-curr"></div>'+
         '<div class="form-group"><label>Neues Passwort (min. 10 Zeichen)</label><input type="password" id="acc-pass-new"></div>'+
@@ -765,23 +785,23 @@ function doChangePasswordVoluntary(){
   var curr = document.getElementById('acc-pass-curr').value;
   var newp = document.getElementById('acc-pass-new').value;
   var newp2 = document.getElementById('acc-pass-new2').value;
-  if(!curr || !newp || !newp2) { showAlert('account-pass-alert', 'Bitte alle Felder ausfüllen.', 'error'); return; }
+  if(!curr || !newp || !newp2) { showAlert('account-pass-alert', 'Bitte alle Felder ausfÃ¼llen.', 'error'); return; }
   if(newp.length < 10) { showAlert('account-pass-alert', 'Das neue Passwort muss mindestens 10 Zeichen haben.', 'error'); return; }
-  if(newp !== newp2) { showAlert('account-pass-alert', 'Die neuen Passwörter stimmen nicht überein.', 'error'); return; }
+  if(newp !== newp2) { showAlert('account-pass-alert', 'Die neuen PasswÃ¶rter stimmen nicht Ã¼berein.', 'error'); return; }
   if(curr === newp) { showAlert('account-pass-alert', 'Das neue Passwort muss sich vom aktuellen unterscheiden.', 'error'); return; }
 
-  showAlert('account-pass-alert', 'Passwort wird geändert...', 'info');
+  showAlert('account-pass-alert', 'Passwort wird geÃ¤ndert...', 'info');
 
   API('/change-password', {
     method: 'POST',
     body: JSON.stringify({ current_password: curr, new_password: newp })
   }).then(function(d) {
-    showAlert('account-pass-alert', '<i data-lucide="check-circle"></i> Passwort erfolgreich geändert.', 'success');
+    showAlert('account-pass-alert', '<i data-lucide="check-circle"></i> Passwort erfolgreich geÃ¤ndert.', 'success');
     document.getElementById('acc-pass-curr').value = '';
     document.getElementById('acc-pass-new').value = '';
     document.getElementById('acc-pass-new2').value = '';
   }).catch(function(e) {
-    showAlert('account-pass-alert', esc(e.message || 'Fehler beim Passwort-Ändern.'), 'error');
+    showAlert('account-pass-alert', esc(e.message || 'Fehler beim Passwort-Ã„ndern.'), 'error');
   });
 }
 
