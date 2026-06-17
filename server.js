@@ -72,6 +72,10 @@ if (process.env.NODE_ENV !== 'test') {
             if (adminCount > 0)
                 console.warn('⚠️  SICHERHEITSHINWEIS: SETUP_TOKEN ist gesetzt, aber Setup ist abgeschlossen. Entferne SETUP_TOKEN aus der .env-Datei!');
         }
+        for (const planId of ['STARTER', 'PRO', 'PRO_PLUS', 'ENTERPRISE']) {
+            const [[row]] = db.query('SELECT plan_id FROM plan_pricing WHERE plan_id = ?', [planId]);
+            if (!row) console.warn(`⚠️  Plan "${planId}" fehlt in plan_pricing — CMS-API liefert ihn nicht!`);
+        }
     } catch (e) {
         console.error('❌  Migration fehlgeschlagen:', e.message);
         process.exit(1);

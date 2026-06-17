@@ -341,10 +341,62 @@ router.get('/health', (req, res) => {
 // ── GET /plans (öffentlich) ───────────────────────────────────────────────────
 router.get('/plans', asyncHandler(async (req, res) => {
     const [rows] = db.query('SELECT * FROM plan_pricing WHERE active = 1 ORDER BY sort_order ASC');
-    res.json({ success: true, plans: rows.map(p => ({
+    const plans = rows.map(p => ({
         ...p,
-        features: parseJsonField(p.features, [])
-    }))});
+        features:     parseJsonField(p.features, []),
+        modules:      PLAN_DEFINITIONS[p.plan_id]?.modules      ?? null,
+        menu_items:   PLAN_DEFINITIONS[p.plan_id]?.menu_items   ?? null,
+        max_tables:   PLAN_DEFINITIONS[p.plan_id]?.max_tables   ?? null,
+        expires_days: PLAN_DEFINITIONS[p.plan_id]?.expires_days ?? null,
+    }));
+    res.set('Cache-Control', 'public, max-age=300');
+    res.json({ success: true, plans });
+}));
+
+// ── GET /licenses/:key/upgrades (License-JWT-Auth) ────────────────────────────
+const UPGRADE_ORDER = { FREE: 0, TRIAL: 0, STARTER: 1, PRO: 2, PRO_PLUS: 3, ENTERPRISE: 4 };
+
+router.get('/licenses/:key/upgrades', asyncHandler(async (req, res) => {
+    const key = req.params.key;
+
+    const authHeader = req.headers['authorization'] || '';
+    const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+    if (!token) return res.status(401).json({ success: false, message: 'License-Token fehlt.' });
+
+    let payload;
+    try {
+        payload = RSA_PUBLIC_KEY
+            ? jwt.verify(token, RSA_PUBLIC_KEY, { algorithms: ['RS256'] })
+            : jwt.verify(token, process.env.ADMIN_SECRET || '', { algorithms: ['HS256'] });
+    } catch {
+        return res.status(401).json({ success: false, message: 'Ungültiger License-Token.' });
+    }
+
+    if (payload.license_key !== key)
+        return res.status(403).json({ success: false, message: 'Token gehört nicht zu dieser Lizenz.' });
+
+    const [rows] = db.query(
+        "SELECT type FROM licenses WHERE license_key = ? AND status IN ('active', 'trial')", [key]
+    );
+    if (!rows.length) return res.status(404).json({ success: false, message: 'Lizenz nicht gefunden.' });
+
+    const currentType = rows[0].type;
+    const currentOrder = UPGRADE_ORDER[currentType] ?? 0;
+
+    const [pricingRows] = db.query('SELECT * FROM plan_pricing WHERE active = 1 ORDER BY sort_order ASC');
+    const upgrades = pricingRows
+        .filter(p => (UPGRADE_ORDER[p.plan_id] ?? 0) > currentOrder)
+        .map(p => ({
+            ...p,
+            features:     parseJsonField(p.features, []),
+            modules:      PLAN_DEFINITIONS[p.plan_id]?.modules      ?? null,
+            menu_items:   PLAN_DEFINITIONS[p.plan_id]?.menu_items   ?? null,
+            max_tables:   PLAN_DEFINITIONS[p.plan_id]?.max_tables   ?? null,
+            expires_days: PLAN_DEFINITIONS[p.plan_id]?.expires_days ?? null,
+        }));
+
+    res.set('Cache-Control', 'private, max-age=60');
+    res.json({ success: true, current_plan: currentType, upgrades });
 }));
 
 // ── GET /faq (öffentlich) ─────────────────────────────────────────────────────
