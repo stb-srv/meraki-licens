@@ -10,7 +10,7 @@ import rateLimit from 'express-rate-limit';
 import { getInvoiceWithItems, createInvoice, createInvoiceFromLicense } from '../invoiceHelper.js';
 import { getInvoicePDFBuffer } from '../pdfGenerator.js';
 import { PLAN_DEFINITIONS } from '../plans.js';
-import { generateKey, addAuditLog, asyncHandler, normalizeDomain } from '../helpers.js';
+import { generateKey, addAuditLog, asyncHandler, normalizeDomain, parseJsonField } from '../helpers.js';
 
 const router = Router();
 const PORTAL_SECRET = process.env.PORTAL_SECRET || '';
@@ -524,12 +524,17 @@ router.post('/licenses/:key/renew', requirePortalAuth, asyncHandler(async (req, 
         [newExpiry, key]
     );
 
+    let invoiceId = null;
     if (lic.type !== 'FREE' && lic.type !== 'TRIAL') {
-        try { createInvoiceFromLicense(key, req.customer.portal_username || req.customer.email); } catch {}
+        try {
+            invoiceId = createInvoiceFromLicense(key, req.customer.portal_username || req.customer.email);
+        } catch (invErr) {
+            console.error('[Portal/renew] Rechnung konnte nicht erstellt werden:', invErr.message);
+        }
     }
 
-    await addAuditLog('license_renewed_by_customer', { license_key: key, new_expiry: newExpiry, customer_id: req.customer.id }, req.customer.name);
-    res.json({ success: true, license_key: key, new_expiry: newExpiry });
+    await addAuditLog('license_renewed_by_customer', { license_key: key, new_expiry: newExpiry, invoice_id: invoiceId, customer_id: req.customer.id }, req.customer.name);
+    res.json({ success: true, license_key: key, new_expiry: newExpiry, invoice_id: invoiceId });
 }));
 
 router.get('/plans', asyncHandler(async (req, res) => {
