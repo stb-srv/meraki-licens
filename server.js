@@ -202,6 +202,23 @@ app.use('/api/v1/reseller', resellerRoutes);
 app.use('/status', statusRoutes);
 
 // ── Setup Wizard ──────────────────────────────────────────────────────────────
+app.get('/openapi.yaml', (req, res) => {
+    res.setHeader('Content-Type', 'application/yaml');
+    res.sendFile(path.join(__dirname, 'openapi.yaml'));
+});
+
+app.get('/docs', (req, res) => {
+    res.setHeader('Content-Type', 'text/html');
+    res.send(`<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8"><title>Meraki License Server – API Docs</title>
+<link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css">
+</head><body>
+<div id="swagger-ui"></div>
+<script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+<script>SwaggerUIBundle({ url: '/openapi.yaml', dom_id: '#swagger-ui', deepLinking: true });</script>
+</body></html>`);
+});
+
 app.get('/setup', (req, res) => res.sendFile(path.join(__dirname, 'public', 'setup.html')));
 
 // ── Static Files ──────────────────────────────────────────────────────────────

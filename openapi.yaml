@@ -1,0 +1,448 @@
+openapi: 3.1.0
+info:
+  title: Meraki License Server API
+  version: 1.0.0
+  description: |
+    REST API for managing restaurant-CMS licenses.
+    - **Public** endpoints (`/api/v1/`) — no auth, used by CMS instances
+    - **Portal** endpoints (`/api/portal/`) — JWT Bearer (customer session)
+    - **Admin** endpoints (`/api/admin/`) — JWT Bearer (admin session)
+
+servers:
+  - url: /api/v1
+    description: Public API
+  - url: /api/portal
+    description: Customer Portal API
+  - url: /api/admin
+    description: Admin API
+
+tags:
+  - name: license
+    description: License validation (CMS-facing)
+  - name: plans
+    description: Plan discovery
+  - name: portal
+    description: Customer self-service portal
+  - name: payment
+    description: Online payments (Mollie)
+  - name: admin
+    description: Admin operations
+
+components:
+  securitySchemes:
+    portalAuth:
+      type: http
+      scheme: bearer
+      description: Customer portal JWT (from POST /api/portal/login)
+    adminAuth:
+      type: http
+      scheme: bearer
+      description: Admin JWT (from POST /api/admin/login)
+    licenseAuth:
+      type: http
+      scheme: bearer
+      description: Signed license JWT (from POST /api/v1/validate)
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        success: { type: boolean, example: false }
+        message: { type: string }
+    LicenseStatus:
+      type: string
+      enum: [active, grace, expired, trial, suspended]
+    ValidateResponse:
+      type: object
+      properties:
+        valid:           { type: boolean }
+        status:          { $ref: '#/components/schemas/LicenseStatus' }
+        customer_name:   { type: string }
+        type:            { type: string, example: PRO }
+        plan_label:      { type: string }
+        expires_at:      { type: string, format: date-time }
+        grace_until:     { type: string, format: date-time, nullable: true }
+        allowed_modules: { type: object }
+        entitlements:    { type: object }
+        limits:          { type: object }
+        token:           { type: string, description: Signed RS256 JWT }
+    Plan:
+      type: object
+      properties:
+        plan_id:      { type: string, example: PRO }
+        label:        { type: string }
+        price:        { type: number }
+        currency:     { type: string, example: EUR }
+        modules:      { type: object }
+        menu_items:   { type: integer }
+        max_tables:   { type: integer }
+        expires_days: { type: integer }
+
+paths:
+  /validate:
+    post:
+      tags: [license]
+      summary: Validate a license key
+      description: Primary endpoint called by CMS. Returns a signed RS256 JWT for offline caching.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [license_key]
+              properties:
+                license_key: { type: string, example: MERAKI-PRO-ABCD-1234 }
+                domain:      { type: string, example: restaurant.example.com }
+      responses:
+        '200':
+          description: License valid (active or grace period)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ValidateResponse' }
+        '403':
+          description: Expired, suspended or invalid
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /refresh:
+    post:
+      tags: [license]
+      summary: Refresh a license token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [license_key]
+              properties:
+                license_key: { type: string }
+                domain:      { type: string }
+      responses:
+        '200':
+          description: Refreshed token
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ValidateResponse' }
+        '403':
+          description: Hard-expired or suspended
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /plans:
+    get:
+      tags: [plans]
+      summary: List active plans with features and pricing
+      description: CMS fetches this at startup for upgrade prompts. Cached 5 minutes.
+      responses:
+        '200':
+          description: Plan list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  plans:
+                    type: array
+                    items: { $ref: '#/components/schemas/Plan' }
+
+  /licenses/{key}/upgrades:
+    get:
+      tags: [license, plans]
+      summary: Available upgrade plans for a license
+      security: [licenseAuth: []]
+      parameters:
+        - in: path
+          name: key
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Upgrade options
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  current_plan: { type: string }
+                  upgrades:
+                    type: array
+                    items: { $ref: '#/components/schemas/Plan' }
+
+  /jwks:
+    get:
+      tags: [license]
+      summary: JWKS public key set
+      description: CMS uses this to verify RS256 tokens locally without server roundtrip.
+      responses:
+        '200':
+          description: JSON Web Key Set
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  keys: { type: array, items: { type: object } }
+
+  /payment/webhook:
+    post:
+      tags: [payment]
+      summary: Mollie payment webhook
+      description: |
+        Called by Mollie after payment. Verifies via API lookup + amount check.
+        Marks invoice paid and activates/renews license in one transaction.
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                id: { type: string, example: tr_WDqYK6vNCuA }
+      responses:
+        '200': { description: Processed }
+        '400': { description: Invalid id or amount mismatch }
+
+  /portal/login:
+    post:
+      tags: [portal]
+      summary: Customer portal login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:    { type: string }
+                password: { type: string }
+      responses:
+        '200':
+          description: Login OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:  { type: boolean }
+                  token:    { type: string }
+                  customer: { type: object }
+
+  /portal/invoices/{id}/checkout:
+    post:
+      tags: [portal, payment]
+      summary: Start Mollie checkout for an invoice
+      security: [portalAuth: []]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Checkout URL
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:      { type: boolean }
+                  checkout_url: { type: string }
+                  payment_id:   { type: string }
+
+  /portal/gdpr/export:
+    get:
+      tags: [portal]
+      summary: Export personal data (GDPR Art. 20)
+      security: [portalAuth: []]
+      responses:
+        '200':
+          description: JSON export
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  exported_at: { type: string }
+                  customer:    { type: object }
+                  licenses:    { type: array, items: { type: object } }
+                  invoices:    { type: array, items: { type: object } }
+
+  /portal/gdpr/delete-request:
+    post:
+      tags: [portal]
+      summary: Submit deletion request (GDPR Art. 17)
+      security: [portalAuth: []]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason: { type: string }
+      responses:
+        '200':
+          description: Request submitted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:    { type: boolean }
+                  request_id: { type: string }
+
+  /admin/login:
+    post:
+      tags: [admin]
+      summary: Admin login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password]
+              properties:
+                username: { type: string }
+                password: { type: string }
+      responses:
+        '200': { description: Login successful }
+        '401': { description: Invalid credentials }
+
+  /admin/licenses:
+    get:
+      tags: [admin]
+      summary: List licenses
+      security: [adminAuth: []]
+      parameters:
+        - in: query
+          name: search
+          schema: { type: string }
+        - in: query
+          name: status
+          schema: { type: string }
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+        - in: query
+          name: limit
+          schema: { type: integer, default: 50 }
+      responses:
+        '200': { description: Paginated license list }
+
+  /admin/licenses/{key}/entitlements:
+    get:
+      tags: [admin]
+      summary: Get effective entitlements for a license
+      security: [adminAuth: []]
+      parameters:
+        - in: path
+          name: key
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Plan modules + custom overrides + effective merged result
+    patch:
+      tags: [admin]
+      summary: Set custom feature-flag overrides for a license
+      security: [adminAuth: []]
+      parameters:
+        - in: path
+          name: key
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example: { analytics: true, backup: false }
+      responses:
+        '200': { description: Entitlements saved }
+
+  /admin/settings/rotate-keys:
+    post:
+      tags: [admin]
+      summary: Rotate RSA signing key (SuperAdmin)
+      description: Generates new RSA-2048 pair, retires old key. Existing tokens stay valid via kid lookup.
+      security: [adminAuth: []]
+      responses:
+        '200':
+          description: New key active
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  kid:     { type: string }
+
+  /admin/settings/sessions:
+    get:
+      tags: [admin]
+      summary: List active admin sessions (SuperAdmin)
+      security: [adminAuth: []]
+      responses:
+        '200': { description: Active session list }
+
+  /admin/customers/gdpr-requests:
+    get:
+      tags: [admin]
+      summary: List pending deletion requests (SuperAdmin)
+      security: [adminAuth: []]
+      responses:
+        '200': { description: Deletion request list }
+
+  /admin/customers/gdpr-requests/{id}/process:
+    post:
+      tags: [admin]
+      summary: Anonymize customer data (SuperAdmin)
+      security: [adminAuth: []]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Customer anonymized, invoices retained }
+
+  /admin/settings/webhook-dead-letters:
+    get:
+      tags: [admin]
+      summary: List unresolved webhook dead letters (SuperAdmin)
+      security: [adminAuth: []]
+      responses:
+        '200': { description: Dead letter list }
+
+  /admin/settings/webhook-dead-letters/{id}/retry:
+    post:
+      tags: [admin]
+      summary: Retry a failed webhook delivery (SuperAdmin)
+      security: [adminAuth: []]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Retry successful }
+        '502': { description: Retry failed again }
+
+  /status/metrics:
+    get:
+      tags: [admin]
+      summary: Prometheus metrics
+      description: No auth. Suitable for prometheus scrape_config.
+      responses:
+        '200':
+          description: Prometheus text format
+          content:
+            text/plain:
+              schema: { type: string }
