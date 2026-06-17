@@ -7,7 +7,7 @@ import path from 'path';
 import db from '../db.js';
 import { sendTemplateMail } from '../mailer/index.js';
 import rateLimit from 'express-rate-limit';
-import { getInvoiceWithItems, createInvoice } from '../invoiceHelper.js';
+import { getInvoiceWithItems, createInvoice, createInvoiceFromLicense } from '../invoiceHelper.js';
 import { getInvoicePDFBuffer } from '../pdfGenerator.js';
 import { PLAN_DEFINITIONS } from '../plans.js';
 import { generateKey, addAuditLog, asyncHandler, normalizeDomain } from '../helpers.js';
@@ -198,6 +198,95 @@ router.get('/licenses', requirePortalAuth, async (req, res) => {
         res.status(500).json({ success: false, message: 'Fehler beim Laden der Lizenzen.' });
     }
 });
+
+// ── POST /licenses/:key/upgrade ──────────────────────────────────────────────
+const UPGRADE_ORDER = { FREE: 0, TRIAL: 0, STARTER: 1, PRO: 2, PRO_PLUS: 3, ENTERPRISE: 4 };
+
+router.post('/licenses/:key/upgrade', requirePortalAuth, asyncHandler(async (req, res) => {
+    const { key } = req.params;
+    const { new_type } = req.body;
+    const upgradableTypes = ['STARTER', 'PRO', 'PRO_PLUS', 'ENTERPRISE'];
+
+    if (!new_type || !upgradableTypes.includes(new_type))
+        return res.status(400).json({ success: false, message: `Ungültiger Plan. Erlaubt: ${upgradableTypes.join(', ')}` });
+
+    const [[license]] = db.query(
+        'SELECT * FROM licenses WHERE license_key = ? AND customer_id = ?',
+        [key, req.customer.id]
+    );
+    if (!license)
+        return res.status(404).json({ success: false, message: 'Lizenz nicht gefunden.' });
+    if (license.status !== 'active')
+        return res.status(400).json({ success: false, message: 'Nur aktive Lizenzen können upgraded werden.' });
+    if ((UPGRADE_ORDER[license.type] || 0) >= (UPGRADE_ORDER[new_type] || 0))
+        return res.status(400).json({ success: false, message: 'Downgrade nicht erlaubt. Bitte wende dich an den Support.' });
+
+    const plan = PLAN_DEFINITIONS[new_type];
+    const newExpiry = toDbDate(new Date(Date.now() + plan.expires_days * 86400000));
+
+    db.query(
+        "UPDATE licenses SET type = ?, expires_at = ?, expiry_notified_at = NULL WHERE license_key = ?",
+        [new_type, newExpiry, key]
+    );
+
+    let invoiceId = null;
+    try {
+        invoiceId = createInvoiceFromLicense(key, req.customer.portal_username || req.customer.email);
+    } catch (invErr) {
+        console.error('[Portal/upgrade] Auto-Rechnung fehlgeschlagen:', invErr.message);
+    }
+
+    await addAuditLog('portal_license_upgraded', {
+        license_key: key, customer_id: req.customer.id,
+        old_type: license.type, new_type, invoice_id: invoiceId
+    });
+
+    const [[updated]] = db.query('SELECT * FROM licenses WHERE license_key = ?', [key]);
+    res.json({ success: true, license: updated, invoice_created: !!invoiceId });
+}));
+
+// ── GET /stats ────────────────────────────────────────────────────────────────
+router.get('/stats', requirePortalAuth, asyncHandler(async (req, res) => {
+    const [licenses] = db.query(
+        `SELECT license_key, type, status, usage_count, max_devices, analytics_features
+         FROM licenses WHERE customer_id = ? AND status = 'active'`,
+        [req.customer.id]
+    );
+
+    let totalValidations = 0, totalDevices = 0;
+    const featureCounts = {};
+
+    for (const lic of licenses) {
+        totalValidations += lic.usage_count || 0;
+        try {
+            const features = JSON.parse(lic.analytics_features || '{}');
+            for (const [name, count] of Object.entries(features))
+                featureCounts[name] = (featureCounts[name] || 0) + (count || 0);
+        } catch {}
+        try {
+            const [[{ cnt }]] = db.query(
+                'SELECT COUNT(*) AS cnt FROM license_devices WHERE license_key = ?',
+                [lic.license_key]
+            );
+            totalDevices += cnt || 0;
+        } catch {}
+    }
+
+    const topFeatures = Object.entries(featureCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5)
+        .map(([name, count]) => ({ name, count }));
+
+    res.json({
+        success: true,
+        stats: {
+            total_validations: totalValidations,
+            active_devices: totalDevices,
+            active_licenses: licenses.length,
+            top_features: topFeatures
+        }
+    });
+}));
 
 // ── PATCH /licenses/:key/domain ───────────────────────────────────────────────
 router.patch('/licenses/:key/domain', requirePortalAuth, async (req, res) => {

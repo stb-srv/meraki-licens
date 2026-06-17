@@ -606,7 +606,13 @@
       border: 1px solid rgba(1,105,111,0.2);
       color: var(--primary);
     }
-    
+    #toast-container{position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;display:flex;flex-direction:column;gap:.5rem;pointer-events:none;}
+    .toast{padding:.6rem 1rem;border-radius:8px;font-size:.85rem;font-weight:500;max-width:340px;box-shadow:0 4px 16px rgba(0,0,0,.35);opacity:1;transform:translateY(0);transition:opacity .35s,transform .35s;pointer-events:all;}
+    .toast-out{opacity:0;transform:translateY(8px);}
+    .toast-success{background:var(--success-hl);border:1px solid rgba(67,122,34,.35);color:var(--success);}
+    .toast-error{background:var(--danger-hl);border:1px solid rgba(161,53,68,.35);color:var(--danger);}
+    .toast-info{background:var(--primary-hl);border:1px solid rgba(1,105,111,.25);color:var(--primary);}
+
     .dashboard {
       display: flex;
       flex: 1;
@@ -2286,7 +2292,7 @@ function saveInvoice() {
   var note        = document.getElementById('ni-note').value || null;
 
   if (!customer_id || isNaN(amount) || amount <= 0) {
-    alert('Bitte Kunde und Betrag angeben.');
+    toast('Bitte Kunde und Betrag angeben.', 'error');
     return;
   }
 
@@ -2485,7 +2491,7 @@ function resendInvoice(id) {
       if (d && d.mail_error) {
         showError('Rechnung als gesendet markiert, aber E-Mail fehlgeschlagen:\n' + d.mail_error + '\n\nBitte SMTP-Einstellungen unter ⚙ prüfen.');
       } else {
-        alert('Rechnung erfolgreich gesendet.');
+        toast('Rechnung erfolgreich gesendet.', 'success');
       }
       loadInvoices();
     })
@@ -2546,7 +2552,7 @@ function saveInvoiceSettings() {
   };
   
   if (!body.company_name || !body.company_address) {
-    alert('Firma und Adresse sind Pflichtfelder.');
+    toast('Firma und Adresse sind Pflichtfelder.', 'error');
     return;
   }
   
@@ -2555,7 +2561,7 @@ function saveInvoiceSettings() {
     body: JSON.stringify(body)
   }).then(function() {
     closeModal('modal-invoice-settings');
-    alert('Einstellungen erfolgreich gespeichert.');
+    toast('Einstellungen erfolgreich gespeichert.', 'success');
   }).catch(function(e) {
     showError('Fehler beim Speichern der Einstellungen: ' + (e.message || String(e)));
   });
@@ -2768,6 +2774,16 @@ function showAlert(elId,msg,type){
   type=type||'error';
   var el=document.getElementById(elId);
   if(el)el.innerHTML='<div class="alert alert-'+type+'">'+msg+'</div>';
+}
+
+function toast(msg, type) {
+  var c=document.getElementById('toast-container');
+  if(!c)return;
+  var t=document.createElement('div');
+  t.className='toast toast-'+(type||'info');
+  t.textContent=msg;
+  c.appendChild(t);
+  setTimeout(function(){t.classList.add('toast-out');setTimeout(function(){t.remove();},350);},4000);
 }
 
 function showPublicPage(name){
@@ -3962,6 +3978,8 @@ function applyConsent(consent) {
     </div>
   </div>
 </div>
+
+<div id="toast-container"></div>
 
 </body>
 </html>

@@ -138,6 +138,20 @@
     .modal-box h3 .lucide{color:var(--accent);}
     .modal-footer{display:flex;gap:.7rem;justify-content:flex-end;margin-top: var(--space-6);}
     code{font-family:var(--font-mono);}
+    #toast-container{position:fixed;bottom: var(--space-6);right: var(--space-6);z-index:9999;display:flex;flex-direction:column;gap:.5rem;pointer-events:none;}
+    .toast{padding: var(--space-3) var(--space-4);border-radius: var(--radius-md);font-size: var(--text-sm);font-weight:500;max-width:340px;box-shadow:0 4px 16px rgba(0,0,0,.35);opacity:1;transform:translateY(0);transition:opacity .35s,transform .35s;pointer-events:all;}
+    .toast-out{opacity:0;transform:translateY(8px);}
+    .toast-success{background:rgba(95,191,106,.15);border:1px solid rgba(95,191,106,.35);color:var(--accent3);}
+    .toast-error{background:rgba(255,93,108,.15);border:1px solid rgba(255,93,108,.35);color:var(--accent2);}
+    .toast-info{background:var(--accent-dim);border:1px solid rgba(0,191,165,.25);color:var(--accent);}
+    .skel-box{background:var(--card);border:1px solid var(--border);border-radius: var(--radius);padding: var(--space-6);margin-bottom: var(--space-4);}
+    .skel-line{background:linear-gradient(90deg,var(--bg3) 25%,var(--border) 50%,var(--bg3) 75%);background-size:200% 100%;animation:skel-shimmer 1.4s infinite;border-radius: var(--radius-sm);height:14px;margin-bottom: var(--space-3);}
+    .skel-line.wide{width:70%}.skel-line.mid{width:45%}.skel-line.short{width:30%}
+    @keyframes skel-shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:.8rem;margin-bottom: var(--space-6);}
+    .stat-card{background:var(--card);border:1px solid var(--border);border-radius: var(--radius);padding: var(--space-4);text-align:center;}
+    .stat-val{font-size: var(--text-xl);font-weight:700;color:var(--accent);line-height:1.1;}
+    .stat-lbl{font-size: var(--text-xs);color:var(--text2);margin-top: var(--space-1);}
   </style>
 </head>
 <body>
@@ -238,7 +252,8 @@
     <main class="main-area">
       <div id="tab-licenses" class="tab-panel active">
         <div class="dash-header"><h2><i data-lucide="key-round"></i> Meine Lizenzen</h2><button class="btn btn-ghost btn-sm" onclick="loadLicenses()"><i data-lucide="refresh-cw"></i> Aktualisieren</button></div>
-        <div id="lic-list"><div class="loading"><div class="spinner"></div></div></div>
+        <div id="lic-stats-row"></div>
+        <div id="lic-list"><div class="skel-box"><div class="skel-line wide"></div><div class="skel-line mid"></div></div></div>
       </div>
       <!-- ── Shop ─────────────────────────────────────────────────── -->
       <div id="tab-shop" class="tab-panel">
@@ -344,6 +359,66 @@ function fmtEur(v){return v!=null&&v!==''?parseFloat(v).toFixed(2)+' €':'—';
 function showAlert(elId,msg,type){
   var el=document.getElementById(elId);
   if(el)el.innerHTML='<div class="alert alert-'+(type||'error')+'">'+msg+'</div>';
+}
+
+function toast(msg, type) {
+  var c=document.getElementById('toast-container');
+  if(!c)return;
+  var t=document.createElement('div');
+  t.className='toast toast-'+(type||'info');
+  t.textContent=msg;
+  c.appendChild(t);
+  setTimeout(function(){t.classList.add('toast-out');setTimeout(function(){t.remove();},350);},4000);
+}
+
+var _upgradeLicenseKey='';
+function openUpgradeModal(key,currentType){
+  _upgradeLicenseKey=key;
+  document.getElementById('upgrade-current-plan').textContent=currentType;
+  document.getElementById('upgrade-alert').innerHTML='';
+  document.getElementById('upgrade-confirm-btn').disabled=false;
+  var sel=document.getElementById('upgrade-plan-select');
+  var order={FREE:0,TRIAL:0,STARTER:1,PRO:2,PRO_PLUS:3,ENTERPRISE:4};
+  var cur=order[currentType]||0;
+  for(var i=0;i<sel.options.length;i++){
+    sel.options[i].disabled=(order[sel.options[i].value]||0)<=cur;
+  }
+  sel.value=sel.options[Math.min(cur,sel.options.length-1)].value;
+  for(var j=0;j<sel.options.length;j++){if(!sel.options[j].disabled){sel.value=sel.options[j].value;break;}}
+  document.getElementById('upgrade-modal').classList.add('open');
+  if(window.lucide)window.lucide.createIcons();
+}
+function closeUpgradeModal(){document.getElementById('upgrade-modal').classList.remove('open');}
+function confirmUpgrade(){
+  var newType=document.getElementById('upgrade-plan-select').value;
+  var btn=document.getElementById('upgrade-confirm-btn');
+  btn.disabled=true;btn.textContent='Wird gesendet…';
+  API('/licenses/'+encodeURIComponent(_upgradeLicenseKey)+'/upgrade',{method:'POST',body:JSON.stringify({new_type:newType})})
+    .then(function(){
+      closeUpgradeModal();
+      toast('Lizenz erfolgreich auf '+newType+' upgraded!','success');
+      loadLicenses();
+    })
+    .catch(function(e){
+      document.getElementById('upgrade-alert').innerHTML='<div style="color:var(--accent2);font-size: var(--text-sm)">'+esc(e.message||'Fehler beim Upgrade.')+'</div>';
+      btn.disabled=false;btn.innerHTML='<i data-lucide="arrow-up-circle"></i> Upgrade bestätigen';
+      if(window.lucide)window.lucide.createIcons();
+    });
+}
+
+function loadLicenseStats(){
+  var el=document.getElementById('lic-stats-row');
+  if(!el)return;
+  API('/stats').then(function(d){
+    var s=d.stats||{};
+    el.innerHTML=
+      '<div class="stats-grid">'+
+      '<div class="stat-card"><div class="stat-val">'+esc(s.active_licenses||0)+'</div><div class="stat-lbl">Aktive Lizenzen</div></div>'+
+      '<div class="stat-card"><div class="stat-val">'+esc(s.total_validations||0)+'</div><div class="stat-lbl">Validierungen gesamt</div></div>'+
+      '<div class="stat-card"><div class="stat-val">'+esc(s.active_devices||0)+'</div><div class="stat-lbl">Aktive Geräte</div></div>'+
+      (s.top_features&&s.top_features.length?'<div class="stat-card"><div class="stat-val" style="font-size: var(--text-base)">'+esc(s.top_features[0].name)+'</div><div class="stat-lbl">Meist genutztes Feature</div></div>':'')+
+      '</div>';
+  }).catch(function(){el.innerHTML='';});
 }
 
 function showPage(name){
@@ -526,7 +601,8 @@ function doLogout(){
 
 // ── Lizenzen ──────────────────────────────────────────────────────────────────
 function loadLicenses(){
-  document.getElementById('lic-list').innerHTML='<div class="loading"><div class="spinner"></div></div>';
+  document.getElementById('lic-list').innerHTML='<div class="skel-box"><div class="skel-line wide"></div><div class="skel-line mid"></div><div class="skel-line short"></div></div><div class="skel-box"><div class="skel-line wide"></div><div class="skel-line mid"></div></div>';
+  loadLicenseStats();
   API('/licenses').then(function(d){
     var lics=d.licenses||[];
     if(!lics.length){
@@ -562,6 +638,10 @@ function loadLicenses(){
           '<button class="btn btn-primary btn-sm" onclick="saveDomain(\''+esc(l.license_key)+'\')" >Speichern</button>'+
           '<span class="domain-msg" id="dom-msg-'+esc(l.license_key)+'"></span>'+
         '</div>'+
+        (l.status==='active'&&l.type!=='ENTERPRISE'?
+          '<div style="margin-top: var(--space-3);padding-top: var(--space-3);border-top:1px solid var(--border)">'+
+          '<button class="btn btn-ghost btn-sm" onclick="openUpgradeModal(\''+esc(l.license_key)+'\',\''+esc(l.type)+'\')"><i data-lucide="arrow-up-circle"></i> Plan upgraden</button>'+
+          '</div>':'')+
       '</div>';
     }).join('');
   }).catch(function(e){
@@ -685,6 +765,8 @@ function confirmOrder(){
 document.addEventListener('click',function(e){
   var modal=document.getElementById('order-modal');
   if(modal&&modal.classList.contains('open')&&e.target===modal)closeOrderModal();
+  var umodal=document.getElementById('upgrade-modal');
+  if(umodal&&umodal.classList.contains('open')&&e.target===umodal)closeUpgradeModal();
 });
 
 // ── Portal-Rechnungen ─────────────────────────────────────────────────────────
@@ -726,7 +808,7 @@ function downloadInv(id,num){
       var a=document.createElement('a');a.href=u;a.download='Rechnung-'+num+'.pdf';
       document.body.appendChild(a);a.click();a.remove();
       setTimeout(function(){URL.revokeObjectURL(u);},2000);
-    }).catch(function(e){alert(e.message);});
+    }).catch(function(e){toast(e.message||'PDF nicht verfügbar','error');});
 }
 
 // ── Kaufhistorie ──────────────────────────────────────────────────────────────
@@ -807,5 +889,31 @@ function doChangePasswordVoluntary(){
 
 init();
 </script>
+
+<div id="toast-container"></div>
+
+<!-- Upgrade Modal -->
+<div id="upgrade-modal" class="modal-overlay">
+  <div class="modal-box">
+    <h3><i data-lucide="arrow-up-circle"></i> Lizenz upgraden</h3>
+    <p style="color:var(--text2);font-size: var(--text-sm);margin-bottom: var(--space-4)">
+      Aktueller Plan: <strong id="upgrade-current-plan"></strong>
+    </p>
+    <div class="form-group">
+      <label>Neuer Plan</label>
+      <select id="upgrade-plan-select" style="width:100%;background:var(--bg2);border:1px solid var(--border);border-radius: var(--radius-md);padding: var(--space-2) var(--space-3);color:var(--text);font-size: var(--text-sm);outline:none;">
+        <option value="STARTER">STARTER – 29 €/Jahr</option>
+        <option value="PRO">PRO – 59 €/Jahr</option>
+        <option value="PRO_PLUS">PRO_PLUS – 89 €/Jahr</option>
+        <option value="ENTERPRISE">ENTERPRISE – 199 €/Jahr</option>
+      </select>
+    </div>
+    <div id="upgrade-alert"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="closeUpgradeModal()">Abbrechen</button>
+      <button class="btn btn-primary btn-sm" id="upgrade-confirm-btn" onclick="confirmUpgrade()"><i data-lucide="arrow-up-circle"></i> Upgrade bestätigen</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>

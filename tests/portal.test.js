@@ -257,4 +257,93 @@ describe('Customer Portal API', () => {
         mockDb.mockRestore();
         mockGetConnection.mockRestore();
     });
+
+    // ── Upgrade endpoint (B4) ─────────────────────────────────────────────────
+
+    test('POST /api/portal/licenses/:key/upgrade requires auth', async () => {
+        const res = await request(app)
+            .post('/api/portal/licenses/TEST-KEY/upgrade')
+            .send({ new_type: 'PRO' });
+        expect(res.statusCode).toBe(401);
+    });
+
+    test('POST /api/portal/licenses/:key/upgrade rejects downgrade', async () => {
+        jest.spyOn(db, 'query').mockImplementation((sql) => {
+            if (sql.includes('FROM customer_sessions')) return Promise.resolve([[{ id: 's1' }], []]);
+            if (sql.includes('FROM customers')) return Promise.resolve([[{ id: 'cust1', name: 'Test', email: 'test@example.com' }], []]);
+            if (sql.includes('FROM licenses WHERE license_key')) {
+                return Promise.resolve([[{ license_key: 'K1', type: 'PRO', status: 'active', customer_id: 'cust1', expires_at: '2025-12-31' }], []]);
+            }
+            return Promise.resolve([[], []]);
+        });
+
+        const res = await request(app)
+            .post('/api/portal/licenses/K1/upgrade')
+            .set('Authorization', `Bearer ${portalToken}`)
+            .send({ new_type: 'STARTER' });
+
+        expect(res.statusCode).toBe(400);
+        expect(res.body.message).toMatch(/downgrade|Downgrade/i);
+    });
+
+    test('POST /api/portal/licenses/:key/upgrade rejects invalid plan type', async () => {
+        jest.spyOn(db, 'query').mockImplementation((sql) => {
+            if (sql.includes('FROM customer_sessions')) return Promise.resolve([[{ id: 's1' }], []]);
+            if (sql.includes('FROM customers')) return Promise.resolve([[{ id: 'cust1', name: 'Test', email: 'test@example.com' }], []]);
+            return Promise.resolve([[], []]);
+        });
+
+        const res = await request(app)
+            .post('/api/portal/licenses/K1/upgrade')
+            .set('Authorization', `Bearer ${portalToken}`)
+            .send({ new_type: 'INVALID_PLAN' });
+
+        expect(res.statusCode).toBe(400);
+    });
+
+    test('POST /api/portal/licenses/:key/upgrade returns 404 when license not found', async () => {
+        jest.spyOn(db, 'query').mockImplementation((sql) => {
+            if (sql.includes('FROM customer_sessions')) return Promise.resolve([[{ id: 's1' }], []]);
+            if (sql.includes('FROM customers')) return Promise.resolve([[{ id: 'cust1', name: 'Test', email: 'test@example.com' }], []]);
+            if (sql.includes('FROM licenses WHERE license_key')) return Promise.resolve([[], []]);
+            return Promise.resolve([[], []]);
+        });
+
+        const res = await request(app)
+            .post('/api/portal/licenses/NOTEXIST/upgrade')
+            .set('Authorization', `Bearer ${portalToken}`)
+            .send({ new_type: 'PRO' });
+
+        expect(res.statusCode).toBe(404);
+    });
+
+    // ── Stats endpoint (C5) ───────────────────────────────────────────────────
+
+    test('GET /api/portal/stats requires auth', async () => {
+        const res = await request(app).get('/api/portal/stats');
+        expect(res.statusCode).toBe(401);
+    });
+
+    test('GET /api/portal/stats returns stats object when authenticated', async () => {
+        jest.spyOn(db, 'query').mockImplementation((sql) => {
+            if (sql.includes('FROM customer_sessions')) return Promise.resolve([[{ id: 's1' }], []]);
+            if (sql.includes('FROM customers')) return Promise.resolve([[{ id: 'cust1', name: 'Test', email: 'test@example.com' }], []]);
+            if (sql.includes('SUM(usage_count)')) {
+                return Promise.resolve([[{ total_validations: 42, active_licenses: 2 }], []]);
+            }
+            if (sql.includes('license_devices')) {
+                return Promise.resolve([[{ active_devices: 5 }], []]);
+            }
+            if (sql.includes('analytics_features')) return Promise.resolve([[], []]);
+            return Promise.resolve([[], []]);
+        });
+
+        const res = await request(app)
+            .get('/api/portal/stats')
+            .set('Authorization', `Bearer ${portalToken}`);
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.success).toBe(true);
+        expect(res.body.stats).toBeDefined();
+    });
 });

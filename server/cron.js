@@ -6,12 +6,21 @@ import { createInvoiceFromLicense } from './invoiceHelper.js';
 
 export async function runExpiryCron() {
     try {
+        let warn1 = 30, warn2 = 7;
+        try {
+            const [[settings]] = db.query('SELECT expiry_warn_days_1, expiry_warn_days_2 FROM invoice_settings WHERE id = 1');
+            if (settings) {
+                warn1 = Math.max(1, Math.min(365, parseInt(settings.expiry_warn_days_1) || 30));
+                warn2 = Math.max(1, Math.min(60,  parseInt(settings.expiry_warn_days_2) || 7));
+            }
+        } catch { /* use defaults */ }
+
         const [expiring] = db.query(`
             SELECT l.license_key, l.customer_name, l.type, l.expires_at, l.notes, c.email
             FROM licenses l
             LEFT JOIN customers c ON l.customer_id = c.id
             WHERE l.status = 'active'
-              AND l.expires_at BETWEEN datetime('now') AND datetime('now', '+30 days')
+              AND l.expires_at BETWEEN datetime('now') AND datetime('now', '+${warn1} days')
               AND l.expiry_notified_at IS NULL
         `);
 
@@ -43,7 +52,7 @@ export async function runExpiryCron() {
             FROM licenses l
             LEFT JOIN customers c ON l.customer_id = c.id
             WHERE l.status = 'active'
-              AND l.expires_at BETWEEN datetime('now') AND datetime('now', '+7 days')
+              AND l.expires_at BETWEEN datetime('now') AND datetime('now', '+${warn2} days')
               AND l.expiry_notified_7d_at IS NULL
         `);
 
@@ -108,44 +117,79 @@ export async function runNonceCleanup() {
     }
 }
 
+const DUNNING_TEMPLATE = {
+    1: 'invoiceDunning1',
+    2: 'invoiceDunning2',
+    3: 'invoiceDunning3',
+    4: 'invoiceDunningFinal'
+};
+
 export async function runOverdueInvoiceCron() {
     try {
+        const portalUrl = (process.env.APP_URL || 'http://localhost:4000').replace(/\/$/, '');
+
         const [overdueInvoices] = db.query(`
-            SELECT i.id, i.invoice_number, i.customer_id, i.amount_gross, i.due_date, c.email, c.name AS customer_name
+            SELECT i.id, i.invoice_number, i.customer_id, i.amount_gross, i.due_date,
+                   i.dunning_level,
+                   CAST(julianday('now') - julianday(i.due_date) AS INTEGER) AS days_overdue,
+                   c.email, c.name AS customer_name
             FROM invoices i
             JOIN customers c ON i.customer_id = c.id
-            WHERE i.status = 'sent' AND i.due_date < date('now')
+            WHERE i.status IN ('sent', 'overdue') AND i.due_date < date('now')
         `);
 
         for (const invoice of overdueInvoices) {
             try {
+                const daysOverdue = Math.max(0, invoice.days_overdue || 0);
+                const currentLevel = invoice.dunning_level || 0;
+
+                let targetLevel = currentLevel;
+                if      (daysOverdue >= 30 && currentLevel < 4) targetLevel = 4;
+                else if (daysOverdue >= 21 && currentLevel < 3) targetLevel = 3;
+                else if (daysOverdue >= 7  && currentLevel < 2) targetLevel = 2;
+                else if (daysOverdue >= 1  && currentLevel < 1) targetLevel = 1;
+
+                if (targetLevel <= currentLevel) continue;
+
                 db.runTransaction(() => {
-                    db.query("UPDATE invoices SET status = 'overdue' WHERE id = ?", [invoice.id]);
-                    db.query("UPDATE customers SET payment_status = 'overdue' WHERE id = ?", [invoice.customer_id]);
+                    db.query("UPDATE invoices SET status = 'overdue', dunning_level = ? WHERE id = ?",
+                        [targetLevel, invoice.id]);
+                    db.query("UPDATE customers SET payment_status = 'overdue' WHERE id = ?",
+                        [invoice.customer_id]);
                 });
 
-                await addAuditLog('invoice_auto_overdue', {
-                    invoice_id: invoice.id,
-                    invoice_number: invoice.invoice_number,
-                    customer_id: invoice.customer_id
+                if (targetLevel === 4) {
+                    const [suspended] = db.query(
+                        "UPDATE licenses SET status = 'suspended' WHERE customer_id = ? AND status = 'active'",
+                        [invoice.customer_id]
+                    );
+                    if (suspended.affectedRows > 0)
+                        await addAuditLog('licenses_suspended_overdue',
+                            { customer_id: invoice.customer_id, invoice_id: invoice.id });
+                }
+
+                await addAuditLog('invoice_dunning', {
+                    invoice_id: invoice.id, invoice_number: invoice.invoice_number,
+                    customer_id: invoice.customer_id, dunning_level: targetLevel, days_overdue: daysOverdue
                 });
 
                 if (invoice.email) {
                     try {
-                        const portalUrl = (process.env.APP_URL || 'http://localhost:4000').replace(/\/$/, '');
-                        await sendTemplateMail('invoiceOverdue', invoice.email, {
+                        await sendTemplateMail(DUNNING_TEMPLATE[targetLevel], invoice.email, {
                             customer_name: invoice.customer_name,
                             invoice_number: invoice.invoice_number,
                             amount_gross: invoice.amount_gross,
                             due_date: invoice.due_date,
+                            days_overdue: daysOverdue,
+                            dunning_level: targetLevel,
                             invoice_url: `${portalUrl}/portal.html?tab=invoices`
                         });
                     } catch (mailErr) {
-                        console.warn(`📧 Mahn-Mail fehlgeschlagen für ${invoice.invoice_number}:`, mailErr.message);
+                        console.warn(`📧 Dunning-Mail fehlgeschlagen für ${invoice.invoice_number}:`, mailErr.message);
                     }
                 }
             } catch (err) {
-                console.error(`Fehler bei Mahnung für Rechnung ${invoice.invoice_number}:`, err.message);
+                console.error(`Fehler bei Dunning für Rechnung ${invoice.invoice_number}:`, err.message);
             }
         }
     } catch (e) {

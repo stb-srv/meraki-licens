@@ -6,6 +6,7 @@ import { sendTemplateMail } from '../mailer/index.js';
 import { fireWebhook } from '../webhook.js';
 import { generateKey, addAuditLog, normalizeDomain, parseJsonField } from '../helpers.js';
 import { requireAuth, asyncHandler, bulkLimiter } from '../middleware.js';
+import { createInvoiceFromLicense } from '../invoiceHelper.js';
 
 const router = Router();
 
@@ -145,6 +146,13 @@ router.post('/licenses', requireAuth, asyncHandler(async (req, res) => {
             } catch (mailErr) {
                 console.error('[licenses] Lizenz-Mail fehlgeschlagen:', mailErr.message);
             }
+            if (raw.type && raw.type !== 'FREE' && raw.type !== 'TRIAL') {
+                try {
+                    createInvoiceFromLicense(key, req.admin.username);
+                } catch (invErr) {
+                    console.error('[licenses] Auto-Rechnung fehlgeschlagen:', invErr.message);
+                }
+            }
         }
 
         await addAuditLog('license_created',
@@ -249,6 +257,13 @@ router.post('/licenses/:key/renew', requireAuth, asyncHandler(async (req, res) =
              `Verlängerung um ${days} Tage – neues Ablaufdatum: ${newExpiryStr}`,
              req.admin.username]
         );
+        if (l.type && l.type !== 'FREE' && l.type !== 'TRIAL') {
+            try {
+                createInvoiceFromLicense(req.params.key, req.admin.username);
+            } catch (invErr) {
+                console.error('[licenses] Auto-Verlängerungs-Rechnung fehlgeschlagen:', invErr.message);
+            }
+        }
     }
 
     await addAuditLog('license_renewed',
@@ -311,27 +326,11 @@ router.post('/licenses/:key/upgrade', requireAuth, asyncHandler(async (req, res)
     await addAuditLog('license_upgraded', { license_key: key, old_type: rows[0].type, new_type, new_expiry: newExpiry, actor: req.admin?.username || 'admin' });
     await fireWebhook('license.upgraded', { license_key: key, old_type: rows[0].type, new_type, expires_at: newExpiry });
 
-    if (new_type !== 'FREE' && new_type !== 'TRIAL') {
+    if (rows[0].customer_id && new_type !== 'FREE' && new_type !== 'TRIAL') {
         try {
-            const { generateInvoicePdf } = await import('../mailer/templates/invoicePdf.js');
-            const { sendMail } = await import('../mailer/index.js');
-            const invoiceNo = `INV-${Date.now()}`;
-            const priceMap  = { STARTER: 29, PRO: 59, PRO_PLUS: 89, ENTERPRISE: 199 };
-            const pdfBuffer = await generateInvoicePdf({
-                invoice_number: invoiceNo, customer_name: rows[0].customer_name,
-                domain: rows[0].associated_domain, plan_label: new_type,
-                price_eur: priceMap[new_type] || 0, date: new Date()
-            });
-            const email = rows[0].customer_email || JSON.parse(rows[0].notes || '{}').contact_email;
-            if (email) {
-                await sendMail({
-                    to: email, subject: `Ihre OPA! Rechnung – ${invoiceNo}`,
-                    text: `Vielen Dank für Ihr Upgrade auf ${new_type}. Ihre Rechnung im Anhang.`,
-                    attachments: [{ filename: `${invoiceNo}.pdf`, content: pdfBuffer, contentType: 'application/pdf' }]
-                });
-            }
-        } catch (pdfErr) {
-            console.warn('Rechnungs-PDF fehlgeschlagen:', pdfErr.message);
+            createInvoiceFromLicense(key, req.admin?.username || 'admin');
+        } catch (invErr) {
+            console.warn('[licenses] Auto-Upgrade-Rechnung fehlgeschlagen:', invErr.message);
         }
     }
 

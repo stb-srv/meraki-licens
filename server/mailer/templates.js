@@ -377,6 +377,119 @@ const TEMPLATES = {
         text: `Deine Meraki Lizenz läuft am ${d.expires_at ? new Date(d.expires_at).toLocaleDateString('de-DE') : 'unbekannt'} (in 7 Tagen) ab.\n\nBitte verlängere deine Lizenz umgehend im Portal, um Ausfälle in deinem Restaurant zu vermeiden.\n\nLizenzschlüssel: ${d.license_key}`
     }),
 
+    invoiceDunning1: (d) => ({
+        subject: `Zahlungserinnerung: Rechnung ${d.invoice_number} – Meraki`,
+        html: layout('Zahlungserinnerung', `
+          <h2 style="margin:0 0 8px;font-size:18px;color:#e67e22">&#128276; Freundliche Zahlungserinnerung</h2>
+          <p style="margin:0 0 20px;color:#555;line-height:1.7">
+            Hallo ${d.customer_name || 'Kunde'},<br><br>
+            wir möchten Sie freundlich daran erinnern, dass die folgende Rechnung noch offen ist.
+          </p>
+          ${infoBox([
+            ['Rechnungsnummer', d.invoice_number],
+            ['Gesamtbetrag', `${(parseFloat(d.amount_gross) || 0).toFixed(2)} €`],
+            ['Fällig seit', d.due_date ? new Date(d.due_date).toLocaleDateString('de-DE') : 'unbekannt'],
+            ['Überfällig seit', `${d.days_overdue} Tag(en)`]
+          ])}
+          <div style="text-align:center;margin:28px 0">
+            <a href="${d.invoice_url}" style="display:inline-block;background:#e67e22;color:#fff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:700;font-size:15px">
+              Rechnung bezahlen
+            </a>
+          </div>
+        `),
+        text: `Zahlungserinnerung\n\nRechnung ${d.invoice_number} (${(parseFloat(d.amount_gross) || 0).toFixed(2)} €) ist seit ${d.days_overdue} Tag(en) überfällig.\n\nBitte begleichen Sie den Betrag unter: ${d.invoice_url}`
+    }),
+
+    invoiceDunning2: (d) => ({
+        subject: `1. Mahnung: Rechnung ${d.invoice_number} – Meraki`,
+        html: layout('1. Mahnung', `
+          <h2 style="margin:0 0 8px;font-size:18px;color:#e74c3c">&#9888;&#65039; 1. Mahnung</h2>
+          <p style="margin:0 0 20px;color:#555;line-height:1.7">
+            Hallo ${d.customer_name || 'Kunde'},<br><br>
+            trotz unserer Zahlungserinnerung ist folgende Rechnung weiterhin unbeglichen.
+            Bitte begleichen Sie den Betrag umgehend.
+          </p>
+          <div style="background:#fde8e8;border:1px solid #f8b4b4;border-radius:8px;padding:14px 18px;margin:20px 0">
+            <p style="margin:0;color:#9b1c1c;font-size:13px;line-height:1.6">
+              &#9888;&#65039; Bei Nichtbegleichung behalten wir uns vor, Ihre Lizenz-Dienste zu unterbrechen.
+            </p>
+          </div>
+          ${infoBox([
+            ['Rechnungsnummer', d.invoice_number],
+            ['Gesamtbetrag', `${(parseFloat(d.amount_gross) || 0).toFixed(2)} €`],
+            ['Überfällig seit', `${d.days_overdue} Tagen`],
+            ['Status', badge('1. MAHNUNG', '#e74c3c')]
+          ])}
+          <div style="text-align:center;margin:28px 0">
+            <a href="${d.invoice_url}" style="display:inline-block;background:#e74c3c;color:#fff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:700;font-size:15px">
+              Jetzt bezahlen
+            </a>
+          </div>
+        `),
+        text: `1. Mahnung\n\nRechnung ${d.invoice_number} (${(parseFloat(d.amount_gross) || 0).toFixed(2)} €) ist seit ${d.days_overdue} Tagen überfällig.\n\nBitte bezahlen Sie umgehend unter: ${d.invoice_url}`
+    }),
+
+    invoiceDunning3: (d) => ({
+        subject: `2. Mahnung: Rechnung ${d.invoice_number} – Meraki`,
+        html: layout('2. Mahnung', `
+          <h2 style="margin:0 0 8px;font-size:18px;color:#c0392b">&#128680; 2. Mahnung – Letzte Warnung</h2>
+          <p style="margin:0 0 20px;color:#555;line-height:1.7">
+            Hallo ${d.customer_name || 'Kunde'},<br><br>
+            wir haben Sie bereits mehrfach auf die offene Zahlung hingewiesen.
+            Dies ist unsere letzte Erinnerung vor der Sperrung Ihrer Lizenz.
+          </p>
+          <div style="background:#fde8e8;border:2px solid #e74c3c;border-radius:8px;padding:14px 18px;margin:20px 0">
+            <p style="margin:0;color:#9b1c1c;font-size:13px;font-weight:600;line-height:1.6">
+              &#128680; DRINGEND: Ohne Zahlung innerhalb von 7 Tagen wird Ihre Lizenz automatisch gesperrt.
+            </p>
+          </div>
+          ${infoBox([
+            ['Rechnungsnummer', d.invoice_number],
+            ['Gesamtbetrag', `${(parseFloat(d.amount_gross) || 0).toFixed(2)} €`],
+            ['Überfällig seit', `${d.days_overdue} Tagen`],
+            ['Status', badge('2. MAHNUNG', '#c0392b')]
+          ])}
+          <div style="text-align:center;margin:28px 0">
+            <a href="${d.invoice_url}" style="display:inline-block;background:#c0392b;color:#fff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:700;font-size:15px">
+              Jetzt bezahlen – Sperrung verhindern
+            </a>
+          </div>
+        `),
+        text: `2. Mahnung\n\nRechnung ${d.invoice_number} (${(parseFloat(d.amount_gross) || 0).toFixed(2)} €) ist seit ${d.days_overdue} Tagen überfällig. Ohne Zahlung wird Ihre Lizenz gesperrt.\n\nJetzt bezahlen: ${d.invoice_url}`
+    }),
+
+    invoiceDunningFinal: (d) => ({
+        subject: `Lizenz gesperrt – offene Zahlung: Rechnung ${d.invoice_number} – Meraki`,
+        html: layout('Lizenz gesperrt', `
+          <h2 style="margin:0 0 8px;font-size:18px;color:#7f1d1d">&#128274; Ihre Lizenz wurde gesperrt</h2>
+          <p style="margin:0 0 20px;color:#555;line-height:1.7">
+            Hallo ${d.customer_name || 'Kunde'},<br><br>
+            aufgrund der anhaltend offenen Zahlung wurde Ihre Lizenz vorübergehend gesperrt.
+            Bitte begleichen Sie den Betrag, um den Dienst wiederherzustellen.
+          </p>
+          <div style="background:#7f1d1d;border-radius:8px;padding:18px 22px;margin:20px 0">
+            <p style="margin:0;color:#fff;font-size:13px;font-weight:700;line-height:1.6">
+              Ihre Lizenz ist GESPERRT. Der Betrieb ist unterbrochen.
+            </p>
+          </div>
+          ${infoBox([
+            ['Rechnungsnummer', d.invoice_number],
+            ['Gesamtbetrag', `${(parseFloat(d.amount_gross) || 0).toFixed(2)} €`],
+            ['Überfällig seit', `${d.days_overdue} Tagen`],
+            ['Status', badge('GESPERRT', '#7f1d1d')]
+          ])}
+          <div style="text-align:center;margin:28px 0">
+            <a href="${d.invoice_url}" style="display:inline-block;background:#7f1d1d;color:#fff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:700;font-size:15px">
+              Jetzt bezahlen – Sperre aufheben
+            </a>
+          </div>
+          <p style="margin:20px 0 0;color:#aaa;font-size:13px">
+            Nach Zahlungseingang wird Ihre Lizenz umgehend reaktiviert.
+          </p>
+        `),
+        text: `Lizenz gesperrt\n\nRechnung ${d.invoice_number} (${(parseFloat(d.amount_gross) || 0).toFixed(2)} €) ist seit ${d.days_overdue} Tagen unbezahlt. Ihre Lizenz wurde gesperrt.\n\nJetzt bezahlen: ${d.invoice_url}`
+    }),
+
     emailVerification: (d) => ({
         subject: 'E-Mail-Adresse bestätigen - Meraki',
         html: layout('E-Mail-Adresse bestätigen', `
