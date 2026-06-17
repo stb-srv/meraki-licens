@@ -570,4 +570,27 @@ router.post('/licenses/book', requirePortalAuth, asyncHandler(async (req, res) =
     res.json({ success: true, license_key: key, invoice_id: invoiceId, message: 'Lizenz reserviert. Nach Zahlungseingang wird sie aktiviert.' });
 }));
 
+// ── DSGVO / GDPR ─────────────────────────────────────────────────────────────
+router.get('/gdpr/export', requirePortalAuth, asyncHandler(async (req, res) => {
+    const customerId = req.customer.id;
+    const [[customer]] = db.query('SELECT id, email, name, company, created_at FROM customers WHERE id = ?', [customerId]);
+    const [licenses]   = db.query('SELECT license_key, type, status, expires_at, associated_domain, created_at FROM licenses WHERE customer_id = ?', [customerId]);
+    const [invoices]   = db.query('SELECT id, amount_gross, status, created_at FROM invoices WHERE customer_id = ?', [customerId]);
+
+    await addAuditLog('gdpr_export', { customer_id: customerId });
+    res.setHeader('Content-Disposition', 'attachment; filename="meine-daten.json"');
+    res.json({ exported_at: new Date().toISOString(), customer, licenses, invoices });
+}));
+
+router.post('/gdpr/delete-request', requirePortalAuth, asyncHandler(async (req, res) => {
+    const customerId = req.customer.id;
+    const [[existing]] = db.query("SELECT id FROM deletion_requests WHERE customer_id = ? AND status = 'pending'", [customerId]);
+    if (existing) return res.status(409).json({ success: false, message: 'Es gibt bereits einen offenen Löschantrag.' });
+
+    const id = crypto.randomUUID();
+    db.query('INSERT INTO deletion_requests (id, customer_id, reason) VALUES (?, ?, ?)', [id, customerId, req.body.reason || null]);
+    await addAuditLog('gdpr_deletion_requested', { customer_id: customerId, request_id: id });
+    res.json({ success: true, request_id: id, message: 'Löschantrag eingereicht. Sie werden per E-Mail informiert.' });
+}));
+
 export default router;

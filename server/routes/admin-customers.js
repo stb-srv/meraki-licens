@@ -314,4 +314,35 @@ router.get('/export/customers', requireAuth, asyncHandler(async (req, res) => {
     res.send('﻿' + csv);
 }));
 
+// ── DSGVO Löschanträge ────────────────────────────────────────────────────────
+router.get('/gdpr-requests', requireAuth, requireSuperAdmin, asyncHandler(async (req, res) => {
+    const [rows] = db.query(`
+        SELECT dr.id, dr.customer_id, dr.status, dr.reason, dr.requested_at, dr.processed_at, dr.processed_by,
+               c.email, c.name
+        FROM deletion_requests dr
+        LEFT JOIN customers c ON dr.customer_id = c.id
+        ORDER BY dr.requested_at DESC
+    `);
+    res.json({ success: true, requests: rows });
+}));
+
+router.post('/gdpr-requests/:id/process', requireAuth, requireSuperAdmin, asyncHandler(async (req, res) => {
+    const [[request]] = db.query("SELECT * FROM deletion_requests WHERE id = ? AND status = 'pending'", [req.params.id]);
+    if (!request) return res.status(404).json({ success: false, message: 'Antrag nicht gefunden oder bereits bearbeitet.' });
+
+    const anonymId = crypto.randomUUID().slice(0, 8);
+    db.runTransaction(() => {
+        db.query(
+            "UPDATE customers SET email=?, name='Gelöschter Nutzer', company=NULL, phone=NULL, address=NULL WHERE id=?",
+            [`deleted-${anonymId}@anon.invalid`, request.customer_id]
+        );
+        db.query(
+            "UPDATE deletion_requests SET status='processed', processed_at=datetime('now'), processed_by=? WHERE id=?",
+            [req.admin?.username || 'system', request.id]
+        );
+    });
+    await addAuditLog('gdpr_deletion_processed', { request_id: request.id, customer_id: request.customer_id, by: req.admin?.username });
+    res.json({ success: true, message: 'Kundendaten anonymisiert. Rechnungen bleiben ohne Personenbezug erhalten.' });
+}));
+
 export default router;
