@@ -445,4 +445,46 @@ router.get('/faq', asyncHandler(async (req, res) => {
     res.json({ success: true, faq: rows });
 }));
 
+// ── POST /payment/webhook (Mollie) ────────────────────────────────────────────
+router.post('/payment/webhook', asyncHandler(async (req, res) => {
+    const paymentId = req.body?.id;
+    const { verifyMollieWebhook, getMolliePayment } = await import('../payment.js');
+
+    if (!verifyMollieWebhook(paymentId))
+        return res.status(400).json({ success: false, message: 'Ungültige Webhook-ID.' });
+
+    let molliePayment;
+    try { molliePayment = await getMolliePayment(paymentId); }
+    catch (e) { return res.status(502).json({ success: false, message: 'Mollie-Lookup fehlgeschlagen.' }); }
+
+    if (molliePayment.status !== 'paid') return res.status(200).json({ success: true, status: molliePayment.status });
+
+    const [[invoice]] = db.query('SELECT * FROM invoices WHERE payment_id = ?', [paymentId]);
+    if (!invoice) return res.status(200).json({ success: true, message: 'Rechnung nicht zugeordnet.' });
+    if (invoice.status === 'paid') return res.status(200).json({ success: true, message: 'Bereits bezahlt.' });
+
+    // Verify amount server-side — never trust client data
+    const mollieAmount = parseFloat(molliePayment.amount.value);
+    if (Math.abs(mollieAmount - parseFloat(invoice.amount_gross)) > 0.01)
+        return res.status(400).json({ success: false, message: 'Betrag stimmt nicht überein.' });
+
+    db.runTransaction(() => {
+        db.query("UPDATE invoices SET status='paid', paid_at=datetime('now') WHERE id=?", [invoice.id]);
+        if (invoice.license_key) {
+            const [[lic]] = db.query('SELECT * FROM licenses WHERE license_key=?', [invoice.license_key]);
+            if (lic) {
+                const plan = PLAN_DEFINITIONS[lic.type] || {};
+                const days = plan.expires_days || 365;
+                const expiresAt = new Date(Date.now() + days * 86400000).toISOString().slice(0, 19).replace('T', ' ');
+                db.query("UPDATE licenses SET status='active', expires_at=? WHERE license_key=?",
+                    [expiresAt, invoice.license_key]);
+            }
+        }
+    });
+
+    await addAuditLog('payment_received', { invoice_id: invoice.id, payment_id: paymentId, amount: mollieAmount });
+    await fireWebhook('invoice.paid', { invoice_id: invoice.id, license_key: invoice.license_key });
+    res.status(200).json({ success: true });
+}));
+
 export default router;

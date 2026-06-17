@@ -570,6 +570,31 @@ router.post('/licenses/book', requirePortalAuth, asyncHandler(async (req, res) =
     res.json({ success: true, license_key: key, invoice_id: invoiceId, message: 'Lizenz reserviert. Nach Zahlungseingang wird sie aktiviert.' });
 }));
 
+// ── Online-Zahlung (Mollie) ───────────────────────────────────────────────────
+router.post('/invoices/:id/checkout', requirePortalAuth, asyncHandler(async (req, res) => {
+    const { isPaymentConfigured, createMolliePayment } = await import('../payment.js');
+    if (!isPaymentConfigured()) return res.status(503).json({ success: false, message: 'Online-Zahlung ist nicht konfiguriert.' });
+
+    const [[invoice]] = db.query(
+        "SELECT * FROM invoices WHERE id = ? AND customer_id = ? AND status NOT IN ('paid','cancelled')",
+        [req.params.id, req.customer.id]
+    );
+    if (!invoice) return res.status(404).json({ success: false, message: 'Rechnung nicht gefunden oder bereits bezahlt.' });
+
+    const appUrl = (process.env.APP_URL || 'http://localhost:4000').replace(/\/$/, '');
+    const molliePayment = await createMolliePayment({
+        amount: invoice.amount_gross,
+        description: `Rechnung ${invoice.invoice_number} – ${req.customer.name}`,
+        redirectUrl: `${appUrl}/portal.html?tab=invoices&paid=1`,
+        webhookUrl:  `${appUrl}/api/v1/payment/webhook`,
+        metadata:    { invoice_id: invoice.id, customer_id: req.customer.id },
+    });
+
+    db.query('UPDATE invoices SET payment_id = ? WHERE id = ?', [molliePayment.id, invoice.id]);
+    await addAuditLog('checkout_initiated', { invoice_id: invoice.id, payment_id: molliePayment.id, customer_id: req.customer.id });
+    res.json({ success: true, checkout_url: molliePayment._links.checkout.href, payment_id: molliePayment.id });
+}));
+
 // ── DSGVO / GDPR ─────────────────────────────────────────────────────────────
 router.get('/gdpr/export', requirePortalAuth, asyncHandler(async (req, res) => {
     const customerId = req.customer.id;
