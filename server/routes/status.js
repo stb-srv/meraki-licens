@@ -66,4 +66,42 @@ router.get('/json', (req, res) => {
     }
 });
 
+router.get('/metrics', (req, res) => {
+    const lines = [];
+    const g = (name, help, value, labels = '') => {
+        lines.push(`# HELP ${name} ${help}`);
+        lines.push(`# TYPE ${name} gauge`);
+        lines.push(labels ? `${name}{${labels}} ${value}` : `${name} ${value}`);
+    };
+
+    try {
+        const statusMap = { active: 0, expired: 0, suspended: 0, trial: 0, grace: 0 };
+        const [licRows] = db.query('SELECT status, COUNT(*) as c FROM licenses GROUP BY status');
+        for (const r of licRows) if (r.status in statusMap) statusMap[r.status] = r.c;
+        for (const [status, count] of Object.entries(statusMap))
+            g('meraki_licenses_total', 'Total licenses by status', count, `status="${status}"`);
+
+        const [[{ customers }]] = db.query('SELECT COUNT(*) as customers FROM customers WHERE archived = 0 OR archived IS NULL');
+        g('meraki_customers_total', 'Total active customers', customers);
+
+        const [[{ invoices_open }]] = db.query("SELECT COUNT(*) as invoices_open FROM invoices WHERE status IN ('sent','overdue')");
+        g('meraki_invoices_open_total', 'Open and overdue invoices', invoices_open);
+
+        const [[{ wh_ok }]]   = db.query("SELECT COUNT(*) as wh_ok FROM webhook_logs WHERE status='success' AND attempted_at > datetime('now','-24 hours')");
+        const [[{ wh_fail }]] = db.query("SELECT COUNT(*) as wh_fail FROM webhook_logs WHERE status='failed' AND attempted_at > datetime('now','-24 hours')");
+        const [[{ wh_dl }]]   = db.query('SELECT COUNT(*) as wh_dl FROM webhook_dead_letters WHERE resolved = 0');
+        g('meraki_webhooks_success_24h', 'Successful webhook deliveries in last 24h', wh_ok);
+        g('meraki_webhooks_failed_24h', 'Failed webhook deliveries in last 24h', wh_fail);
+        g('meraki_webhook_dead_letters', 'Unresolved webhook dead letters', wh_dl);
+
+        g('meraki_uptime_seconds', 'Process uptime in seconds', Math.floor(process.uptime()));
+        g('meraki_memory_rss_bytes', 'RSS memory usage in bytes', process.memoryUsage().rss);
+    } catch (e) {
+        lines.push(`# ERROR ${e.message}`);
+    }
+
+    res.setHeader('Content-Type', 'text/plain; version=0.0.4');
+    res.send(lines.join('\n') + '\n');
+});
+
 export default router;
