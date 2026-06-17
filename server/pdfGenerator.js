@@ -1,6 +1,10 @@
 import PDFDocument from 'pdfkit';
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const LOGO_PATH = path.join(__dirname, '..', 'public', 'Meraki_RMS_CMS.png');
 
 function safeText(val, maxLen = 300) {
     if (val == null) return '';
@@ -42,6 +46,11 @@ function buildPDFLayout(invoiceData, doc) {
     const lightGray = '#9ca3af';
     const borderColor = '#e5e7eb';
 
+    // --- LOGO (Top Right) ---
+    if (fs.existsSync(LOGO_PATH)) {
+        doc.image(LOGO_PATH, 390, 40, { fit: [155, 50], align: 'right' });
+    }
+
     // --- SENDER INFO (Top Left) ---
     doc.fillColor(primaryColor).fontSize(14).font('Helvetica-Bold');
     doc.text(safeText(invoiceData.company_name) || 'Meraki', 50, 50);
@@ -56,12 +65,12 @@ function buildPDFLayout(invoiceData, doc) {
 
     // --- INVOICE DETAILS (Top Right) ---
     doc.fillColor(primaryColor).fontSize(14).font('Helvetica-Bold');
-    const docTypeLabel = invoiceData.type === 'credit_note' ? 'GUTSCHRIFT' : 
+    const docTypeLabel = invoiceData.type === 'credit_note' ? 'GUTSCHRIFT' :
                          (invoiceData.type === 'reminder' ? 'MAHNUNG' : 'RECHNUNG');
-    doc.text(docTypeLabel, 350, 50, { align: 'right', width: 195 });
+    doc.text(docTypeLabel, 350, 100, { align: 'right', width: 195 });
 
     doc.fillColor(textColor).fontSize(9).font('Helvetica');
-    let detailsY = 68;
+    let detailsY = 118;
     doc.text('Rechnungsnr.:', 350, detailsY, { align: 'right', width: 95 });
     doc.font('Helvetica-Bold').text(safeText(invoiceData.invoice_number), 450, detailsY, { align: 'right', width: 95 });
     
