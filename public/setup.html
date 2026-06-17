@@ -141,7 +141,7 @@
     <!-- Loading -->
     <div id="view-loading" class="card-body" style="text-align:center;padding: var(--space-12) var(--space-8);">
       <div style="width:38px;height:38px;border:3px solid var(--border);border-top-color:var(--accent);border-radius: 50%;animation:spin .8s linear infinite;margin: 0 auto var(--space-4);"></div>
-      <div style="color:var(--text2);font-size: var(--text-sm);">Setup-Status wird geprÃ¼ftâ€¦</div>
+      <div style="color:var(--text2);font-size: var(--text-sm);">Setup-Status wird geprüft…</div>
     </div>
 
     <!-- Already done -->
@@ -167,7 +167,7 @@
         <div class="step-indicator">
           <div class="step-dot active" id="sdot-1"></div>
           <div class="step-dot" id="sdot-2"></div>
-          <span class="step-label" id="step-label">Ãœberblick</span>
+          <span class="step-label" id="step-label">Überblick</span>
         </div>
 
         <!-- Step 1 -->
@@ -180,12 +180,12 @@
             <li><i data-lucide="check"></i> ADMIN_SECRET generiert (HS256 / RS256)</li>
             <li><i data-lucide="check"></i> HMAC_SECRET generiert (Offline-Token Signing)</li>
             <li><i data-lucide="check"></i> PORTAL_SECRET generiert (Kunden-Portal JWT)</li>
-            <li><i data-lucide="check"></i> RSA-SchlÃ¼sselpaar generiert (2048-bit)</li>
-            <li><i data-lucide="check"></i> Datenbank-Migrationen ausgefÃ¼hrt</li>
+            <li><i data-lucide="check"></i> RSA-Schlüsselpaar generiert (2048-bit)</li>
+            <li><i data-lucide="check"></i> Datenbank-Migrationen ausgeführt</li>
           </ul>
           <hr class="divider">
           <div style="font-size: var(--text-sm);color:var(--text2);margin-bottom: var(--space-4);">
-            Im nÃ¤chsten Schritt erstellst du deinen <strong>Superadmin-Account</strong>.
+            Im nächsten Schritt erstellst du deinen <strong>Superadmin-Account</strong>.
           </div>
           <button class="btn btn-primary" onclick="goStep(2)">
             Weiter <i data-lucide="arrow-right"></i>
@@ -201,13 +201,13 @@
           </div>
           <div class="form-group">
             <label>Passwort <span style="color:var(--text2);font-weight:400;">(min. 12 Zeichen)</span></label>
-            <input type="password" id="inp-password" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" autocomplete="new-password" oninput="updateStrength()">
+            <input type="password" id="inp-password" placeholder="••••••••••••" autocomplete="new-password" oninput="updateStrength()">
             <div class="pw-strength"><div class="pw-strength-bar" id="pw-bar"></div></div>
             <div class="pw-hint" id="pw-hint"></div>
           </div>
           <div class="form-group">
-            <label>Passwort bestÃ¤tigen</label>
-            <input type="password" id="inp-confirm" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" autocomplete="new-password">
+            <label>Passwort bestätigen</label>
+            <input type="password" id="inp-confirm" placeholder="••••••••••••" autocomplete="new-password">
           </div>
           <button class="btn btn-primary" id="btn-create" onclick="createAdmin()">
             Admin-Account erstellen
@@ -260,7 +260,7 @@
     document.getElementById('step-num').textContent = n;
     document.getElementById('sdot-1').className = 'step-dot' + (n > 1 ? ' done' : ' active');
     document.getElementById('sdot-2').className = 'step-dot' + (n === 2 ? ' active' : '');
-    const labels = ['', 'Ãœberblick', 'Admin erstellen'];
+    const labels = ['', 'Überblick', 'Admin erstellen'];
     document.getElementById('step-label').textContent = labels[n] || '';
     if (n === 2) setTimeout(() => document.getElementById('inp-username').focus(), 50);
     lucide.createIcons();
@@ -298,11 +298,11 @@
 
     if (!username)            { setAlert('error', 'Benutzername ist ein Pflichtfeld.'); return; }
     if (password.length < 12) { setAlert('error', 'Passwort muss mindestens 12 Zeichen haben.'); return; }
-    if (password !== confirm)  { setAlert('error', 'PasswÃ¶rter stimmen nicht Ã¼berein.'); return; }
+    if (password !== confirm)  { setAlert('error', 'Passwörter stimmen nicht überein.'); return; }
 
     const btn = document.getElementById('btn-create');
     btn.disabled  = true;
-    btn.innerHTML = '<span class="spinner"></span> Wird erstelltâ€¦';
+    btn.innerHTML = '<span class="spinner"></span> Wird erstellt…';
 
     try {
       const res  = await fetch('/api/v1/setup', {
@@ -328,7 +328,7 @@
         btn.innerHTML = 'Admin-Account erstellen';
       }
     } catch {
-      setAlert('error', 'Netzwerkfehler â€“ ist der Server erreichbar?');
+      setAlert('error', 'Netzwerkfehler – ist der Server erreichbar?');
       btn.disabled  = false;
       btn.innerHTML = 'Admin-Account erstellen';
     }
@@ -354,7 +354,7 @@
     } catch {
       show('view-wizard');
       document.getElementById('wizard-alert').innerHTML =
-        `<div class="alert alert-warn"><i data-lucide="alert-triangle"></i><div>Server nicht erreichbar. Stelle sicher, dass <code style="font-family:var(--font-mono)">npm start</code> lÃ¤uft.</div></div>`;
+        `<div class="alert alert-warn"><i data-lucide="alert-triangle"></i><div>Server nicht erreichbar. Stelle sicher, dass <code style="font-family:var(--font-mono)">npm start</code> läuft.</div></div>`;
       goStep(1);
     }
     lucide.createIcons();

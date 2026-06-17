@@ -127,8 +127,8 @@
     .plan-price{font-family:var(--font-display);font-size: var(--text-xl);font-weight: 700;color:var(--accent);line-height:1;}
     .plan-price span{font-size: var(--text-sm);font-weight:400;color:var(--text2);}
     .plan-features{list-style:none;margin: var(--space-4) 0 var(--space-4);font-size: var(--text-sm);display:flex;flex-direction:column;gap:.4rem;}
-    .plan-features li::before{content:'âœ“ ';color:var(--accent3);font-weight:700;}
-    .plan-features li.no::before{content:'âœ— ';color:var(--text2);}
+    .plan-features li::before{content:'✓ ';color:var(--accent3);font-weight:700;}
+    .plan-features li.no::before{content:'✗ ';color:var(--text2);}
     .plan-features li.no{color:var(--text2);}
     /* Order modal */
     .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(2px);z-index:200;align-items:center;justify-content:center;}
@@ -174,13 +174,13 @@
   <div class="center-wrap">
     <div class="auth-card">
       <h2><i data-lucide="lock"></i> Passwort setzen</h2>
-      <p class="sub" id="setup-name-hint">Willkommen! Bitte setze ein Passwort fÃ¼r dein Konto.</p>
+      <p class="sub" id="setup-name-hint">Willkommen! Bitte setze ein Passwort für dein Konto.</p>
       <div id="setup-alert"></div>
       <div class="form-group"><label>Neues Passwort <span style="color:var(--text2);font-size: var(--text-xs)">(min. 10 Zeichen)</span></label><input type="password" id="setup-pass" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"></div>
       <div class="form-group"><label>Passwort wiederholen</label><input type="password" id="setup-pass2" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"></div>
       <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="doSetupPassword()">Passwort setzen &amp; einloggen</button>
       <div style="text-align:center;margin-top: var(--space-6);font-size: var(--text-sm);color:var(--text2)">
-        <a href="login.html" style="color:var(--text2);text-decoration:none;">&larr; ZurÃ¼ck zum Login</a>
+        <a href="login.html" style="color:var(--text2);text-decoration:none;">&larr; Zurück zum Login</a>
       </div>
     </div>
   </div>
@@ -190,13 +190,13 @@
 <div id="page-change-password" class="page">
   <div class="center-wrap">
     <div class="auth-card">
-      <h2><i data-lucide="key-round"></i> Passwort Ã¤ndern</h2>
-      <p class="sub">Dein Passwort muss aus SicherheitsgrÃ¼nden geÃ¤ndert werden.</p>
+      <h2><i data-lucide="key-round"></i> Passwort ändern</h2>
+      <p class="sub">Dein Passwort muss aus Sicherheitsgründen geändert werden.</p>
       <div id="change-pass-alert"></div>
       <div class="form-group"><label>Aktuelles Passwort</label><input type="password" id="change-pass-curr"></div>
       <div class="form-group"><label>Neues Passwort <span style="color:var(--text2);font-size: var(--text-xs)">(min. 10 Zeichen)</span></label><input type="password" id="change-pass-new"></div>
       <div class="form-group"><label>Neues Passwort wiederholen</label><input type="password" id="change-pass-new2"></div>
-      <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="doChangePasswordForced()">Passwort Ã¤ndern</button>
+      <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="doChangePasswordForced()">Passwort ändern</button>
       <div style="text-align:center;margin-top: var(--space-6);font-size: var(--text-sm);color:var(--text2)">
         <a href="#" onclick="doLogout()" style="color:var(--text2);text-decoration:none;">&larr; Abbrechen &amp; Logout</a>
       </div>
@@ -209,11 +209,11 @@
   <div class="center-wrap">
     <div class="auth-card" style="text-align:center">
       <div id="verify-spinner" class="spinner" style="margin: 0 auto var(--space-6)"></div>
-      <h2 id="verify-title"><i data-lucide="mail"></i> E-Mail-BestÃ¤tigung</h2>
+      <h2 id="verify-title"><i data-lucide="mail"></i> E-Mail-Bestätigung</h2>
       <div id="verify-alert" style="margin-top: var(--space-4);"></div>
       <p id="verify-text" style="color:var(--text2);font-size: var(--text-sm);margin-top: var(--space-4)">Deine E-Mail-Adresse wird verifiziert...</p>
       <div id="verify-login-link" style="text-align:center;margin-top: var(--space-6);font-size: var(--text-sm);color:var(--text2);display:none;">
-        <a href="login.html" style="color:var(--text2);text-decoration:none;">&larr; ZurÃ¼ck zum Login</a>
+        <a href="login.html" style="color:var(--text2);text-decoration:none;">&larr; Zurück zum Login</a>
       </div>
     </div>
   </div>
@@ -240,19 +240,19 @@
         <div class="dash-header"><h2><i data-lucide="key-round"></i> Meine Lizenzen</h2><button class="btn btn-ghost btn-sm" onclick="loadLicenses()"><i data-lucide="refresh-cw"></i> Aktualisieren</button></div>
         <div id="lic-list"><div class="loading"><div class="spinner"></div></div></div>
       </div>
-      <!-- â”€â”€ Shop â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+      <!-- ── Shop ─────────────────────────────────────────────────── -->
       <div id="tab-shop" class="tab-panel">
         <div class="dash-header">
           <h2><i data-lucide="shopping-cart"></i> Lizenz kaufen</h2>
           <button class="btn btn-ghost btn-sm" onclick="loadShop()"><i data-lucide="refresh-cw"></i> Aktualisieren</button>
         </div>
         <p style="color:var(--text2);font-size: var(--text-sm);margin-bottom: var(--space-4);">
-          WÃ¤hle einen Plan und gib deine Domain an. Nach Bestelleingang erhÃ¤ltst du eine Rechnung &mdash; deine Lizenz wird nach Zahlungseingang aktiviert.
+          Wähle einen Plan und gib deine Domain an. Nach Bestelleingang erhältst du eine Rechnung &mdash; deine Lizenz wird nach Zahlungseingang aktiviert.
         </p>
         <div id="shop-content"><div class="loading"><div class="spinner"></div></div></div>
       </div>
 
-      <!-- â”€â”€ Rechnungen â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+      <!-- ── Rechnungen ────────────────────────────────────────────── -->
       <div id="tab-invoices" class="tab-panel">
         <div class="dash-header"><h2><i data-lucide="receipt"></i> Meine Rechnungen</h2><button class="btn btn-ghost btn-sm" onclick="loadPortalInvoices()"><i data-lucide="refresh-cw"></i> Aktualisieren</button></div>
         <div id="portal-inv-list"><div class="loading"><div class="spinner"></div></div></div>
@@ -270,13 +270,13 @@
   </div>
 </div>
 
-<!-- â”€â”€ Bestell-Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+<!-- ── Bestell-Modal ─────────────────────────────────────────────────────── -->
 <div class="modal-overlay" id="order-modal">
   <div class="modal-box">
     <h3><i data-lucide="shopping-cart"></i> Lizenz bestellen</h3>
     <div id="order-plan-info" style="background:var(--bg2);border-radius: var(--radius-md);padding: var(--space-4) var(--space-4);margin-bottom: var(--space-4);font-size: var(--text-sm);"></div>
     <div class="form-group">
-      <label style="font-size: var(--text-sm);color:var(--text2);display:block;margin-bottom: var(--space-1);">Domain fÃ¼r diese Lizenz *</label>
+      <label style="font-size: var(--text-sm);color:var(--text2);display:block;margin-bottom: var(--space-1);">Domain für diese Lizenz *</label>
       <input type="text" id="order-domain" placeholder="z.B. meinrestaurant.de" style="width:100%;background:var(--bg2);border:1px solid var(--border);border-radius: var(--radius-md);padding: var(--space-2) var(--space-4);color:var(--text);font-size: var(--text-sm);outline:none;font-family:var(--font-body);" oninput="this.style.borderColor=''">
       <div style="font-size: var(--text-xs);color:var(--text2);margin-top: var(--space-1);">Nur die Domain ohne https:// eingeben.</div>
     </div>
@@ -336,10 +336,10 @@ function API(path,opts){
 }
 
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function fmtDate(d){return d?new Date(d).toLocaleString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):'â€”';}
-function fmtDateShort(d){return d?new Date(d).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'}):'â€”';}
+function fmtDate(d){return d?new Date(d).toLocaleString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):'—';}
+function fmtDateShort(d){return d?new Date(d).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'}):'—';}
 function daysLeft(d){return Math.ceil((new Date(d)-Date.now())/86400000);}
-function fmtEur(v){return v!=null&&v!==''?parseFloat(v).toFixed(2)+' â‚¬':'â€”';}
+function fmtEur(v){return v!=null&&v!==''?parseFloat(v).toFixed(2)+' €':'—';}
 
 function showAlert(elId,msg,type){
   var el=document.getElementById(elId);
@@ -365,11 +365,11 @@ function switchTab(name){
   else if(name==='account')loadAccount();
 }
 
-// â”€â”€ Startup: invite token prÃ¼fen â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Startup: invite token prüfen ──────────────────────────────────────────────
 function init(){
   var params=new URLSearchParams(window.location.search);
 
-  // E-Mail-Verifizierung Ã¼ber Hash oder Query
+  // E-Mail-Verifizierung über Hash oder Query
   var verifyToken = '';
   if (window.location.hash && window.location.hash.indexOf('#verify') === 0) {
     var hashQuery = window.location.hash.split('?')[1];
@@ -391,7 +391,7 @@ function init(){
       .then(function(d) {
         document.getElementById('verify-spinner').style.display = 'none';
         showAlert('verify-alert', '<i data-lucide="check-circle"></i> ' + esc(d.message || 'E-Mail erfolgreich verifiziert!'), 'success');
-        document.getElementById('verify-text').innerHTML = 'Du wirst in KÃ¼rze zum Login weitergeleitet...';
+        document.getElementById('verify-text').innerHTML = 'Du wirst in Kürze zum Login weitergeleitet...';
         document.getElementById('verify-login-link').style.display = 'block';
         setTimeout(function() {
           window.location.href = 'login.html';
@@ -400,7 +400,7 @@ function init(){
       .catch(function(e) {
         document.getElementById('verify-spinner').style.display = 'none';
         showAlert('verify-alert', esc(e.message || 'Verifizierung fehlgeschlagen.'), 'error');
-        document.getElementById('verify-text').innerHTML = 'Der BestÃ¤tigungslink ist ungÃ¼ltig oder abgelaufen.';
+        document.getElementById('verify-text').innerHTML = 'Der Bestätigungslink ist ungültig oder abgelaufen.';
         document.getElementById('verify-login-link').style.display = 'block';
         setTimeout(function() {
           window.location.href = 'login.html';
@@ -417,7 +417,7 @@ function init(){
       .then(function(r){return r.json();})
       .then(function(d){
         if(d.success){
-          document.getElementById('setup-name-hint').textContent='Willkommen, '+d.name+'! Bitte setze ein Passwort fÃ¼r '+d.email+'.';
+          document.getElementById('setup-name-hint').textContent='Willkommen, '+d.name+'! Bitte setze ein Passwort für '+d.email+'.';
         } else {
           showAlert('setup-alert',esc(d.message),'error');
         }
@@ -426,7 +426,7 @@ function init(){
     return;
   }
   if(TOKEN){
-    // Token noch gÃ¼ltig?
+    // Token noch gültig?
     API('/me').then(function(d){
       CUSTOMER=d.customer;
       showDashboard();
@@ -459,14 +459,14 @@ function showDashboard(){
   loadLicenses();
 }
 
-// â”€â”€ Login (removed â€” handled by login.html) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Login (removed — handled by login.html) ──────────────────────────────────
 
-// â”€â”€ Setup Password â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Setup Password ────────────────────────────────────────────────────────────
 function doSetupPassword(){
   var pass=document.getElementById('setup-pass').value;
   var pass2=document.getElementById('setup-pass2').value;
   if(pass.length<10){showAlert('setup-alert','Passwort muss mindestens 10 Zeichen haben.','error');return;}
-  if(pass!==pass2){showAlert('setup-alert','PasswÃ¶rter stimmen nicht Ã¼berein.','error');return;}
+  if(pass!==pass2){showAlert('setup-alert','Passwörter stimmen nicht überein.','error');return;}
   showAlert('setup-alert','Passwort wird gesetzt&hellip;','info');
   fetch('/api/portal/setup-password',{
     method:'POST',
@@ -490,18 +490,18 @@ function doChangePasswordForced(){
   var curr = document.getElementById('change-pass-curr').value;
   var newp = document.getElementById('change-pass-new').value;
   var newp2 = document.getElementById('change-pass-new2').value;
-  if(!curr || !newp || !newp2) { showAlert('change-pass-alert', 'Bitte alle Felder ausfÃ¼llen.', 'error'); return; }
+  if(!curr || !newp || !newp2) { showAlert('change-pass-alert', 'Bitte alle Felder ausfüllen.', 'error'); return; }
   if(newp.length < 10) { showAlert('change-pass-alert', 'Das neue Passwort muss mindestens 10 Zeichen haben.', 'error'); return; }
-  if(newp !== newp2) { showAlert('change-pass-alert', 'Die neuen PasswÃ¶rter stimmen nicht Ã¼berein.', 'error'); return; }
+  if(newp !== newp2) { showAlert('change-pass-alert', 'Die neuen Passwörter stimmen nicht überein.', 'error'); return; }
   if(curr === newp) { showAlert('change-pass-alert', 'Das neue Passwort muss sich vom aktuellen unterscheiden.', 'error'); return; }
 
-  showAlert('change-pass-alert', 'Passwort wird geÃ¤ndert...', 'info');
+  showAlert('change-pass-alert', 'Passwort wird geändert...', 'info');
 
   API('/change-password', {
     method: 'POST',
     body: JSON.stringify({ current_password: curr, new_password: newp })
   }).then(function(d) {
-    showAlert('change-pass-alert', '<i data-lucide="check-circle"></i> Passwort geÃ¤ndert! Du wirst eingeloggt...', 'success');
+    showAlert('change-pass-alert', '<i data-lucide="check-circle"></i> Passwort geändert! Du wirst eingeloggt...', 'success');
     setTimeout(function() {
       document.getElementById('change-pass-curr').value = '';
       document.getElementById('change-pass-new').value = '';
@@ -509,11 +509,11 @@ function doChangePasswordForced(){
       init();
     }, 2000);
   }).catch(function(e) {
-    showAlert('change-pass-alert', esc(e.message || 'Fehler beim Passwort-Ã„ndern.'), 'error');
+    showAlert('change-pass-alert', esc(e.message || 'Fehler beim Passwort-Ändern.'), 'error');
   });
 }
 
-// â”€â”€ Logout â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Logout ────────────────────────────────────────────────────────────────────
 function doLogout(){
   if(TOKEN){
     API('/logout',{method:'POST'}).catch(function(){});
@@ -524,7 +524,7 @@ function doLogout(){
   showPage('login');
 }
 
-// â”€â”€ Lizenzen â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Lizenzen ──────────────────────────────────────────────────────────────────
 function loadLicenses(){
   document.getElementById('lic-list').innerHTML='<div class="loading"><div class="spinner"></div></div>';
   API('/licenses').then(function(d){
@@ -539,12 +539,12 @@ function loadLicenses(){
       var statusBadge='<span class="badge badge-'+esc(l.status)+'">'+esc(l.status)+'</span>';
       var typeBadge='<span class="badge badge-'+esc(l.type)+'">'+esc(l.type)+'</span>';
       var warnHtml = (days > 0 && days <= 30)
-        ? '<div style="background:var(--accent-dim);color:var(--gold);border-radius: var(--radius-sm);padding: var(--space-2) var(--space-3);font-size: var(--text-sm);margin-bottom: var(--space-4)"><i data-lucide="alert-triangle"></i> LÃ¤uft in '+days+' Tagen ab</div>'
+        ? '<div style="background:var(--accent-dim);color:var(--gold);border-radius: var(--radius-sm);padding: var(--space-2) var(--space-3);font-size: var(--text-sm);margin-bottom: var(--space-4)"><i data-lucide="alert-triangle"></i> Läuft in '+days+' Tagen ab</div>'
         : (days <= 0 ? '<div style="background:rgba(255,93,108,.1);color:var(--accent2);border-radius: var(--radius-sm);padding: var(--space-2) var(--space-3);font-size: var(--text-sm);margin-bottom: var(--space-4)"><i data-lucide="x-circle"></i> Abgelaufen</div>' : '');
       return '<div class="lic-card">'+
         '<div class="lic-header" style="margin-bottom:'+(warnHtml?'.5rem':'1rem')+'">'+
           '<div>'+
-            '<div style="font-size: var(--text-xs);color:var(--text2);margin-bottom: var(--space-1)">LizenzschlÃ¼ssel (klicken zum Kopieren)</div>'+
+            '<div style="font-size: var(--text-xs);color:var(--text2);margin-bottom: var(--space-1)">Lizenzschlüssel (klicken zum Kopieren)</div>'+
             '<div class="lic-key" onclick="copyKey(this,\''+esc(l.license_key)+'\')" title="Klicken zum Kopieren">'+esc(l.license_key)+'</div>'+
           '</div>'+
           '<div style="display:flex;gap:.5rem;align-items:center">'+typeBadge+statusBadge+'</div>'+
@@ -572,7 +572,7 @@ function loadLicenses(){
 function copyKey(el, key){
   navigator.clipboard.writeText(key).then(function(){
     var orig=el.textContent;
-    el.textContent='âœ“ Kopiert!';
+    el.textContent='✓ Kopiert!';
     setTimeout(function(){el.textContent=orig;},1500);
   }).catch(function(){});
 }
@@ -582,26 +582,26 @@ function saveDomain(key){
   var msg=document.getElementById('dom-msg-'+key);
   var domain=input?input.value.trim():'';
   if(!domain){msg.style.color='var(--accent2)';msg.textContent='Bitte Domain eingeben.';return;}
-  msg.style.color='var(--text2)';msg.textContent='Speichertâ€¦';
+  msg.style.color='var(--text2)';msg.textContent='Speichert…';
   API('/licenses/'+encodeURIComponent(key)+'/domain',{method:'PATCH',body:JSON.stringify({domain:domain})})
     .then(function(d){
-      msg.style.color='var(--accent3)';msg.textContent='âœ“ '+esc(d.domain)+' gespeichert.';
+      msg.style.color='var(--accent3)';msg.textContent='✓ '+esc(d.domain)+' gespeichert.';
     })
     .catch(function(e){
-      msg.style.color='var(--accent2)';msg.textContent='âœ— '+esc(e.message||'Fehler');
+      msg.style.color='var(--accent2)';msg.textContent='✗ '+esc(e.message||'Fehler');
     });
 }
 
-// â”€â”€ Shop â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Shop ──────────────────────────────────────────────────────────────────────
 var _selectedPlan = null;
-var _shopPlansMap = {};   // plan_id â†’ plan object, sicherer als JSON.stringify im onclick
+var _shopPlansMap = {};   // plan_id → plan object, sicherer als JSON.stringify im onclick
 
 function loadShop(){
   var el=document.getElementById('shop-content');
   el.innerHTML='<div class="loading"><div class="spinner"></div></div>';
   API('/plans').then(function(d){
     var plans=(d.plans||[]);
-    if(!plans.length){el.innerHTML='<p style="color:var(--text2)">Keine PlÃ¤ne verfÃ¼gbar.</p>';return;}
+    if(!plans.length){el.innerHTML='<p style="color:var(--text2)">Keine Pläne verfügbar.</p>';return;}
     _shopPlansMap={};
     plans.forEach(function(p){ _shopPlansMap[p.plan_id]=p; });
     el.innerHTML='<div class="plan-grid">'+plans.map(function(p){
@@ -611,7 +611,7 @@ function loadShop(){
       var price=parseFloat(p.price)||0;
       var priceHtml=price===0
         ?'<div class="plan-price">Kostenlos</div>'
-        :'<div class="plan-price">'+price.toFixed(0)+' â‚¬<span> / Jahr</span></div>';
+        :'<div class="plan-price">'+price.toFixed(0)+' €<span> / Jahr</span></div>';
       return '<div class="plan-card'+(isPopular?' popular':'')+'">'+
         (isPopular?'<div class="plan-popular-badge"><i data-lucide="star"></i> Beliebt</div>':'')+
         '<div class="plan-name">'+esc(p.label)+'</div>'+
@@ -639,7 +639,7 @@ function openOrderModal(plan){
   document.getElementById('order-plan-info').innerHTML=
     '<strong>'+esc(plan.label)+'</strong> &mdash; '+
     (price===0?'<span style="color:var(--accent3)">Kostenlos</span>':
-     '<span style="color:var(--accent);font-weight:700">'+price.toFixed(2)+' â‚¬ / Jahr</span>')+
+     '<span style="color:var(--accent);font-weight:700">'+price.toFixed(2)+' € / Jahr</span>')+
     '<br><span style="color:var(--text2)">'+esc(plan.description||'')+'</span>';
   document.getElementById('order-domain').value='';
   document.getElementById('order-alert').innerHTML='';
@@ -662,14 +662,14 @@ function confirmOrder(){
     return;
   }
   var btn=document.getElementById('order-confirm-btn');
-  btn.disabled=true;btn.textContent='Wird Ã¼bermitteltâ€¦';
+  btn.disabled=true;btn.textContent='Wird übermittelt…';
   API('/licenses/book',{method:'POST',body:JSON.stringify({plan_id:_selectedPlan.plan_id,domain:domain})})
     .then(function(d){
       closeOrderModal();
       document.getElementById('shop-content').innerHTML=
         '<div style="background:rgba(95,191,106,.1);border:1px solid rgba(95,191,106,.3);border-radius: var(--radius-lg);padding: var(--space-6);max-width:480px;">'+
         '<h3 style="color:var(--accent3);margin-bottom: var(--space-2);display:flex;align-items:center;gap:.45rem"><i data-lucide="check-circle"></i> Bestellung eingegangen!</h3>'+
-        '<p style="color:var(--text);margin-bottom: var(--space-3);">Deine Lizenz wurde reserviert. Du erhÃ¤ltst in KÃ¼rze eine Rechnung per E-Mail.</p>'+
+        '<p style="color:var(--text);margin-bottom: var(--space-3);">Deine Lizenz wurde reserviert. Du erhältst in Kürze eine Rechnung per E-Mail.</p>'+
         '<p style="font-size: var(--text-sm);color:var(--text2);">Lizenz-Key: <code style="background:var(--bg3);padding: .1rem var(--space-2);border-radius: var(--radius-sm);">'+esc(d.license_key)+'</code></p>'+
         '<p style="font-size: var(--text-sm);color:var(--text2);margin-top: var(--space-2);">Die Lizenz wird nach Zahlungseingang aktiviert.</p>'+
         '<button class="btn btn-ghost btn-sm" style="margin-top: var(--space-4)" onclick="switchTab(\'licenses\')"><i data-lucide="key-round"></i> Zu meinen Lizenzen</button>'+
@@ -681,13 +681,13 @@ function confirmOrder(){
     });
 }
 
-// Klick auÃŸerhalb modal schlieÃŸt es
+// Klick außerhalb modal schließt es
 document.addEventListener('click',function(e){
   var modal=document.getElementById('order-modal');
   if(modal&&modal.classList.contains('open')&&e.target===modal)closeOrderModal();
 });
 
-// â”€â”€ Portal-Rechnungen â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Portal-Rechnungen ─────────────────────────────────────────────────────────
 function loadPortalInvoices(){
   var el=document.getElementById('portal-inv-list');
   el.innerHTML='<div class="loading"><div class="spinner"></div></div>';
@@ -698,16 +698,16 @@ function loadPortalInvoices(){
       return;
     }
     el.innerHTML='<div class="table-wrap"><table class="data-table"><thead><tr>'+
-      '<th>Nummer</th><th>Datum</th><th>Betrag</th><th>FÃ¤llig</th><th>Status</th><th></th>'+
+      '<th>Nummer</th><th>Datum</th><th>Betrag</th><th>Fällig</th><th>Status</th><th></th>'+
       '</tr></thead><tbody>'+
       invs.map(function(inv){
         var statusColor={draft:'var(--text2)',sent:'var(--accent)',overdue:'var(--accent2)',paid:'var(--accent3)',cancelled:'var(--text2)'}[inv.status]||'var(--text2)';
-        var statusLabel={draft:'Entwurf',sent:'Offen',overdue:'ÃœberfÃ¤llig',paid:'Bezahlt',cancelled:'Storniert'}[inv.status]||inv.status;
+        var statusLabel={draft:'Entwurf',sent:'Offen',overdue:'Überfällig',paid:'Bezahlt',cancelled:'Storniert'}[inv.status]||inv.status;
         return '<tr>'+
-          '<td><strong>'+esc(inv.invoice_number||'â€“')+'</strong></td>'+
+          '<td><strong>'+esc(inv.invoice_number||'–')+'</strong></td>'+
           '<td>'+fmtDateShort(inv.created_at)+'</td>'+
-          '<td><strong>'+(parseFloat(inv.amount_gross)||0).toFixed(2)+' â‚¬</strong></td>'+
-          '<td>'+(inv.due_date?fmtDateShort(inv.due_date):'â€“')+'</td>'+
+          '<td><strong>'+(parseFloat(inv.amount_gross)||0).toFixed(2)+' €</strong></td>'+
+          '<td>'+(inv.due_date?fmtDateShort(inv.due_date):'–')+'</td>'+
           '<td><span style="color:'+statusColor+';font-weight: 500;font-size: var(--text-sm);">'+esc(statusLabel)+'</span></td>'+
           '<td>'+(inv.pdf_path||inv.id?'<button class="btn btn-ghost btn-sm" onclick="downloadInv(\''+esc(inv.id)+'\',\''+esc(inv.invoice_number||inv.id)+'\')"><i data-lucide="file-text"></i> PDF</button>':'')+'</td>'+
         '</tr>';
@@ -720,7 +720,7 @@ function loadPortalInvoices(){
 
 function downloadInv(id,num){
   fetch('/api/portal/invoices/'+encodeURIComponent(id)+'/pdf',{headers:{'Authorization':'Bearer '+TOKEN}})
-    .then(function(r){if(!r.ok)throw new Error('PDF nicht verfÃ¼gbar');return r.blob();})
+    .then(function(r){if(!r.ok)throw new Error('PDF nicht verfügbar');return r.blob();})
     .then(function(b){
       var u=URL.createObjectURL(b);
       var a=document.createElement('a');a.href=u;a.download='Rechnung-'+num+'.pdf';
@@ -729,7 +729,7 @@ function downloadInv(id,num){
     }).catch(function(e){alert(e.message);});
 }
 
-// â”€â”€ Kaufhistorie â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Kaufhistorie ──────────────────────────────────────────────────────────────
 function loadHistory(){
   document.getElementById('hist-table').innerHTML='<div class="loading"><div class="spinner"></div></div>';
   API('/history').then(function(d){
@@ -743,15 +743,15 @@ function loadHistory(){
           '<td><span class="badge badge-'+esc(h.plan)+'">'+esc(h.plan)+'</span></td>'+
           '<td><span class="badge badge-'+esc(h.action)+'">'+esc(h.action)+'</span></td>'+
           '<td style="font-weight: 500;color:'+(h.amount?'var(--accent3)':'var(--text2)')+'">'+ fmtEur(h.amount)+'</td>'+
-          '<td style="font-size: var(--text-sm);max-width:180px">'+esc(h.note||'â€”')+'</td>'+
+          '<td style="font-size: var(--text-sm);max-width:180px">'+esc(h.note||'—')+'</td>'+
         '</tr>';
-      }).join('')+'</tbody></table>':'<div class="loading" style="padding: var(--space-8)">Keine EintrÃ¤ge.</div>';
+      }).join('')+'</tbody></table>':'<div class="loading" style="padding: var(--space-8)">Keine Einträge.</div>';
   }).catch(function(e){
     document.getElementById('hist-table').innerHTML='<div class="alert alert-error" style="margin: var(--space-4)">'+esc(e.message||'Fehler')+'</div>';
   });
 }
 
-// â”€â”€ Konto â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Konto ─────────────────────────────────────────────────────────────────────
 function loadAccount(){
   API('/me').then(function(d){
     var c=d.customer;
@@ -766,10 +766,10 @@ function loadAccount(){
           '<tr><td style="padding: var(--space-2) 0;color:var(--text2)">Zahlungsstatus</td><td style="padding: var(--space-2) 0"><span class="badge badge-'+(c.payment_status==='paid'?'active':'revoked')+'">'+esc(c.payment_status)+'</span></td></tr>'+
           '<tr><td style="padding: var(--space-2) 0;color:var(--text2)">Kunde seit</td><td style="padding: var(--space-2) 0">'+fmtDateShort(c.created_at)+'</td></tr>'+
         '</table>'+
-        '<p style="margin-top: var(--space-4);font-size: var(--text-sm);color:var(--text2)">MÃ¶chtest du deine Daten Ã¤ndern? Bitte kontaktiere uns direkt.</p>'+
+        '<p style="margin-top: var(--space-4);font-size: var(--text-sm);color:var(--text2)">Möchtest du deine Daten ändern? Bitte kontaktiere uns direkt.</p>'+
       '</div>' +
       '<div class="card" style="margin-top: var(--space-4)">'+
-        '<div class="card-title"><i data-lucide="key-round"></i> Passwort Ã¤ndern</div>'+
+        '<div class="card-title"><i data-lucide="key-round"></i> Passwort ändern</div>'+
         '<div id="account-pass-alert"></div>'+
         '<div class="form-group"><label>Aktuelles Passwort</label><input type="password" id="acc-pass-curr"></div>'+
         '<div class="form-group"><label>Neues Passwort (min. 10 Zeichen)</label><input type="password" id="acc-pass-new"></div>'+
@@ -785,23 +785,23 @@ function doChangePasswordVoluntary(){
   var curr = document.getElementById('acc-pass-curr').value;
   var newp = document.getElementById('acc-pass-new').value;
   var newp2 = document.getElementById('acc-pass-new2').value;
-  if(!curr || !newp || !newp2) { showAlert('account-pass-alert', 'Bitte alle Felder ausfÃ¼llen.', 'error'); return; }
+  if(!curr || !newp || !newp2) { showAlert('account-pass-alert', 'Bitte alle Felder ausfüllen.', 'error'); return; }
   if(newp.length < 10) { showAlert('account-pass-alert', 'Das neue Passwort muss mindestens 10 Zeichen haben.', 'error'); return; }
-  if(newp !== newp2) { showAlert('account-pass-alert', 'Die neuen PasswÃ¶rter stimmen nicht Ã¼berein.', 'error'); return; }
+  if(newp !== newp2) { showAlert('account-pass-alert', 'Die neuen Passwörter stimmen nicht überein.', 'error'); return; }
   if(curr === newp) { showAlert('account-pass-alert', 'Das neue Passwort muss sich vom aktuellen unterscheiden.', 'error'); return; }
 
-  showAlert('account-pass-alert', 'Passwort wird geÃ¤ndert...', 'info');
+  showAlert('account-pass-alert', 'Passwort wird geändert...', 'info');
 
   API('/change-password', {
     method: 'POST',
     body: JSON.stringify({ current_password: curr, new_password: newp })
   }).then(function(d) {
-    showAlert('account-pass-alert', '<i data-lucide="check-circle"></i> Passwort erfolgreich geÃ¤ndert.', 'success');
+    showAlert('account-pass-alert', '<i data-lucide="check-circle"></i> Passwort erfolgreich geändert.', 'success');
     document.getElementById('acc-pass-curr').value = '';
     document.getElementById('acc-pass-new').value = '';
     document.getElementById('acc-pass-new2').value = '';
   }).catch(function(e) {
-    showAlert('account-pass-alert', esc(e.message || 'Fehler beim Passwort-Ã„ndern.'), 'error');
+    showAlert('account-pass-alert', esc(e.message || 'Fehler beim Passwort-Ändern.'), 'error');
   });
 }
 

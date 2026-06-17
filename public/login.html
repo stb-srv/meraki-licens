@@ -124,7 +124,7 @@
 
     <div class="card-body">
 
-      <!-- â”€â”€ Kunden: Login â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+      <!-- ── Kunden: Login ─────────────────────────────────────── -->
       <div id="panel-cust-login" class="panel active">
         <div class="panel-title"><i data-lucide="log-in"></i> Anmelden</div>
         <div class="panel-sub">Melde dich mit deiner E-Mail oder deinem Benutzernamen an.</div>
@@ -138,7 +138,7 @@
         </div>
       </div>
 
-      <!-- â”€â”€ Kunden: Registrieren â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+      <!-- ── Kunden: Registrieren ─────────────────────────────── -->
       <div id="panel-cust-register" class="panel">
         <div class="panel-title"><i data-lucide="user-plus"></i> Registrieren</div>
         <div class="panel-sub">Erstelle ein neues Kunden-Konto.</div>
@@ -153,20 +153,20 @@
           <label for="reg-agb" style="margin: 0;font-size: var(--text-sm);line-height:1.4;">Ich akzeptiere die AGB und Datenschutzbestimmungen *</label>
         </div>
         <button class="btn btn-primary" style="margin-top: var(--space-2)" onclick="doRegister()">Konto erstellen</button>
-        <div class="links-row"><a class="link" onclick="showPanel('cust','login')">&#8592; ZurÃ¼ck zum Login</a></div>
+        <div class="links-row"><a class="link" onclick="showPanel('cust','login')">&#8592; Zurück zum Login</a></div>
       </div>
 
-      <!-- â”€â”€ Kunden: Passwort vergessen â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+      <!-- ── Kunden: Passwort vergessen ──────────────────────── -->
       <div id="panel-cust-forgot" class="panel">
         <div class="panel-title"><i data-lucide="key-round"></i> Passwort vergessen</div>
-        <div class="panel-sub">Gib deine E-Mail-Adresse ein â€“ du erhÃ¤ltst einen Reset-Link.</div>
+        <div class="panel-sub">Gib deine E-Mail-Adresse ein – du erhältst einen Reset-Link.</div>
         <div id="cust-forgot-alert"></div>
         <div class="form-group"><label>E-Mail-Adresse</label><input type="email" id="forgot-email"></div>
         <button class="btn btn-primary" onclick="doForgotPassword()">Reset-Link senden</button>
-        <div class="links-row"><a class="link" onclick="showPanel('cust','login')">&#8592; ZurÃ¼ck zum Login</a></div>
+        <div class="links-row"><a class="link" onclick="showPanel('cust','login')">&#8592; Zurück zum Login</a></div>
       </div>
 
-      <!-- â”€â”€ Admin: Login â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+      <!-- ── Admin: Login ─────────────────────────────────────── -->
       <div id="panel-admin-login" class="panel">
         <div class="panel-title"><i data-lucide="shield"></i> Anmelden</div>
         <div class="panel-sub">Administration des Lizenzservers.</div>
@@ -176,7 +176,7 @@
         <button class="btn btn-primary" onclick="doAdminLogin()">Einloggen</button>
       </div>
 
-      <!-- â”€â”€ Admin: 2FA â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+      <!-- ── Admin: 2FA ───────────────────────────────────────── -->
       <div id="panel-admin-2fa" class="panel">
         <div class="panel-title"><i data-lucide="shield-check"></i> Zwei-Faktor</div>
         <div class="panel-sub">Bitte den 6-stelligen Authenticator-Code eingeben.</div>
@@ -266,7 +266,7 @@ function clearAlerts(){
   document.querySelectorAll('.alert').forEach(function(el){el.innerHTML='';});
 }
 
-// â”€â”€ Kunden Login â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Kunden Login ────────────────────────────────────────────────────
 function doCustomerLogin(){
   var email=document.getElementById('cust-email').value.trim();
   var pass=document.getElementById('cust-pass').value;
@@ -283,7 +283,7 @@ function doCustomerLogin(){
     });
 }
 
-// â”€â”€ Registrieren â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Registrieren ────────────────────────────────────────────────────
 function doRegister(){
   var name=document.getElementById('reg-name').value.trim();
   var email=document.getElementById('reg-email').value.trim();
@@ -291,8 +291,8 @@ function doRegister(){
   var pass2=document.getElementById('reg-pass2').value;
   var company=document.getElementById('reg-company').value.trim();
   var agb=document.getElementById('reg-agb').checked;
-  if(!name||!email||!pass)return showAlert('cust-reg-alert','Bitte alle Pflichtfelder ausfÃ¼llen.');
-  if(pass!==pass2)return showAlert('cust-reg-alert','PasswÃ¶rter stimmen nicht Ã¼berein.');
+  if(!name||!email||!pass)return showAlert('cust-reg-alert','Bitte alle Pflichtfelder ausfüllen.');
+  if(pass!==pass2)return showAlert('cust-reg-alert','Passwörter stimmen nicht überein.');
   if(pass.length<10)return showAlert('cust-reg-alert','Passwort muss mindestens 10 Zeichen lang sein.');
   if(!agb)return showAlert('cust-reg-alert','Bitte akzeptiere die AGB.');
   fetch('/api/portal/register',{method:'POST',headers:{'Content-Type':'application/json'},
@@ -305,7 +305,7 @@ function doRegister(){
     }).catch(function(e){showAlert('cust-reg-alert',esc(e.message||'Registrierung fehlgeschlagen.'));});
 }
 
-// â”€â”€ Passwort vergessen â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Passwort vergessen ──────────────────────────────────────────────
 function doForgotPassword(){
   var email=document.getElementById('forgot-email').value.trim();
   if(!email)return showAlert('cust-forgot-alert','Bitte E-Mail eingeben.');
@@ -316,7 +316,7 @@ function doForgotPassword(){
     .catch(function(e){showAlert('cust-forgot-alert',esc(e.message||'Fehler.'));});
 }
 
-// â”€â”€ Admin Login â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Admin Login ─────────────────────────────────────────────────────
 var _adminTempToken='';
 function doAdminLogin(){
   var user=document.getElementById('admin-user').value.trim();
@@ -348,10 +348,10 @@ function doAdmin2FA(){
     sessionStorage.setItem('admin_user',  d.username || '');
     window.location.href='index.html';
   })
-    .catch(function(e){showAlert('admin-2fa-alert',esc(e.message||'Code ungÃ¼ltig.'));});
+    .catch(function(e){showAlert('admin-2fa-alert',esc(e.message||'Code ungültig.'));});
 }
 
-// â”€â”€ Enter-Taste â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Enter-Taste ─────────────────────────────────────────────────────
 document.addEventListener('keydown',function(e){
   if(e.key!=='Enter')return;
   var active=document.querySelector('.panel.active');
