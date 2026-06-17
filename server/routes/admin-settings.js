@@ -13,6 +13,26 @@ const router = Router();
 // ── Plans ────────────────────────────────────────────────────────────────────
 router.get('/plans', requireAuth, (req, res) => res.json(PLAN_DEFINITIONS));
 
+// ── Session-Management ────────────────────────────────────────────────────────
+router.get('/sessions', requireAuth, requireSuperAdmin, asyncHandler(async (req, res) => {
+    const [rows] = db.query(`
+        SELECT id, admin_username, ip, user_agent, created_at, expires_at,
+               CASE WHEN token_hash = ? THEN 1 ELSE 0 END AS is_current
+        FROM admin_sessions
+        WHERE revoked = 0 AND expires_at > datetime('now')
+        ORDER BY created_at DESC
+    `, [req.adminTokenHash || '']);
+    res.json({ success: true, sessions: rows });
+}));
+
+router.delete('/sessions/:id', requireAuth, requireSuperAdmin, asyncHandler(async (req, res) => {
+    const [[session]] = db.query('SELECT id, admin_username FROM admin_sessions WHERE id = ?', [req.params.id]);
+    if (!session) return res.status(404).json({ success: false, message: 'Session nicht gefunden.' });
+    db.query('UPDATE admin_sessions SET revoked = 1 WHERE id = ?', [req.params.id]);
+    await addAuditLog('session_revoked', { session_id: req.params.id, username: session.admin_username, by: req.admin.username });
+    res.json({ success: true });
+}));
+
 // ── Key-Rotation / JWKS ───────────────────────────────────────────────────────
 router.get('/signing-keys', requireAuth, requireSuperAdmin, asyncHandler(async (req, res) => {
     const [rows] = db.query('SELECT kid, status, created_at FROM signing_keys ORDER BY created_at DESC');
