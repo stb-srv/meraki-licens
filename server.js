@@ -67,6 +67,11 @@ if (process.env.NODE_ENV !== 'test') {
         const { runMigrations } = await import('./server/migrate.js');
         await runMigrations(database);
         console.log('✅  Datenbank-Migrationen erfolgreich abgeschlossen.');
+        if (SETUP_TOKEN) {
+            const [[{ adminCount }]] = db.query('SELECT COUNT(*) AS adminCount FROM admins');
+            if (adminCount > 0)
+                console.warn('⚠️  SICHERHEITSHINWEIS: SETUP_TOKEN ist gesetzt, aber Setup ist abgeschlossen. Entferne SETUP_TOKEN aus der .env-Datei!');
+        }
     } catch (e) {
         console.error('❌  Migration fehlgeschlagen:', e.message);
         process.exit(1);
@@ -97,7 +102,10 @@ app.use(helmet({
 const rawCorsOrigins = process.env.CORS_ORIGINS || '';
 const staticAllowedOrigins = rawCorsOrigins ? rawCorsOrigins.split(',').map(o => o.trim()).filter(Boolean) : [];
 
+let _corsCache = { origins: [], ts: 0 };
+
 function getDynamicAllowedOrigins() {
+    if (Date.now() - _corsCache.ts < 60_000) return _corsCache.origins;
     try {
         const [rows] = db.query(
             "SELECT DISTINCT associated_domain FROM licenses WHERE status = 'active' AND associated_domain IS NOT NULL AND associated_domain != '*'"
@@ -112,6 +120,7 @@ function getDynamicAllowedOrigins() {
                 dynamic.push(`http://www.${clean}`);
             }
         }
+        _corsCache = { origins: dynamic, ts: Date.now() };
         return dynamic;
     } catch { return []; }
 }

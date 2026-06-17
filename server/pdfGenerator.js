@@ -2,6 +2,11 @@ import PDFDocument from 'pdfkit';
 import fs from 'fs';
 import path from 'path';
 
+function safeText(val, maxLen = 300) {
+    if (val == null) return '';
+    return String(val).trim().slice(0, maxLen);
+}
+
 /**
  * Format currency in EUR format
  * @param {number} val - Amount
@@ -39,10 +44,10 @@ function buildPDFLayout(invoiceData, doc) {
 
     // --- SENDER INFO (Top Left) ---
     doc.fillColor(primaryColor).fontSize(14).font('Helvetica-Bold');
-    doc.text(invoiceData.company_name || 'Meraki', 50, 50);
-    
+    doc.text(safeText(invoiceData.company_name) || 'Meraki', 50, 50);
+
     doc.fillColor(textColor).fontSize(8.5).font('Helvetica');
-    const addressLines = (invoiceData.company_address || '').split('\n').filter(Boolean);
+    const addressLines = safeText(invoiceData.company_address, 500).split('\n').filter(Boolean);
     let addressY = 68;
     for (const line of addressLines) {
         doc.text(line.trim(), 50, addressY);
@@ -58,7 +63,7 @@ function buildPDFLayout(invoiceData, doc) {
     doc.fillColor(textColor).fontSize(9).font('Helvetica');
     let detailsY = 68;
     doc.text('Rechnungsnr.:', 350, detailsY, { align: 'right', width: 95 });
-    doc.font('Helvetica-Bold').text(invoiceData.invoice_number || '', 450, detailsY, { align: 'right', width: 95 });
+    doc.font('Helvetica-Bold').text(safeText(invoiceData.invoice_number), 450, detailsY, { align: 'right', width: 95 });
     
     doc.font('Helvetica');
     detailsY += 14;
@@ -79,21 +84,21 @@ function buildPDFLayout(invoiceData, doc) {
     doc.fillColor(textColor).fontSize(9.5).font('Helvetica-Bold');
     let recipientY = 166;
     if (invoiceData.customer_company) {
-        doc.text(invoiceData.customer_company, 50, recipientY);
+        doc.text(safeText(invoiceData.customer_company), 50, recipientY);
         recipientY += 13;
-        doc.font('Helvetica').text(invoiceData.customer_name || '', 50, recipientY);
+        doc.font('Helvetica').text(safeText(invoiceData.customer_name), 50, recipientY);
         recipientY += 13;
     } else {
-        doc.text(invoiceData.customer_name || '', 50, recipientY);
+        doc.text(safeText(invoiceData.customer_name), 50, recipientY);
         recipientY += 13;
     }
 
     // Adresse aus separaten Feldern zusammenbauen
     doc.font('Helvetica');
     const billingLines = [
-        invoiceData.customer_billing_street,
-        [invoiceData.customer_billing_zip, invoiceData.customer_billing_city].filter(Boolean).join(' '),
-        invoiceData.customer_billing_country
+        safeText(invoiceData.customer_billing_street),
+        [safeText(invoiceData.customer_billing_zip), safeText(invoiceData.customer_billing_city)].filter(Boolean).join(' '),
+        safeText(invoiceData.customer_billing_country)
     ].filter(Boolean);
     for (const line of billingLines) {
         doc.text(line.trim(), 50, recipientY);
@@ -122,7 +127,7 @@ function buildPDFLayout(invoiceData, doc) {
     let index = 1;
     for (const item of items) {
         doc.text(String(index++), 50, tableY, { width: 30 });
-        doc.text(item.description || '', 90, tableY, { width: 250 });
+        doc.text(safeText(item.description), 90, tableY, { width: 250 });
         doc.text(parseFloat(item.quantity).toFixed(1), 350, tableY, { width: 50, align: 'center' });
         doc.text(formatCurrency(item.unit_price), 410, tableY, { width: 65, align: 'right' });
         doc.text(formatCurrency(item.total), 485, tableY, { width: 60, align: 'right' });
@@ -155,7 +160,7 @@ function buildPDFLayout(invoiceData, doc) {
         tableY += 35;
         doc.fillColor(lightGray).fontSize(7.5).font('Helvetica-Bold').text('BEMERKUNGEN / HINWEISE', 50, tableY);
         tableY += 12;
-        doc.fillColor(textColor).fontSize(7.5).font('Helvetica').text(invoiceData.notes, 50, tableY, { width: 280 });
+        doc.fillColor(textColor).fontSize(7.5).font('Helvetica').text(safeText(invoiceData.notes, 1000), 50, tableY, { width: 280 });
     }
 
     // --- FOOTER BLOCK ---
@@ -167,9 +172,9 @@ function buildPDFLayout(invoiceData, doc) {
     doc.fillColor(textColor).fontSize(footerTextSize).font('Helvetica');
 
     // Column 1: Company details
-    doc.text(invoiceData.company_name || 'Meraki', 50, footerY + 10, { width: colWidth });
+    doc.text(safeText(invoiceData.company_name) || 'Meraki', 50, footerY + 10, { width: colWidth });
     if (invoiceData.company_tax_id) {
-        doc.text(`Steuernummer / USt-IdNr.: ${invoiceData.company_tax_id}`, 50, footerY + 22, { width: colWidth });
+        doc.text(`Steuernummer / USt-IdNr.: ${safeText(invoiceData.company_tax_id)}`, 50, footerY + 22, { width: colWidth });
     }
 
     // Column 2: Bank connection
@@ -178,19 +183,19 @@ function buildPDFLayout(invoiceData, doc) {
         doc.text('Bankverbindung:', 220, bankY, { width: colWidth });
         bankY += 12;
         if (invoiceData.company_bank_name) {
-            doc.text(invoiceData.company_bank_name, 220, bankY, { width: colWidth });
+            doc.text(safeText(invoiceData.company_bank_name), 220, bankY, { width: colWidth });
             bankY += 10;
         }
-        doc.text(`IBAN: ${invoiceData.company_iban}`, 220, bankY, { width: colWidth });
+        doc.text(`IBAN: ${safeText(invoiceData.company_iban)}`, 220, bankY, { width: colWidth });
         bankY += 10;
         if (invoiceData.company_bic) {
-            doc.text(`BIC: ${invoiceData.company_bic}`, 220, bankY, { width: colWidth });
+            doc.text(`BIC: ${safeText(invoiceData.company_bic)}`, 220, bankY, { width: colWidth });
         }
     }
 
     // Column 3: Custom footer text or generic message
     const defaultFooterText = 'Vielen Dank für Ihre Bestellung und das Vertrauen in Meraki Restaurant-Management-System.';
-    doc.fillColor(lightGray).fontSize(6.5).text(invoiceData.footer_text || defaultFooterText, 390, footerY + 10, { width: 155, align: 'right' });
+    doc.fillColor(lightGray).fontSize(6.5).text(safeText(invoiceData.footer_text, 500) || defaultFooterText, 390, footerY + 10, { width: 155, align: 'right' });
 }
 
 /**
