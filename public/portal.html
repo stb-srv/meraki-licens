@@ -406,6 +406,16 @@ function confirmUpgrade(){
     });
 }
 
+function renewLicense(key) {
+  if (!confirm('Lizenz um einen weiteren Lizenzzeitraum verlängern? Es wird eine neue Rechnung erstellt.')) return;
+  API('/licenses/'+encodeURIComponent(key)+'/renew', {method:'POST'})
+    .then(function(d){
+      toast('Lizenz verlängert bis '+new Date(d.new_expiry).toLocaleDateString('de-DE')+'.', 'success');
+      loadLicenses();
+    })
+    .catch(function(e){ toast(e.message||'Fehler beim Verlängern.', 'error'); });
+}
+
 function loadLicenseStats(){
   var el=document.getElementById('lic-stats-row');
   if(!el)return;
@@ -638,9 +648,10 @@ function loadLicenses(){
           '<button class="btn btn-primary btn-sm" onclick="saveDomain(\''+esc(l.license_key)+'\')" >Speichern</button>'+
           '<span class="domain-msg" id="dom-msg-'+esc(l.license_key)+'"></span>'+
         '</div>'+
-        (l.status==='active'&&l.type!=='ENTERPRISE'?
-          '<div style="margin-top: var(--space-3);padding-top: var(--space-3);border-top:1px solid var(--border)">'+
-          '<button class="btn btn-ghost btn-sm" onclick="openUpgradeModal(\''+esc(l.license_key)+'\',\''+esc(l.type)+'\')"><i data-lucide="arrow-up-circle"></i> Plan upgraden</button>'+
+        ((l.status==='active'||l.status==='expired')&&l.type!=='FREE'&&l.type!=='TRIAL'?
+          '<div style="margin-top: var(--space-3);padding-top: var(--space-3);border-top:1px solid var(--border);display:flex;gap:.6rem;flex-wrap:wrap">'+
+          (l.status==='active'&&l.type!=='ENTERPRISE'?'<button class="btn btn-ghost btn-sm" onclick="openUpgradeModal(\''+esc(l.license_key)+'\',\''+esc(l.type)+'\')"><i data-lucide="arrow-up-circle"></i> Upgraden</button>':'')+
+          '<button class="btn btn-ghost btn-sm" onclick="renewLicense(\''+esc(l.license_key)+'\')"><i data-lucide="refresh-cw"></i> Verlängern</button>'+
           '</div>':'')+
       '</div>';
     }).join('');

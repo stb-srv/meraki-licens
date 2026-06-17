@@ -385,4 +385,33 @@ router.get('/invoice-settings/preview-pdf', requireAuth, asyncHandler(async (req
     }
 }));
 
+// ── Export Invoices ───────────────────────────────────────────────────────────
+router.get('/export/invoices', requireAuth, asyncHandler(async (req, res) => {
+    const format = req.query.format === 'json' ? 'json' : 'csv';
+    const [rows] = db.query(
+        `SELECT i.id, i.invoice_number, i.status, i.type, i.customer_id,
+                c.name AS customer_name, c.email AS customer_email,
+                i.license_key, i.amount_net, i.amount_tax, i.amount_gross, i.tax_rate,
+                i.due_date, i.paid_at, i.created_at, i.dunning_level
+         FROM invoices i
+         LEFT JOIN customers c ON i.customer_id = c.id
+         ORDER BY i.created_at DESC`
+    );
+    if (format === 'json') {
+        res.setHeader('Content-Type', 'application/json');
+        res.setHeader('Content-Disposition', 'attachment; filename=invoices_export.json');
+        return res.send(JSON.stringify(rows, null, 2));
+    }
+    const headers = ['id', 'invoice_number', 'status', 'type', 'customer_name', 'customer_email',
+        'license_key', 'amount_net', 'amount_tax', 'amount_gross', 'tax_rate', 'due_date', 'paid_at', 'created_at', 'dunning_level'];
+    let csv = headers.join(';') + '\n';
+    for (const row of rows) {
+        const line = headers.map(h => `"${String(row[h] ?? '').replace(/"/g, '""')}"`);
+        csv += line.join(';') + '\n';
+    }
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename=invoices_export.csv');
+    res.send('﻿' + csv);
+}));
+
 export default router;

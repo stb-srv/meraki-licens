@@ -502,6 +502,36 @@ router.post('/forgot-password', registerLimiter, asyncHandler(async (req, res) =
 }));
 
 // ── GET /plans (aus DB) ───────────────────────────────────────────────────────
+// ── POST /licenses/:key/renew ─────────────────────────────────────────────────
+router.post('/licenses/:key/renew', requirePortalAuth, asyncHandler(async (req, res) => {
+    const key = req.params.key;
+    const [rows] = db.query(
+        'SELECT * FROM licenses WHERE license_key = ? AND customer_id = ?',
+        [key, req.customer.id]
+    );
+    if (!rows.length) return res.status(404).json({ success: false, message: 'Lizenz nicht gefunden.' });
+    const lic = rows[0];
+    if (!['active', 'expired'].includes(lic.status))
+        return res.status(400).json({ success: false, message: `Lizenz im Status "${lic.status}" kann nicht verlängert werden.` });
+    const plan = PLAN_DEFINITIONS[lic.type];
+    if (!plan) return res.status(400).json({ success: false, message: 'Unbekannter Plantyp.' });
+
+    const base = lic.status === 'active' && lic.expires_at ? new Date(lic.expires_at) : new Date();
+    const newExpiry = toDbDate(new Date(base.getTime() + plan.expires_days * 86400000));
+
+    db.query(
+        `UPDATE licenses SET expires_at = ?, status = 'active', expiry_notified_at = NULL, expiry_notified_7d_at = NULL WHERE license_key = ?`,
+        [newExpiry, key]
+    );
+
+    if (lic.type !== 'FREE' && lic.type !== 'TRIAL') {
+        try { createInvoiceFromLicense(key, req.customer.portal_username || req.customer.email); } catch {}
+    }
+
+    await addAuditLog('license_renewed_by_customer', { license_key: key, new_expiry: newExpiry, customer_id: req.customer.id }, req.customer.name);
+    res.json({ success: true, license_key: key, new_expiry: newExpiry });
+}));
+
 router.get('/plans', asyncHandler(async (req, res) => {
     const [rows] = db.query('SELECT * FROM plan_pricing WHERE active = 1 ORDER BY sort_order ASC');
     res.json({ success: true, plans: rows.map(p => ({ ...p, features: parseJsonField(p.features, []) })) });

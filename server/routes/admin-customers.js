@@ -288,4 +288,30 @@ router.get('/export/history', requireAuth, asyncHandler(async (req, res) => {
     res.send('﻿' + csv);
 }));
 
+// ── Export Customers ──────────────────────────────────────────────────────────
+router.get('/export/customers', requireAuth, asyncHandler(async (req, res) => {
+    const format = req.query.format === 'json' ? 'json' : 'csv';
+    const [rows] = db.query(
+        `SELECT id, name, email, company, phone, contact_person, payment_status,
+                billing_street, billing_zip, billing_city, billing_country, tax_id,
+                portal_username, created_at, updated_at, archived
+         FROM customers ORDER BY created_at DESC`
+    );
+    if (format === 'json') {
+        res.setHeader('Content-Type', 'application/json');
+        res.setHeader('Content-Disposition', 'attachment; filename=customers_export.json');
+        return res.send(JSON.stringify(rows, null, 2));
+    }
+    const headers = ['id', 'name', 'email', 'company', 'phone', 'contact_person', 'payment_status',
+        'billing_street', 'billing_zip', 'billing_city', 'billing_country', 'tax_id', 'created_at', 'archived'];
+    let csv = headers.join(';') + '\n';
+    for (const row of rows) {
+        const line = headers.map(h => `"${String(row[h] ?? '').replace(/"/g, '""')}"`);
+        csv += line.join(';') + '\n';
+    }
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename=customers_export.csv');
+    res.send('﻿' + csv);
+}));
+
 export default router;
