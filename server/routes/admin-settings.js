@@ -7,6 +7,7 @@ import { PLAN_DEFINITIONS } from '../plans.js';
 import { addAuditLog } from '../helpers.js';
 import { requireAuth, requireSuperAdmin, asyncHandler, MIN_PASSWORD_LENGTH } from '../middleware.js';
 import { generateKeyPair, getAllJwks } from '../crypto.js';
+import { retryDeadLetter } from '../webhook.js';
 
 const router = Router();
 
@@ -223,6 +224,19 @@ router.delete('/webhooks/:id', requireAuth, requireSuperAdmin, asyncHandler(asyn
     } catch (e) {
         res.status(500).json({ success: false, message: 'Internal server error' });
     }
+}));
+
+router.get('/webhook-dead-letters', requireAuth, requireSuperAdmin, asyncHandler(async (req, res) => {
+    const [rows] = db.query(
+        'SELECT id, webhook_url, event, error, attempt_count, failed_at, retried_at, resolved FROM webhook_dead_letters ORDER BY failed_at DESC LIMIT 100'
+    );
+    res.json({ success: true, dead_letters: rows });
+}));
+
+router.post('/webhook-dead-letters/:id/retry', requireAuth, requireSuperAdmin, asyncHandler(async (req, res) => {
+    await retryDeadLetter(req.params.id);
+    await addAuditLog('webhook_dead_letter_retried', { id: req.params.id, by: req.admin.username });
+    res.json({ success: true, message: 'Webhook erfolgreich wiederholt.' });
 }));
 
 router.get('/webhooks/signing-info', requireAuth, (req, res) => {
