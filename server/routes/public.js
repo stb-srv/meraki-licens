@@ -17,6 +17,24 @@ function toDbDate(d) {
     return (d instanceof Date ? d : new Date(d)).toISOString().slice(0, 19).replace('T', ' ');
 }
 
+function getGraceDays(license) {
+    if (license.grace_period_days != null) return license.grace_period_days;
+    try {
+        const [[s]] = db.query('SELECT grace_period_days FROM invoice_settings WHERE id = 1');
+        return s?.grace_period_days ?? 7;
+    } catch { return 7; }
+}
+
+function resolveGrace(license) {
+    const now = new Date();
+    const expiresAt = new Date(license.expires_at);
+    if (now <= expiresAt) return { licenseStatus: 'active', graceUntil: null, hardExpired: false };
+    const graceDays = getGraceDays(license);
+    const graceUntil = new Date(expiresAt.getTime() + graceDays * 86400000);
+    if (now <= graceUntil) return { licenseStatus: 'grace', graceUntil, hardExpired: false };
+    return { licenseStatus: 'expired', graceUntil, hardExpired: true };
+}
+
 // ── Setup Status ──────────────────────────────────────────────────────────────
 router.get('/setup-status', asyncHandler(async (req, res) => {
     const [[{ count }]] = db.query('SELECT COUNT(*) as count FROM admins');
@@ -152,8 +170,9 @@ router.post('/validate', validateLimiter, asyncHandler(async (req, res) => {
         const l = rows[0];
 
         if (!l) { await addAuditLog('validate_failed', { license_key, reason: 'not_found', ip: clientIp }); return res.status(404).json({ status: 'invalid', message: 'Lizenz-Key nicht gefunden.' }); }
-        if (new Date(l.expires_at) < new Date()) { await addAuditLog('validate_failed', { license_key, reason: 'expired', ip: clientIp }); return res.status(403).json({ status: 'expired', message: 'Lizenz ist abgelaufen.' }); }
         if (l.status !== 'active') { await addAuditLog('validate_failed', { license_key, reason: `status_${l.status}`, ip: clientIp }); return res.status(403).json({ status: l.status, message: 'Lizenz ist nicht aktiv.' }); }
+        const { licenseStatus, graceUntil, hardExpired } = resolveGrace(l);
+        if (hardExpired) { await addAuditLog('validate_failed', { license_key, reason: 'expired', ip: clientIp }); return res.status(403).json({ status: 'expired', message: 'Lizenz ist abgelaufen.' }); }
         if (!domainMatches(l.associated_domain, domain)) { await addAuditLog('validate_failed', { license_key, reason: 'domain_mismatch', domain, ip: clientIp }); return res.status(403).json({ status: 'domain_mismatch', message: `Lizenz ist nicht für Domain "${domain}" gültig.` }); }
 
         if (nonce) {
@@ -212,14 +231,16 @@ router.post('/validate', validateLimiter, asyncHandler(async (req, res) => {
             : { max_dishes: plan.menu_items, max_tables: plan.max_tables };
 
         const responsePayload = {
-            status: 'active', customer_name: l.customer_name, type: l.type, plan_label: plan.label,
+            status: licenseStatus, customer_name: l.customer_name, type: l.type, plan_label: plan.label,
             expires_at: l.expires_at, allowed_modules: allowedModules, limits,
+            ...(graceUntil ? { grace_until: graceUntil.toISOString() } : {}),
             ...(customer ? { account_email: customer.email, company: customer.company } : {})
         };
 
         const signedToken = createSignedLicenseToken({
             license_key, type: l.type, plan_label: plan.label, expires_at: l.expires_at,
             allowed_modules: allowedModules, limits, domain: domain || l.associated_domain,
+            status: licenseStatus, ...(graceUntil ? { grace_until: graceUntil.toISOString() } : {}),
             issued_at: Math.floor(Date.now() / 1000)
         }, '80h');
 
@@ -248,7 +269,9 @@ router.post('/refresh', validateLimiter, asyncHandler(async (req, res) => {
 
         if (!l) { await addAuditLog('refresh_failed', { license_key, reason: 'not_found', ip: clientIp }); return res.status(404).json({ status: 'invalid', message: 'Lizenz-Key nicht gefunden.' }); }
         if (l.status === 'revoked' || l.status === 'cancelled') { await addAuditLog('refresh_failed', { license_key, reason: l.status, ip: clientIp }); return res.status(403).json({ status: l.status, message: `Lizenz wurde widerrufen (${l.status}).` }); }
-        if (l.status !== 'active' || new Date(l.expires_at) < new Date()) { await addAuditLog('refresh_failed', { license_key, reason: 'expired_or_inactive', ip: clientIp }); return res.status(403).json({ status: 'expired', message: 'Lizenz ist abgelaufen oder inaktiv.' }); }
+        if (l.status !== 'active') { await addAuditLog('refresh_failed', { license_key, reason: `status_${l.status}`, ip: clientIp }); return res.status(403).json({ status: l.status, message: 'Lizenz ist nicht aktiv.' }); }
+        const { licenseStatus: refreshStatus, graceUntil: refreshGrace, hardExpired: refreshHardExpired } = resolveGrace(l);
+        if (refreshHardExpired) { await addAuditLog('refresh_failed', { license_key, reason: 'expired', ip: clientIp }); return res.status(403).json({ status: 'expired', message: 'Lizenz ist abgelaufen.' }); }
         if (domain && !domainMatches(l.associated_domain, domain)) { await addAuditLog('refresh_failed', { license_key, reason: 'domain_mismatch', domain, ip: clientIp }); return res.status(403).json({ status: 'domain_mismatch', message: 'Domain stimmt nicht überein.' }); }
 
         db.query(`UPDATE licenses SET last_heartbeat=datetime('now') WHERE license_key=?`, [license_key]);
@@ -263,10 +286,12 @@ router.post('/refresh', validateLimiter, asyncHandler(async (req, res) => {
         const signedToken = createSignedLicenseToken({
             license_key, type: l.type, plan_label: plan.label, expires_at: l.expires_at,
             allowed_modules: allowedModules, limits, domain: domain || l.associated_domain,
-            customer_name: l.customer_name || null, issued_at: Math.floor(Date.now() / 1000)
+            customer_name: l.customer_name || null, status: refreshStatus,
+            ...(refreshGrace ? { grace_until: refreshGrace.toISOString() } : {}),
+            issued_at: Math.floor(Date.now() / 1000)
         }, '80h');
 
-        res.json({ status: 'active', token: signedToken, type: l.type, plan_label: plan.label, expires_at: l.expires_at, allowed_modules: allowedModules, limits });
+        res.json({ status: refreshStatus, token: signedToken, type: l.type, plan_label: plan.label, expires_at: l.expires_at, allowed_modules: allowedModules, limits, ...(refreshGrace ? { grace_until: refreshGrace.toISOString() } : {}) });
     } catch (e) {
         logger.error({ err: e }, 'Refresh error');
         res.status(500).json({ status: 'error', message: 'Internal server error' });
@@ -292,8 +317,9 @@ router.post('/offline-token', offlineTokenLimiter, asyncHandler(async (req, res)
     try {
         const [rows] = db.query('SELECT * FROM licenses WHERE license_key = ?', [license_key]);
         const l = rows[0];
-        if (!l || l.status !== 'active' || new Date(l.expires_at) < new Date())
-            return res.status(403).json({ success: false, message: 'License invalid or expired' });
+        if (!l || l.status !== 'active') return res.status(403).json({ success: false, message: 'License invalid.' });
+        const { licenseStatus: offlineStatus, hardExpired: offlineHardExpired } = resolveGrace(l);
+        if (offlineHardExpired) return res.status(403).json({ success: false, message: 'License expired.' });
         if (domain && !domainMatches(l.associated_domain, domain))
             return res.status(403).json({ success: false, message: `Offline-Token: Lizenz ist nicht für Domain "${domain}" gültig.` });
 
