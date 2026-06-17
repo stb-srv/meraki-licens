@@ -7,22 +7,29 @@ import { runBackup, rotateBackups } from './backup.js';
 
 export async function runExpiryCron() {
     try {
-        let warn1 = 30, warn2 = 7;
+        // Configurable reminder intervals (days before expiry), read from settings
+        let intervals = [90, 30, 7, 1];
         try {
-            const [[settings]] = db.query('SELECT expiry_warn_days_1, expiry_warn_days_2 FROM invoice_settings WHERE id = 1');
+            const [[settings]] = db.query(
+                'SELECT expiry_warn_days_1, expiry_warn_days_2, expiry_warn_days_3, expiry_warn_days_4 FROM invoice_settings WHERE id = 1'
+            );
             if (settings) {
-                warn1 = Math.max(1, Math.min(365, parseInt(settings.expiry_warn_days_1) || 30));
-                warn2 = Math.max(1, Math.min(60,  parseInt(settings.expiry_warn_days_2) || 7));
+                intervals = [
+                    settings.expiry_warn_days_1 || 90,
+                    settings.expiry_warn_days_2 || 30,
+                    settings.expiry_warn_days_3 || 7,
+                    settings.expiry_warn_days_4 || 1,
+                ].map(Number).filter(n => n > 0).sort((a, b) => b - a);
             }
         } catch { /* use defaults */ }
 
+        const maxDays = intervals[0];
         const [expiring] = db.query(`
             SELECT l.license_key, l.customer_name, l.type, l.expires_at, l.notes, c.email
             FROM licenses l
             LEFT JOIN customers c ON l.customer_id = c.id
             WHERE l.status = 'active'
-              AND l.expires_at BETWEEN datetime('now') AND datetime('now', '+${warn1} days')
-              AND l.expiry_notified_at IS NULL
+              AND l.expires_at BETWEEN datetime('now') AND datetime('now', '+${maxDays} days')
         `);
 
         for (const lic of expiring) {
@@ -33,50 +40,29 @@ export async function runExpiryCron() {
             if (!email) continue;
 
             const daysLeft = Math.ceil((new Date(lic.expires_at) - new Date()) / 86400000);
+            const matchedInterval = intervals.find(d => daysLeft <= d);
+            if (!matchedInterval) continue;
+
+            // Idempotency: skip if already sent this reminder level
+            const [[sent]] = db.query(
+                'SELECT 1 FROM renewal_reminders WHERE license_key = ? AND days_before = ?',
+                [lic.license_key, matchedInterval]
+            );
+            if (sent) continue;
+
+            const template = matchedInterval <= 1 ? 'licenseExpiring7d' : 'licenseExpiringSoon';
             try {
-                await sendTemplateMail('licenseExpiringSoon', email, {
+                await sendTemplateMail(template, email, {
                     customer_name: lic.customer_name, license_key: lic.license_key,
                     type: lic.type, expires_at: lic.expires_at, days_left: daysLeft
                 });
                 db.query(
-                    `UPDATE licenses SET expiry_notified_at = datetime('now') WHERE license_key = ?`,
-                    [lic.license_key]
+                    'INSERT INTO renewal_reminders (license_key, days_before) VALUES (?, ?) ON CONFLICT DO NOTHING',
+                    [lic.license_key, matchedInterval]
                 );
-                await addAuditLog('expiry_notification_sent', { license_key: lic.license_key, days_left: daysLeft, email });
+                await addAuditLog('expiry_notification_sent', { license_key: lic.license_key, days_left: daysLeft, interval: matchedInterval, email });
             } catch (e) {
                 console.warn(`📧 Ablauf-Mail fehlgeschlagen für ${lic.license_key}:`, e.message);
-            }
-        }
-
-        const [expiring7d] = db.query(`
-            SELECT l.license_key, l.customer_name, l.type, l.expires_at, l.notes, c.email
-            FROM licenses l
-            LEFT JOIN customers c ON l.customer_id = c.id
-            WHERE l.status = 'active'
-              AND l.expires_at BETWEEN datetime('now') AND datetime('now', '+${warn2} days')
-              AND l.expiry_notified_7d_at IS NULL
-        `);
-
-        for (const lic of expiring7d) {
-            let email = lic.email;
-            if (!email && lic.notes) {
-                try { email = JSON.parse(lic.notes).contact_email || null; } catch {}
-            }
-            if (!email) continue;
-
-            const daysLeft = Math.ceil((new Date(lic.expires_at) - new Date()) / 86400000);
-            try {
-                await sendTemplateMail('licenseExpiring7d', email, {
-                    customer_name: lic.customer_name, license_key: lic.license_key,
-                    type: lic.type, expires_at: lic.expires_at
-                });
-                db.query(
-                    `UPDATE licenses SET expiry_notified_7d_at = datetime('now') WHERE license_key = ?`,
-                    [lic.license_key]
-                );
-                await addAuditLog('expiry_notification_7d_sent', { license_key: lic.license_key, days_left: daysLeft, email });
-            } catch (e) {
-                console.warn(`📧 7-Tage-Ablauf-Mail fehlgeschlagen für ${lic.license_key}:`, e.message);
             }
         }
 
