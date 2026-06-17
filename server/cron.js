@@ -3,6 +3,7 @@ import { sendTemplateMail } from './mailer/index.js';
 import { addAuditLog } from './helpers.js';
 import { fireWebhook } from './webhook.js';
 import { createInvoiceFromLicense } from './invoiceHelper.js';
+import { runBackup, rotateBackups } from './backup.js';
 
 export async function runExpiryCron() {
     try {
@@ -229,6 +230,17 @@ export async function runAutoInvoiceCron() {
     }
 }
 
+export async function runBackupCron() {
+    try {
+        const dest = await runBackup();
+        const removed = rotateBackups();
+        if (removed > 0) console.log(`🗑️  Backup-Rotation: ${removed} alte Backups gelöscht.`);
+        return dest;
+    } catch (e) {
+        console.error('❌ Backup-Cron Fehler:', e.message);
+    }
+}
+
 export function startCron() {
     setInterval(runExpiryCron, 24 * 60 * 60 * 1000);
     runExpiryCron();
@@ -238,6 +250,8 @@ export function startCron() {
     runOverdueInvoiceCron();
     setInterval(runAutoInvoiceCron, 24 * 60 * 60 * 1000);
     runAutoInvoiceCron();
+    setInterval(runBackupCron, 24 * 60 * 60 * 1000);
+    runBackupCron();
 }
 
 export async function createInvoiceForLicense(licenseId) {

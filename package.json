@@ -11,7 +11,9 @@
     "start": "node init.js && node server.js",
     "dev": "node init.js && node --watch server.js",
     "setup-db": "node setup-db.js",
-    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest"
+    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest",
+    "backup": "node -e \"import('./server/backup.js').then(m=>m.runBackup()).then(p=>console.log('Backup:',p))\"",
+    "restore": "node restore.js"
   },
   "dependencies": {
     "@meraki/plans": "github:stb-srv/meraki-plans",
