@@ -4,6 +4,7 @@ db.json
 CLAUDE.md
 AGENTS.md
 TODO.md
+FEATURES_FUER_CLAUDE_CODE.md
 
 # RSA Private/Public Keys – niemals ins Repo!
 *.pem
