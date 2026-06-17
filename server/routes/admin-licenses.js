@@ -148,7 +148,7 @@ router.post('/licenses', requireAuth, asyncHandler(async (req, res) => {
             }
             if (raw.type && raw.type !== 'FREE' && raw.type !== 'TRIAL') {
                 try {
-                    createInvoiceFromLicense(key, req.admin.username);
+                    createInvoiceFromLicense(key, req.admin.username, { discount_pct: raw.discount_pct });
                 } catch (invErr) {
                     console.error('[licenses] Auto-Rechnung fehlgeschlagen:', invErr.message);
                 }
@@ -259,7 +259,7 @@ router.post('/licenses/:key/renew', requireAuth, asyncHandler(async (req, res) =
         );
         if (l.type && l.type !== 'FREE' && l.type !== 'TRIAL') {
             try {
-                createInvoiceFromLicense(req.params.key, req.admin.username);
+                createInvoiceFromLicense(req.params.key, req.admin.username, { discount_pct: req.body.discount_pct });
             } catch (invErr) {
                 console.error('[licenses] Auto-Verlängerungs-Rechnung fehlgeschlagen:', invErr.message);
             }

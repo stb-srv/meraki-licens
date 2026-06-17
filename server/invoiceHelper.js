@@ -2,14 +2,23 @@ import crypto from 'crypto';
 import { query, runTransaction } from './db.js';
 import { PLAN_DEFINITIONS } from './plans.js';
 
-const priceMap = {
+// Fallback prices used only when plan_pricing table has no entry for a plan.
+const FALLBACK_PRICE_MAP = {
     FREE: 0.00,
     TRIAL: 0.00,
     STARTER: 29.00,
     PRO: 59.00,
     PRO_PLUS: 89.00,
-    ENTERPRISE: 199.00
+    ENTERPRISE: 199.00,
 };
+
+function getPlanPrice(planType) {
+    try {
+        const [[row]] = query('SELECT price, tax_rate FROM plan_pricing WHERE plan_id = ? AND active = 1', [planType]);
+        if (row) return { price: parseFloat(row.price) || 0, taxRate: parseFloat(row.tax_rate) || 19 };
+    } catch { /* DB not ready — fall through */ }
+    return { price: FALLBACK_PRICE_MAP[planType] ?? 0, taxRate: 19 };
+}
 
 function toDbDate(d) {
     return (d instanceof Date ? d : new Date(d)).toISOString().slice(0, 19).replace('T', ' ');
@@ -60,26 +69,27 @@ export function calculateInvoiceTotals(items, taxRate) {
     return { amount_net, amount_tax, amount_gross };
 }
 
-export function createInvoiceFromLicense(licenseKey, createdBy = 'system') {
+export function createInvoiceFromLicense(licenseKey, createdBy = 'system', { discount_pct = 0 } = {}) {
     return runTransaction(() => {
-        const [license] = query('SELECT * FROM licenses WHERE license_key = ?', [licenseKey]);
+        const [[license]] = query('SELECT * FROM licenses WHERE license_key = ?', [licenseKey]);
         if (!license) throw new Error(`License with key ${licenseKey} not found.`);
         if (!license.customer_id) throw new Error(`License with key ${licenseKey} has no customer linked.`);
 
-        const [customer] = query('SELECT name, currency FROM customers WHERE id = ?', [license.customer_id]);
+        const [[customer]] = query('SELECT name, currency FROM customers WHERE id = ?', [license.customer_id]);
         if (!customer) throw new Error(`Customer with ID ${license.customer_id} linked to license ${licenseKey} not found.`);
 
         const planType = license.type || 'FREE';
         const planDetails = PLAN_DEFINITIONS[planType] || { label: planType };
-        const price = priceMap[planType] || 0.00;
+        const { price: basePrice, taxRate } = getPlanPrice(planType);
 
-        const items = [{
-            description: `Lizenzgebühr Meraki - ${planDetails.label || planType}`,
-            quantity: 1,
-            unit_price: price
-        }];
+        const discountFactor = 1 - Math.min(100, Math.max(0, parseFloat(discount_pct) || 0)) / 100;
+        const unit_price = parseFloat((basePrice * discountFactor).toFixed(2));
 
-        const taxRate = 19.00;
+        const description = discount_pct > 0
+            ? `Lizenzgebühr ${planDetails.label || planType} (${discount_pct}% Rabatt)`
+            : `Lizenzgebühr ${planDetails.label || planType}`;
+
+        const items = [{ description, quantity: 1, unit_price }];
         const { amount_net, amount_tax, amount_gross } = calculateInvoiceTotals(items, taxRate);
 
         const invoiceNumber = generateInvoiceNumber();
@@ -91,16 +101,17 @@ export function createInvoiceFromLicense(licenseKey, createdBy = 'system') {
             `INSERT INTO invoices (
                 id, invoice_number, customer_id, license_key, status, type,
                 amount_net, amount_tax, amount_gross, tax_rate, currency,
-                due_date, created_by
-            ) VALUES (?, ?, ?, ?, 'draft', 'invoice', ?, ?, ?, ?, ?, ?, ?)`,
+                due_date, created_by, discount_pct
+            ) VALUES (?, ?, ?, ?, 'draft', 'invoice', ?, ?, ?, ?, ?, ?, ?, ?)`,
             [invoiceId, invoiceNumber, license.customer_id, licenseKey,
-             amount_net, amount_tax, amount_gross, taxRate, currency, dueDate, createdBy]
+             amount_net, amount_tax, amount_gross, taxRate, currency, dueDate, createdBy,
+             parseFloat(discount_pct) || 0]
         );
 
         query(
             `INSERT INTO invoice_items (invoice_id, description, quantity, unit_price, total, sort_order)
              VALUES (?, ?, ?, ?, ?, 0)`,
-            [invoiceId, items[0].description, items[0].quantity, items[0].unit_price, amount_net]
+            [invoiceId, description, 1, unit_price, amount_net]
         );
 
         return invoiceId;
