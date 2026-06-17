@@ -6,11 +6,31 @@ import { buildTransporter, sendTemplateMail, getActiveSmtpConfig } from '../mail
 import { PLAN_DEFINITIONS } from '../plans.js';
 import { addAuditLog } from '../helpers.js';
 import { requireAuth, requireSuperAdmin, asyncHandler, MIN_PASSWORD_LENGTH } from '../middleware.js';
+import { generateKeyPair, getAllJwks } from '../crypto.js';
 
 const router = Router();
 
 // ── Plans ────────────────────────────────────────────────────────────────────
 router.get('/plans', requireAuth, (req, res) => res.json(PLAN_DEFINITIONS));
+
+// ── Key-Rotation / JWKS ───────────────────────────────────────────────────────
+router.get('/signing-keys', requireAuth, requireSuperAdmin, asyncHandler(async (req, res) => {
+    const [rows] = db.query('SELECT kid, status, created_at FROM signing_keys ORDER BY created_at DESC');
+    res.json({ success: true, keys: rows, jwks: getAllJwks() });
+}));
+
+router.post('/rotate-keys', requireAuth, requireSuperAdmin, asyncHandler(async (req, res) => {
+    const { privateKey, publicKey, kid } = generateKeyPair();
+    db.runTransaction(() => {
+        db.query("UPDATE signing_keys SET status = 'retired' WHERE status = 'active'");
+        db.query(
+            'INSERT INTO signing_keys (kid, public_key, private_key, status) VALUES (?, ?, ?, ?)',
+            [kid, publicKey, privateKey, 'active']
+        );
+    });
+    await addAuditLog('key_rotation', { kid, performed_by: req.admin?.username || 'unknown' });
+    res.json({ success: true, kid, message: 'Neuer Signing-Key aktiv. Alten Tokens bleiben bis Token-Ablauf gültig.' });
+}));
 
 // ── Admin Users ──────────────────────────────────────────────────────────────
 router.get('/users', requireAuth, requireSuperAdmin, asyncHandler(async (req, res) => {

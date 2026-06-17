@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import db from '../db.js';
 import { PLAN_DEFINITIONS } from '../plans.js';
-import { RSA_PUBLIC_KEY, createSignedLicenseToken, signResponse, isHmacActive, HMAC_SECRET } from '../crypto.js';
+import { RSA_PUBLIC_KEY, createSignedLicenseToken, signResponse, isHmacActive, HMAC_SECRET, getAllJwks, getPublicKeyByKid } from '../crypto.js';
 import { domainMatches, getClientIp, addAuditLog, parseJsonField, normalizeDomain } from '../helpers.js';
 import { fireWebhook } from '../webhook.js';
 import { sendTemplateMail } from '../mailer/index.js';
@@ -257,6 +257,12 @@ router.post('/validate', validateLimiter, asyncHandler(async (req, res) => {
 // ── Public Key ───────────────────────────────────────────────────────────────────
 router.get('/public-key', (req, res) => res.json({ public_key: RSA_PUBLIC_KEY, algorithm: 'RS256' }));
 
+// ── JWKS (alle aktiven Public Keys für CMS-Verifikation) ──────────────────────
+router.get('/jwks', (req, res) => {
+    res.set('Cache-Control', 'public, max-age=3600');
+    res.json(getAllJwks());
+});
+
 // ── Refresh ──────────────────────────────────────────────────────────────────────
 router.post('/refresh', validateLimiter, asyncHandler(async (req, res) => {
     const { license_key, domain } = req.body;
@@ -303,7 +309,11 @@ router.post('/verify-license-token', validateLimiter, asyncHandler(async (req, r
     const { license_token } = req.body;
     if (!license_token) return res.status(400).json({ valid: false, message: 'No token provided' });
     try {
-        const decoded = jwt.verify(license_token, RSA_PUBLIC_KEY, { algorithms: ['RS256'] });
+        const unverified = jwt.decode(license_token, { complete: true });
+        const kid = unverified?.header?.kid ?? null;
+        const pubKey = getPublicKeyByKid(kid) || RSA_PUBLIC_KEY;
+        if (!pubKey) return res.status(400).json({ valid: false, message: 'Kein Public Key verfügbar.' });
+        const decoded = jwt.verify(license_token, pubKey, { algorithms: ['RS256'] });
         res.json({ valid: true, payload: decoded });
     } catch (e) {
         res.status(401).json({ valid: false, message: 'Ungültiges oder abgelaufenes Token: ' + e.message });
