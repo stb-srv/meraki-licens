@@ -230,16 +230,20 @@ router.post('/validate', validateLimiter, asyncHandler(async (req, res) => {
             ? parseJsonField(l.limits, { max_dishes: plan.menu_items, max_tables: plan.max_tables })
             : { max_dishes: plan.menu_items, max_tables: plan.max_tables };
 
+        const entitlements = l.entitlements
+            ? { ...allowedModules, ...parseJsonField(l.entitlements, {}) }
+            : allowedModules;
+
         const responsePayload = {
             status: licenseStatus, customer_name: l.customer_name, type: l.type, plan_label: plan.label,
-            expires_at: l.expires_at, allowed_modules: allowedModules, limits,
+            expires_at: l.expires_at, allowed_modules: allowedModules, entitlements, limits,
             ...(graceUntil ? { grace_until: graceUntil.toISOString() } : {}),
             ...(customer ? { account_email: customer.email, company: customer.company } : {})
         };
 
         const signedToken = createSignedLicenseToken({
             license_key, type: l.type, plan_label: plan.label, expires_at: l.expires_at,
-            allowed_modules: allowedModules, limits, domain: domain || l.associated_domain,
+            allowed_modules: allowedModules, entitlements, limits, domain: domain || l.associated_domain,
             status: licenseStatus, ...(graceUntil ? { grace_until: graceUntil.toISOString() } : {}),
             issued_at: Math.floor(Date.now() / 1000)
         }, '80h');

@@ -552,4 +552,27 @@ router.patch('/resellers/:id', requireAuth, asyncHandler(async (req, res) => {
     return res.json({ success: true });
 }));
 
+// ── Entitlements / Feature-Flags pro Lizenz ────────────────────────────────────
+router.patch('/licenses/:key/entitlements', requireAuth, asyncHandler(async (req, res) => {
+    const [[license]] = db.query('SELECT license_key, type FROM licenses WHERE license_key = ?', [req.params.key]);
+    if (!license) return res.status(404).json({ success: false, message: 'Lizenz nicht gefunden.' });
+
+    const entitlements = req.body;
+    if (typeof entitlements !== 'object' || Array.isArray(entitlements))
+        return res.status(400).json({ success: false, message: 'Entitlements müssen ein Objekt sein.' });
+
+    db.query('UPDATE licenses SET entitlements = ? WHERE license_key = ?',
+        [JSON.stringify(entitlements), req.params.key]);
+    await addAuditLog('entitlements_updated', { license_key: req.params.key, entitlements, by: req.admin.username }, req.admin.username);
+    res.json({ success: true, message: 'Entitlements gespeichert.', entitlements });
+}));
+
+router.get('/licenses/:key/entitlements', requireAuth, asyncHandler(async (req, res) => {
+    const [[license]] = db.query('SELECT license_key, type, entitlements, allowed_modules FROM licenses WHERE license_key = ?', [req.params.key]);
+    if (!license) return res.status(404).json({ success: false, message: 'Lizenz nicht gefunden.' });
+    const base = license.allowed_modules ? JSON.parse(license.allowed_modules) : {};
+    const extra = license.entitlements ? JSON.parse(license.entitlements) : {};
+    res.json({ success: true, plan_modules: base, custom_entitlements: extra, effective: { ...base, ...extra } });
+}));
+
 export default router;
