@@ -13,7 +13,11 @@
     "setup-db": "node setup-db.js",
     "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest",
     "backup": "node -e \"import('./server/backup.js').then(m=>m.runBackup()).then(p=>console.log('Backup:',p))\"",
-    "restore": "node restore.js"
+    "restore": "node restore.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "@meraki/plans": "github:stb-srv/meraki-plans",
@@ -32,8 +36,12 @@
     "qrcode": "^1.5.4"
   },
   "devDependencies": {
+    "@eslint/js": "^9.0.0",
     "cross-env": "^10.1.0",
+    "eslint": "^9.0.0",
+    "globals": "^15.0.0",
     "jest": "^30.3.0",
+    "prettier": "^3.0.0",
     "supertest": "^7.2.2"
   }
 }

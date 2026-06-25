@@ -50,16 +50,16 @@ npm start
 
 ## Was automatisch passiert
 
-| Schritt | Automatisch |
-|---|---|
-| `.env` erstellen | ✅ |
-| `ADMIN_SECRET` generieren | ✅ |
-| `HMAC_SECRET` generieren (Offline-Tokens) | ✅ |
-| `PORTAL_SECRET` generieren (Kunden-Portal JWT) | ✅ |
-| RSA-Schlüsselpaar generieren (2048-bit) | ✅ |
-| Datenbank-Migrationen ausführen | ✅ |
-| Admin-Account erstellen | Im Browser unter `/setup` |
-| SMTP / Domain konfigurieren | Im Admin-Panel |
+| Schritt                                        | Automatisch               |
+| ---------------------------------------------- | ------------------------- |
+| `.env` erstellen                               | ✅                        |
+| `ADMIN_SECRET` generieren                      | ✅                        |
+| `HMAC_SECRET` generieren (Offline-Tokens)      | ✅                        |
+| `PORTAL_SECRET` generieren (Kunden-Portal JWT) | ✅                        |
+| RSA-Schlüsselpaar generieren (2048-bit)        | ✅                        |
+| Datenbank-Migrationen ausführen                | ✅                        |
+| Admin-Account erstellen                        | Im Browser unter `/setup` |
+| SMTP / Domain konfigurieren                    | Im Admin-Panel            |
 
 ---
 
@@ -88,26 +88,26 @@ npm start
 
 Die `.env` wird beim ersten `npm start` **automatisch mit sicheren Zufallswerten erstellt**. Optionale Parameter kannst du danach anpassen.
 
-| Variable | Pflicht | Beschreibung |
-|---|---|---|
-| `PORT` | Nein | HTTP-Port (Standard: `4000`) |
-| `DB_PATH` | Nein | SQLite-Datenbankpfad (Standard: `./data/licens.db`) |
-| `STORAGE_PATH` | Nein | PDF-Speicherpfad (Standard: `./storage`) |
-| `ADMIN_SECRET` | **Ja** | JWT-Secret für Admin-Sessions |
-| `HMAC_SECRET` | **Ja** | Secret für HMAC-Offline-Tokens (min. 32 Zeichen) |
-| `PORTAL_SECRET` | **Ja** | JWT-Secret für Kunden-Portal-Sessions |
-| `RSA_PRIVATE_KEY` | Empfohlen | PEM-Privatschlüssel für RS256 Lizenz-Tokens |
-| `RSA_PUBLIC_KEY` | Empfohlen | PEM-Öffentlicher Schlüssel für CMS-seitige Verifikation |
-| `SETUP_TOKEN` | Einmalig | Token für Ersteinrichtung (nach Setup irrelevant) |
-| `CORS_ORIGINS` | Nein | Erlaubte Origins, kommagetrennt (leer = dynamisch aus DB) |
-| `ADMIN_IP_WHITELIST` | Nein | Erlaubte IPs für Admin-Zugriff, kommagetrennt |
-| `PORTAL_URL` | Nein | Basis-URL für Portal-Links in E-Mails |
-| `APP_URL` | Nein | App-URL für E-Mail-Links |
-| `SMTP_HOST` | Nein | SMTP-Server (alternativ über Admin-Panel konfigurierbar) |
-| `SMTP_PORT` | Nein | SMTP-Port (Standard: `587`) |
-| `SMTP_USER` | Nein | SMTP-Benutzername |
-| `SMTP_PASS` | Nein | SMTP-Passwort |
-| `SMTP_FROM` | Nein | Absender-Adresse |
+| Variable             | Pflicht   | Beschreibung                                              |
+| -------------------- | --------- | --------------------------------------------------------- |
+| `PORT`               | Nein      | HTTP-Port (Standard: `4000`)                              |
+| `DB_PATH`            | Nein      | SQLite-Datenbankpfad (Standard: `./data/licens.db`)       |
+| `STORAGE_PATH`       | Nein      | PDF-Speicherpfad (Standard: `./storage`)                  |
+| `ADMIN_SECRET`       | **Ja**    | JWT-Secret für Admin-Sessions                             |
+| `HMAC_SECRET`        | **Ja**    | Secret für HMAC-Offline-Tokens (min. 32 Zeichen)          |
+| `PORTAL_SECRET`      | **Ja**    | JWT-Secret für Kunden-Portal-Sessions                     |
+| `RSA_PRIVATE_KEY`    | Empfohlen | PEM-Privatschlüssel für RS256 Lizenz-Tokens               |
+| `RSA_PUBLIC_KEY`     | Empfohlen | PEM-Öffentlicher Schlüssel für CMS-seitige Verifikation   |
+| `SETUP_TOKEN`        | Einmalig  | Token für Ersteinrichtung (nach Setup irrelevant)         |
+| `CORS_ORIGINS`       | Nein      | Erlaubte Origins, kommagetrennt (leer = dynamisch aus DB) |
+| `ADMIN_IP_WHITELIST` | Nein      | Erlaubte IPs für Admin-Zugriff, kommagetrennt             |
+| `PORTAL_URL`         | Nein      | Basis-URL für Portal-Links in E-Mails                     |
+| `APP_URL`            | Nein      | App-URL für E-Mail-Links                                  |
+| `SMTP_HOST`          | Nein      | SMTP-Server (alternativ über Admin-Panel konfigurierbar)  |
+| `SMTP_PORT`          | Nein      | SMTP-Port (Standard: `587`)                               |
+| `SMTP_USER`          | Nein      | SMTP-Benutzername                                         |
+| `SMTP_PASS`          | Nein      | SMTP-Passwort                                             |
+| `SMTP_FROM`          | Nein      | Absender-Adresse                                          |
 
 ---
 
@@ -131,7 +131,8 @@ Migrationen laufen **automatisch** beim Serverstart. Neue Dateien in `server/mig
 ```js
 import { DB_SCHEMA } from '../db-schema.js';
 
-export function up(db) {  // kein async – better-sqlite3 ist synchron
+export function up(db) {
+    // kein async – better-sqlite3 ist synchron
     db.exec(`
         CREATE TABLE IF NOT EXISTS meine_tabelle (
             id         TEXT NOT NULL PRIMARY KEY,
@@ -151,16 +152,16 @@ export default up;
 
 ### Public (`/api/v1/`) — kein Auth
 
-| Methode | Route | Beschreibung |
-|---|---|---|
-| `GET` | `/setup-status` | Prüft ob Setup benötigt wird |
-| `POST` | `/setup` | Erstellt ersten Superadmin (einmalig) |
-| `POST` | `/validate` | Lizenz-Key validieren (Domain, Device, Nonce) |
-| `POST` | `/heartbeat` | Letzten Aktivitätszeitpunkt aktualisieren |
-| `POST` | `/refresh` | Lizenz-Token erneuern |
-| `POST` | `/offline-token` | Offline-Token ausstellen (max. 168h) |
-| `GET` | `/public-key` | RSA-Öffentlichschlüssel abrufen |
-| `POST` | `/trial/register` | 30-Tage Trial-Lizenz registrieren |
+| Methode | Route             | Beschreibung                                  |
+| ------- | ----------------- | --------------------------------------------- |
+| `GET`   | `/setup-status`   | Prüft ob Setup benötigt wird                  |
+| `POST`  | `/setup`          | Erstellt ersten Superadmin (einmalig)         |
+| `POST`  | `/validate`       | Lizenz-Key validieren (Domain, Device, Nonce) |
+| `POST`  | `/heartbeat`      | Letzten Aktivitätszeitpunkt aktualisieren     |
+| `POST`  | `/refresh`        | Lizenz-Token erneuern                         |
+| `POST`  | `/offline-token`  | Offline-Token ausstellen (max. 168h)          |
+| `GET`   | `/public-key`     | RSA-Öffentlichschlüssel abrufen               |
+| `POST`  | `/trial/register` | 30-Tage Trial-Lizenz registrieren             |
 
 ### Admin (`/api/admin/`) — Admin JWT
 

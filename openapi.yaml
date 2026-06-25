@@ -55,27 +55,27 @@ components:
     ValidateResponse:
       type: object
       properties:
-        valid:           { type: boolean }
-        status:          { $ref: '#/components/schemas/LicenseStatus' }
-        customer_name:   { type: string }
-        type:            { type: string, example: PRO }
-        plan_label:      { type: string }
-        expires_at:      { type: string, format: date-time }
-        grace_until:     { type: string, format: date-time, nullable: true }
+        valid: { type: boolean }
+        status: { $ref: '#/components/schemas/LicenseStatus' }
+        customer_name: { type: string }
+        type: { type: string, example: PRO }
+        plan_label: { type: string }
+        expires_at: { type: string, format: date-time }
+        grace_until: { type: string, format: date-time, nullable: true }
         allowed_modules: { type: object }
-        entitlements:    { type: object }
-        limits:          { type: object }
-        token:           { type: string, description: Signed RS256 JWT }
+        entitlements: { type: object }
+        limits: { type: object }
+        token: { type: string, description: Signed RS256 JWT }
     Plan:
       type: object
       properties:
-        plan_id:      { type: string, example: PRO }
-        label:        { type: string }
-        price:        { type: number }
-        currency:     { type: string, example: EUR }
-        modules:      { type: object }
-        menu_items:   { type: integer }
-        max_tables:   { type: integer }
+        plan_id: { type: string, example: PRO }
+        label: { type: string }
+        price: { type: number }
+        currency: { type: string, example: EUR }
+        modules: { type: object }
+        menu_items: { type: integer }
+        max_tables: { type: integer }
         expires_days: { type: integer }
 
 paths:
@@ -93,7 +93,7 @@ paths:
               required: [license_key]
               properties:
                 license_key: { type: string, example: MERAKI-PRO-ABCD-1234 }
-                domain:      { type: string, example: restaurant.example.com }
+                domain: { type: string, example: restaurant.example.com }
       responses:
         '200':
           description: License valid (active or grace period)
@@ -119,7 +119,7 @@ paths:
               required: [license_key]
               properties:
                 license_key: { type: string }
-                domain:      { type: string }
+                domain: { type: string }
       responses:
         '200':
           description: Refreshed token
@@ -219,7 +219,7 @@ paths:
               type: object
               required: [email, password]
               properties:
-                email:    { type: string }
+                email: { type: string }
                 password: { type: string }
       responses:
         '200':
@@ -229,8 +229,8 @@ paths:
               schema:
                 type: object
                 properties:
-                  success:  { type: boolean }
-                  token:    { type: string }
+                  success: { type: boolean }
+                  token: { type: string }
                   customer: { type: object }
 
   /portal/invoices/{id}/checkout:
@@ -251,9 +251,9 @@ paths:
               schema:
                 type: object
                 properties:
-                  success:      { type: boolean }
+                  success: { type: boolean }
                   checkout_url: { type: string }
-                  payment_id:   { type: string }
+                  payment_id: { type: string }
 
   /portal/gdpr/export:
     get:
@@ -269,9 +269,9 @@ paths:
                 type: object
                 properties:
                   exported_at: { type: string }
-                  customer:    { type: object }
-                  licenses:    { type: array, items: { type: object } }
-                  invoices:    { type: array, items: { type: object } }
+                  customer: { type: object }
+                  licenses: { type: array, items: { type: object } }
+                  invoices: { type: array, items: { type: object } }
 
   /portal/gdpr/delete-request:
     post:
@@ -293,7 +293,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  success:    { type: boolean }
+                  success: { type: boolean }
                   request_id: { type: string }
 
   /admin/login:
@@ -382,7 +382,7 @@ paths:
                 type: object
                 properties:
                   success: { type: boolean }
-                  kid:     { type: string }
+                  kid: { type: string }
 
   /admin/settings/sessions:
     get:

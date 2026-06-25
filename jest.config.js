@@ -7,9 +7,9 @@ process.env.PORTAL_SECRET = 'portal-secure-test-secret';
 process.env.HMAC_SECRET = 'hmac-secure-test-secret-long-enough-for-validation';
 
 export default {
-  testEnvironment: 'node',
-  transform: {},
-  moduleNameMapper: {
-    '^(\\.{1,2}/.*)\\.js$': '$1',
-  },
+    testEnvironment: 'node',
+    transform: {},
+    moduleNameMapper: {
+        '^(\\.{1,2}/.*)\\.js$': '$1',
+    },
 };

@@ -22,7 +22,7 @@ if (!fs.existsSync(DB_PATH)) {
 
 const db = new Database(DB_PATH);
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-const ask = (q) => new Promise(r => rl.question(q, r));
+const ask = (q) => new Promise((r) => rl.question(q, r));
 
 async function main() {
     const admins = db.prepare('SELECT username, role FROM admins ORDER BY role DESC').all();
@@ -32,8 +32,9 @@ async function main() {
     if (admins.length === 0) {
         console.log('  Keine Admin-Accounts gefunden. Erstelle neuen Superadmin.\n');
 
-        const username = process.argv[2] || await ask('  Benutzername: ');
-        const password = process.argv[3] || await askPassword('  Neues Passwort (min. 12 Zeichen): ');
+        const username = process.argv[2] || (await ask('  Benutzername: '));
+        const password =
+            process.argv[3] || (await askPassword('  Neues Passwort (min. 12 Zeichen): '));
 
         if (password.length < 12) {
             console.error('\n❌  Passwort zu kurz (min. 12 Zeichen).');
@@ -41,7 +42,11 @@ async function main() {
         }
 
         const hash = await bcrypt.hash(password, 12);
-        db.prepare('INSERT INTO admins (username, password_hash, role) VALUES (?, ?, ?)').run(username, hash, 'superadmin');
+        db.prepare('INSERT INTO admins (username, password_hash, role) VALUES (?, ?, ?)').run(
+            username,
+            hash,
+            'superadmin'
+        );
         console.log(`\n✅  Superadmin '${username}' erstellt.\n`);
     } else {
         console.log('  Vorhandene Accounts:');
@@ -62,7 +67,9 @@ async function main() {
             process.exit(1);
         }
 
-        const password = process.argv[3] || await askPassword(`  Neues Passwort für '${targetUsername}' (min. 12 Zeichen): `);
+        const password =
+            process.argv[3] ||
+            (await askPassword(`  Neues Passwort für '${targetUsername}' (min. 12 Zeichen): `));
 
         if (password.length < 12) {
             console.error('\n❌  Passwort zu kurz (min. 12 Zeichen).');
@@ -70,7 +77,10 @@ async function main() {
         }
 
         const hash = await bcrypt.hash(password, 12);
-        db.prepare('UPDATE admins SET password_hash = ? WHERE username = ?').run(hash, targetUsername);
+        db.prepare('UPDATE admins SET password_hash = ? WHERE username = ?').run(
+            hash,
+            targetUsername
+        );
 
         // Alle Sessions dieses Users invalidieren
         db.prepare('DELETE FROM admin_sessions WHERE admin_username = ?').run(targetUsername);
@@ -108,4 +118,7 @@ async function askPassword(prompt) {
     });
 }
 
-main().catch(e => { console.error('Fehler:', e.message); process.exit(1); });
+main().catch((e) => {
+    console.error('Fehler:', e.message);
+    process.exit(1);
+});

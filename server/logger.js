@@ -8,8 +8,8 @@ const logger = pino({
     timestamp: pino.stdTimeFunctions.isoTime,
     redact: {
         paths: ['body.password', 'body.password_hash', 'req.headers["authorization"]'],
-        censor: '[REDACTED]'
-    }
+        censor: '[REDACTED]',
+    },
 });
 
 export default logger;

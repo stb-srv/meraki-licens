@@ -18,27 +18,40 @@ function logWebhookCall(url, event, status, errorMessage = null, attemptCount = 
 
 function matchesEvent(subscribedEvents, event) {
     try {
-        const list = typeof subscribedEvents === 'string' ? JSON.parse(subscribedEvents) : subscribedEvents;
+        const list =
+            typeof subscribedEvents === 'string' ? JSON.parse(subscribedEvents) : subscribedEvents;
         if (!Array.isArray(list) || list.includes('*')) return true;
-        return list.some(e => e === event || event.startsWith(e.replace('*', '')));
-    } catch { return true; }
+        return list.some((e) => e === event || event.startsWith(e.replace('*', '')));
+    } catch {
+        return true;
+    }
 }
 
 async function sendWithRetry(url, secret, body, event) {
     for (let attempt = 1; attempt <= RETRY_DELAYS.length; attempt++) {
         if (RETRY_DELAYS[attempt - 1] > 0)
-            await new Promise(r => setTimeout(r, RETRY_DELAYS[attempt - 1]));
+            await new Promise((r) => setTimeout(r, RETRY_DELAYS[attempt - 1]));
         try {
-            const sig = secret ? crypto.createHmac('sha256', secret).update(body).digest('hex') : null;
+            const sig = secret
+                ? crypto.createHmac('sha256', secret).update(body).digest('hex')
+                : null;
             const headers = { 'Content-Type': 'application/json' };
             if (sig) headers['X-MERAKI-Signature'] = sig;
-            const response = await fetch(url, { method: 'POST', headers, body, signal: AbortSignal.timeout(5000) });
+            const response = await fetch(url, {
+                method: 'POST',
+                headers,
+                body,
+                signal: AbortSignal.timeout(5000),
+            });
             if (!response.ok) throw new Error(`HTTP ${response.status} ${response.statusText}`);
             logWebhookCall(url, event, 'success', null, attempt);
             return;
         } catch (e) {
             if (attempt === RETRY_DELAYS.length) {
-                console.warn(`⚠️  Webhook ${url} nach ${attempt} Versuchen fehlgeschlagen:`, e.message);
+                console.warn(
+                    `⚠️  Webhook ${url} nach ${attempt} Versuchen fehlgeschlagen:`,
+                    e.message
+                );
                 logWebhookCall(url, event, 'failed', e.message, attempt);
                 try {
                     db.query(
@@ -46,7 +59,9 @@ async function sendWithRetry(url, secret, body, event) {
                          VALUES (?, ?, ?, ?, ?, ?)`,
                         [crypto.randomUUID(), url, event, body, e.message, attempt]
                     );
-                } catch { /* non-critical */ }
+                } catch {
+                    /* non-critical */
+                }
             }
         }
     }
@@ -54,11 +69,14 @@ async function sendWithRetry(url, secret, body, event) {
 
 export async function fireWebhook(event, payload) {
     const targets = [];
-    if (process.env.WEBHOOK_URL) targets.push({ url: process.env.WEBHOOK_URL, secret: WEBHOOK_SECRET, events: ['*'] });
+    if (process.env.WEBHOOK_URL)
+        targets.push({ url: process.env.WEBHOOK_URL, secret: WEBHOOK_SECRET, events: ['*'] });
     try {
         const [rows] = db.query('SELECT url, secret, events FROM webhooks WHERE active = 1');
         for (const r of rows) targets.push({ url: r.url, secret: r.secret, events: r.events });
-    } catch {}
+    } catch {
+        /* webhooks-Tabelle evtl. nicht vorhanden – nur ENV-Target verwenden */
+    }
 
     const body = JSON.stringify({ event, ts: new Date().toISOString(), ...payload });
     for (const { url, secret, events } of targets) {
@@ -68,17 +86,31 @@ export async function fireWebhook(event, payload) {
 }
 
 export async function retryDeadLetter(id) {
-    const [[dl]] = db.query('SELECT * FROM webhook_dead_letters WHERE id = ? AND resolved = 0', [id]);
+    const [[dl]] = db.query('SELECT * FROM webhook_dead_letters WHERE id = ? AND resolved = 0', [
+        id,
+    ]);
     if (!dl) throw new Error('Dead letter not found or already resolved.');
-    const [rows] = db.query('SELECT secret FROM webhooks WHERE url = ? AND active = 1', [dl.webhook_url]);
+    const [rows] = db.query('SELECT secret FROM webhooks WHERE url = ? AND active = 1', [
+        dl.webhook_url,
+    ]);
     const secret = rows[0]?.secret || WEBHOOK_SECRET;
     try {
-        const sig = secret ? crypto.createHmac('sha256', secret).update(dl.payload).digest('hex') : null;
+        const sig = secret
+            ? crypto.createHmac('sha256', secret).update(dl.payload).digest('hex')
+            : null;
         const headers = { 'Content-Type': 'application/json' };
         if (sig) headers['X-MERAKI-Signature'] = sig;
-        const response = await fetch(dl.webhook_url, { method: 'POST', headers, body: dl.payload, signal: AbortSignal.timeout(5000) });
+        const response = await fetch(dl.webhook_url, {
+            method: 'POST',
+            headers,
+            body: dl.payload,
+            signal: AbortSignal.timeout(5000),
+        });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        db.query("UPDATE webhook_dead_letters SET resolved = 1, retried_at = datetime('now') WHERE id = ?", [id]);
+        db.query(
+            "UPDATE webhook_dead_letters SET resolved = 1, retried_at = datetime('now') WHERE id = ?",
+            [id]
+        );
     } catch (e) {
         db.query("UPDATE webhook_dead_letters SET retried_at = datetime('now') WHERE id = ?", [id]);
         throw e;

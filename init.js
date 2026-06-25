@@ -10,16 +10,21 @@ import { fileURLToPath } from 'url';
 import crypto from 'crypto';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const ENV_PATH  = path.join(__dirname, '.env');
+const ENV_PATH = path.join(__dirname, '.env');
 
-const G  = s => `\x1b[32m${s}\x1b[0m`;
-const C  = s => `\x1b[36m${s}\x1b[0m`;
-const B  = s => `\x1b[1m${s}\x1b[0m`;
-const D  = s => `\x1b[2m${s}\x1b[0m`;
+const G = (s) => `\x1b[32m${s}\x1b[0m`;
+const C = (s) => `\x1b[36m${s}\x1b[0m`;
+const B = (s) => `\x1b[1m${s}\x1b[0m`;
+const D = (s) => `\x1b[2m${s}\x1b[0m`;
 
 const UNSAFE = new Set([
-    '', 'aendere_mich_sofort', 'aendere_mich_sofort_hmac', 'aendere_mich_sofort_portal',
-    'change-me-in-production', 'hmac-change-me-in-production', 'once_setup_key_123',
+    '',
+    'aendere_mich_sofort',
+    'aendere_mich_sofort_hmac',
+    'aendere_mich_sofort_portal',
+    'change-me-in-production',
+    'hmac-change-me-in-production',
+    'once_setup_key_123',
 ]);
 
 function parseEnv(text) {
@@ -34,18 +39,22 @@ function parseEnv(text) {
     return env;
 }
 
-function isUnsafe(v) { return !v || UNSAFE.has(v); }
-function genSecret(bytes = 48) { return crypto.randomBytes(bytes).toString('hex'); }
+function isUnsafe(v) {
+    return !v || UNSAFE.has(v);
+}
+function genSecret(bytes = 48) {
+    return crypto.randomBytes(bytes).toString('hex');
+}
 
 function genRsa() {
     const { privateKey, publicKey } = crypto.generateKeyPairSync('rsa', {
         modulusLength: 2048,
-        publicKeyEncoding:  { type: 'spki',  format: 'pem' },
+        publicKeyEncoding: { type: 'spki', format: 'pem' },
         privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
     });
     return {
         private: privateKey.replace(/\n/g, '\\n'),
-        public:  publicKey.replace(/\n/g, '\\n'),
+        public: publicKey.replace(/\n/g, '\\n'),
     };
 }
 
@@ -94,14 +103,14 @@ function patchEnv(content, updates) {
 }
 
 // ── Read existing .env ───────────────────────────────────────────────────────
-const isFirstRun   = !fs.existsSync(ENV_PATH);
+const isFirstRun = !fs.existsSync(ENV_PATH);
 const existingText = isFirstRun ? '' : fs.readFileSync(ENV_PATH, 'utf8');
-const env          = isFirstRun ? {} : parseEnv(existingText);
+const env = isFirstRun ? {} : parseEnv(existingText);
 
 // ── Decide what needs generating ─────────────────────────────────────────────
 const NEED_RANDOM = ['ADMIN_SECRET', 'HMAC_SECRET', 'PORTAL_SECRET', 'SETUP_TOKEN'];
-const missing     = NEED_RANDOM.filter(k => isUnsafe(env[k]));
-const needsRsa    = !env.RSA_PRIVATE_KEY || !env.RSA_PUBLIC_KEY;
+const missing = NEED_RANDOM.filter((k) => isUnsafe(env[k]));
+const needsRsa = !env.RSA_PRIVATE_KEY || !env.RSA_PUBLIC_KEY;
 
 if (!isFirstRun && missing.length === 0 && !needsRsa) {
     process.exit(0); // Already fully configured – nothing to do
@@ -115,7 +124,7 @@ for (const k of missing) {
 if (needsRsa) {
     const rsa = genRsa();
     updates.RSA_PRIVATE_KEY = rsa.private;
-    updates.RSA_PUBLIC_KEY  = rsa.public;
+    updates.RSA_PUBLIC_KEY = rsa.public;
 }
 
 // ── Write .env ────────────────────────────────────────────────────────────────
@@ -130,7 +139,7 @@ if (isFirstRun) {
 fs.writeFileSync(ENV_PATH, newContent, { mode: 0o600 });
 
 // ── Print setup instructions ──────────────────────────────────────────────────
-const finalEnv  = parseEnv(fs.readFileSync(ENV_PATH, 'utf8'));
+const finalEnv = parseEnv(fs.readFileSync(ENV_PATH, 'utf8'));
 const finalPort = finalEnv.PORT || '4000';
 
 console.log('');
@@ -142,7 +151,9 @@ console.log('');
 if (isFirstRun) {
     console.log(`  ${G('✓')}  .env erstellt – alle Secrets automatisch generiert`);
 } else {
-    console.log(`  ${G('✓')}  .env aktualisiert (${Object.keys(updates).length} fehlende Secrets generiert)`);
+    console.log(
+        `  ${G('✓')}  .env aktualisiert (${Object.keys(updates).length} fehlende Secrets generiert)`
+    );
 }
 
 console.log('');

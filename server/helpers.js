@@ -2,13 +2,14 @@ import crypto from 'crypto';
 import db from './db.js';
 
 export const generateKey = (type) => {
-    const prefix = {
-        FREE: 'MERAKI-FREE',
-        STARTER: 'MERAKI-START',
-        PRO: 'MERAKI-PRO',
-        PRO_PLUS: 'MERAKI-PROPLUS',
-        ENTERPRISE: 'MERAKI-ENT'
-    }[type] || 'MERAKI-UNKNOWN';
+    const prefix =
+        {
+            FREE: 'MERAKI-FREE',
+            STARTER: 'MERAKI-START',
+            PRO: 'MERAKI-PRO',
+            PRO_PLUS: 'MERAKI-PROPLUS',
+            ENTERPRISE: 'MERAKI-ENT',
+        }[type] || 'MERAKI-UNKNOWN';
     const rand = crypto.randomBytes(4).toString('hex').toUpperCase();
     return `${prefix}-${rand}-${new Date().getFullYear()}`;
 };
@@ -16,7 +17,8 @@ export const generateKey = (type) => {
 export const normalizeDomain = (raw) => {
     if (!raw) return null;
     return raw
-        .trim().toLowerCase()
+        .trim()
+        .toLowerCase()
         .replace(/^https?:\/\//, '')
         .replace(/:\d+$/, '')
         .split('/')[0]
@@ -37,10 +39,10 @@ export const domainMatches = (pattern, domain) => {
 };
 
 export const getClientIp = (req) =>
-    req.headers['x-forwarded-for']?.split(',')[0]?.trim()
-    || req.headers['x-real-ip']
-    || req.socket?.remoteAddress
-    || 'unknown';
+    req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
+    req.headers['x-real-ip'] ||
+    req.socket?.remoteAddress ||
+    'unknown';
 
 // Schema is fixed in SQLite — always 'details' and 'ts'
 export const addAuditLog = async (action, details, actor = 'system') => {
@@ -56,8 +58,11 @@ export const addAuditLog = async (action, details, actor = 'system') => {
 
 export const parseJsonField = (value, fallback = {}) => {
     if (!value) return fallback;
-    try { return typeof value === 'string' ? JSON.parse(value) : value; }
-    catch { return fallback; }
+    try {
+        return typeof value === 'string' ? JSON.parse(value) : value;
+    } catch {
+        return fallback;
+    }
 };
 
 export const asyncHandler = (fn) => (req, res, next) =>

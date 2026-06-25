@@ -21,17 +21,22 @@ describe('Admin API', () => {
 
     test('POST /api/admin/login should work with correct credentials', async () => {
         const passwordHash = await bcrypt.hash('password123', 12);
-        
+
         // Mock DB for login
         const mockQuery = jest.spyOn(db, 'query').mockImplementation((sql, params) => {
             if (sql.includes('FROM admins WHERE username = ?')) {
-                return Promise.resolve([[{ 
-                    id: 1, 
-                    username: 'testadmin', 
-                    password_hash: passwordHash, 
-                    role: 'superadmin',
-                    two_factor_enabled: 0
-                }], []]);
+                return Promise.resolve([
+                    [
+                        {
+                            id: 1,
+                            username: 'testadmin',
+                            password_hash: passwordHash,
+                            role: 'superadmin',
+                            two_factor_enabled: 0,
+                        },
+                    ],
+                    [],
+                ]);
             }
             if (sql.includes('INSERT INTO admin_sessions')) {
                 return Promise.resolve([{ affectedRows: 1 }, []]);
@@ -49,7 +54,7 @@ describe('Admin API', () => {
         expect(res.statusCode).toBe(200);
         expect(res.body.success).toBe(true);
         expect(res.body).toHaveProperty('token');
-        
+
         mockQuery.mockRestore();
     });
 
@@ -95,25 +100,51 @@ describe('Admin API', () => {
                 return Promise.resolve([[{ id: 'sess1' }], []]);
             }
             if (sql.includes('total_invoiced')) {
-                return Promise.resolve([[{ 
-                    total_invoiced: 250.00,
-                    total_paid: 150.00,
-                    total_open: 50.00,
-                    total_overdue: 50.00,
-                    count_draft: 1,
-                    count_sent: 1,
-                    count_overdue: 1,
-                    count_paid: 1
-                }], []]);
+                return Promise.resolve([
+                    [
+                        {
+                            total_invoiced: 250.0,
+                            total_paid: 150.0,
+                            total_open: 50.0,
+                            total_overdue: 50.0,
+                            count_draft: 1,
+                            count_sent: 1,
+                            count_overdue: 1,
+                            count_paid: 1,
+                        },
+                    ],
+                    [],
+                ]);
             }
             if (sql.includes('mrr')) {
-                return Promise.resolve([[{ mrr: 150.00 }], []]);
+                return Promise.resolve([[{ mrr: 150.0 }], []]);
             }
             if (sql.includes('days_overdue')) {
-                return Promise.resolve([[{ invoice_number: 'INV-2026-0001', customer_name: 'Max', amount_gross: 50.00, due_date: '2026-05-01', days_overdue: 18 }], []]);
+                return Promise.resolve([
+                    [
+                        {
+                            invoice_number: 'INV-2026-0001',
+                            customer_name: 'Max',
+                            amount_gross: 50.0,
+                            due_date: '2026-05-01',
+                            days_overdue: 18,
+                        },
+                    ],
+                    [],
+                ]);
             }
             if (sql.includes('paid_at')) {
-                return Promise.resolve([[{ invoice_number: 'INV-2026-0002', customer_name: 'Max', amount_gross: 150.00, paid_at: '2026-05-18' }], []]);
+                return Promise.resolve([
+                    [
+                        {
+                            invoice_number: 'INV-2026-0002',
+                            customer_name: 'Max',
+                            amount_gross: 150.0,
+                            paid_at: '2026-05-18',
+                        },
+                    ],
+                    [],
+                ]);
             }
             return Promise.resolve([[], []]);
         });

@@ -48,7 +48,12 @@ router.get('/', (req, res) => {
         <div class="card">
             <h1>🟢 OPA! Lizenz-Server</h1>
             <span class="badge ${overallOk ? 'ok' : 'fail'}">${overallOk ? '✓ Alle Systeme operational' : '✗ Störung erkannt'}</span>
-            ${Object.values(checks).map(c => `<div class="check"><span>${c.label}</span><div class="dot ${c.ok ? 'ok' : 'fail'}"></div></div>`).join('')}
+            ${Object.values(checks)
+                .map(
+                    (c) =>
+                        `<div class="check"><span>${c.label}</span><div class="dot ${c.ok ? 'ok' : 'fail'}"></div></div>`
+                )
+                .join('')}
         </div>
         <footer>Automatisch aktualisiert alle 60s · ${new Date().toLocaleString('de-DE')}</footer>
     </body></html>`;
@@ -81,15 +86,25 @@ router.get('/metrics', (req, res) => {
         for (const [status, count] of Object.entries(statusMap))
             g('meraki_licenses_total', 'Total licenses by status', count, `status="${status}"`);
 
-        const [[{ customers }]] = db.query('SELECT COUNT(*) as customers FROM customers WHERE archived = 0 OR archived IS NULL');
+        const [[{ customers }]] = db.query(
+            'SELECT COUNT(*) as customers FROM customers WHERE archived = 0 OR archived IS NULL'
+        );
         g('meraki_customers_total', 'Total active customers', customers);
 
-        const [[{ invoices_open }]] = db.query("SELECT COUNT(*) as invoices_open FROM invoices WHERE status IN ('sent','overdue')");
+        const [[{ invoices_open }]] = db.query(
+            "SELECT COUNT(*) as invoices_open FROM invoices WHERE status IN ('sent','overdue')"
+        );
         g('meraki_invoices_open_total', 'Open and overdue invoices', invoices_open);
 
-        const [[{ wh_ok }]]   = db.query("SELECT COUNT(*) as wh_ok FROM webhook_logs WHERE status='success' AND attempted_at > datetime('now','-24 hours')");
-        const [[{ wh_fail }]] = db.query("SELECT COUNT(*) as wh_fail FROM webhook_logs WHERE status='failed' AND attempted_at > datetime('now','-24 hours')");
-        const [[{ wh_dl }]]   = db.query('SELECT COUNT(*) as wh_dl FROM webhook_dead_letters WHERE resolved = 0');
+        const [[{ wh_ok }]] = db.query(
+            "SELECT COUNT(*) as wh_ok FROM webhook_logs WHERE status='success' AND attempted_at > datetime('now','-24 hours')"
+        );
+        const [[{ wh_fail }]] = db.query(
+            "SELECT COUNT(*) as wh_fail FROM webhook_logs WHERE status='failed' AND attempted_at > datetime('now','-24 hours')"
+        );
+        const [[{ wh_dl }]] = db.query(
+            'SELECT COUNT(*) as wh_dl FROM webhook_dead_letters WHERE resolved = 0'
+        );
         g('meraki_webhooks_success_24h', 'Successful webhook deliveries in last 24h', wh_ok);
         g('meraki_webhooks_failed_24h', 'Failed webhook deliveries in last 24h', wh_fail);
         g('meraki_webhook_dead_letters', 'Unresolved webhook dead letters', wh_dl);

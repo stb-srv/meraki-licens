@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 
 const MOLLIE_API_KEY = process.env.MOLLIE_API_KEY || '';
-const MOLLIE_BASE    = 'https://api.mollie.com/v2';
+const MOLLIE_BASE = 'https://api.mollie.com/v2';
 
 async function mollieRequest(method, path, body = null) {
     if (!MOLLIE_API_KEY) throw new Error('MOLLIE_API_KEY nicht konfiguriert.');
@@ -16,7 +16,14 @@ async function mollieRequest(method, path, body = null) {
     return json;
 }
 
-export async function createMolliePayment({ amount, currency = 'EUR', description, redirectUrl, webhookUrl, metadata }) {
+export async function createMolliePayment({
+    amount,
+    currency = 'EUR',
+    description,
+    redirectUrl,
+    webhookUrl,
+    metadata,
+}) {
     return mollieRequest('POST', '/payments', {
         amount: { currency, value: Number(amount).toFixed(2) },
         description,

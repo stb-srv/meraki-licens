@@ -12,19 +12,24 @@ import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const STORAGE_PATH = process.env.STORAGE_PATH || './storage';
-const BACKUP_DIR   = path.join(STORAGE_PATH, 'backups');
-const DB_PATH      = process.env.DB_PATH || path.join(__dirname, 'data', 'licens.db');
+const BACKUP_DIR = path.join(STORAGE_PATH, 'backups');
+const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'data', 'licens.db');
 
 function listBackups() {
     if (!fs.existsSync(BACKUP_DIR)) return [];
-    return fs.readdirSync(BACKUP_DIR)
-        .filter(f => f.startsWith('licens-') && f.endsWith('.db'))
-        .sort().reverse();
+    return fs
+        .readdirSync(BACKUP_DIR)
+        .filter((f) => f.startsWith('licens-') && f.endsWith('.db'))
+        .sort()
+        .reverse();
 }
 
 function restore(backupName) {
     const src = path.join(BACKUP_DIR, backupName);
-    if (!fs.existsSync(src)) { console.error('Backup nicht gefunden:', src); process.exit(1); }
+    if (!fs.existsSync(src)) {
+        console.error('Backup nicht gefunden:', src);
+        process.exit(1);
+    }
 
     if (fs.existsSync(DB_PATH)) {
         const safetyPath = `${DB_PATH}.before-restore.${Date.now()}`;
@@ -33,11 +38,13 @@ function restore(backupName) {
     }
     fs.copyFileSync(src, DB_PATH);
     console.log('✅  Wiederhergestellt von:', src);
-    console.log('ℹ️   Integrity-Check: node -e "import(\'better-sqlite3\').then(({default:D})=>{const db=new D(\'./data/licens.db\');console.log(db.pragma(\'integrity_check\',{simple:true}));db.close();})"');
+    console.log(
+        "ℹ️   Integrity-Check: node -e \"import('better-sqlite3').then(({default:D})=>{const db=new D('./data/licens.db');console.log(db.pragma('integrity_check',{simple:true}));db.close();})\""
+    );
 }
 
 const backups = listBackups();
-const target  = process.argv[2];
+const target = process.argv[2];
 
 if (target) {
     console.log('⚠️  Stelle sicher dass der Server gestoppt ist!');

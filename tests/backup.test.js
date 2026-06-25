@@ -14,7 +14,6 @@ const { runBackup, rotateBackups, listBackups } = await import('../server/backup
 afterEach(() => jest.clearAllMocks());
 
 describe('WP2 – Backup', () => {
-
     test('runBackup calls database.backup() and returns path', async () => {
         jest.spyOn(fs, 'existsSync').mockReturnValue(true);
         const { database } = await import('../server/db.js');
@@ -26,7 +25,10 @@ describe('WP2 – Backup', () => {
 
     test('rotateBackups deletes files older than retention', () => {
         jest.spyOn(fs, 'existsSync').mockReturnValue(true);
-        jest.spyOn(fs, 'readdirSync').mockReturnValue(['licens-2020-01-01T00-00-00.db', 'licens-2099-01-01T00-00-00.db']);
+        jest.spyOn(fs, 'readdirSync').mockReturnValue([
+            'licens-2020-01-01T00-00-00.db',
+            'licens-2099-01-01T00-00-00.db',
+        ]);
         jest.spyOn(fs, 'statSync').mockImplementation((p) => ({
             mtimeMs: p.includes('2020') ? Date.now() - 100 * 86400000 : Date.now(),
         }));
@@ -51,5 +53,4 @@ describe('WP2 – Backup', () => {
         expect(listBackups()).toEqual([]);
         jest.restoreAllMocks();
     });
-
 });

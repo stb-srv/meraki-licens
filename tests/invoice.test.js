@@ -28,8 +28,10 @@ describe('Invoice Admin API', () => {
 
     test('DELETE /api/admin/invoices/:id requires superadmin', async () => {
         jest.spyOn(db, 'query').mockImplementation((sql) => {
-            if (sql.includes('FROM admin_sessions')) return Promise.resolve([[{ id: 'sess1' }], []]);
-            if (sql.includes('FROM admins WHERE username')) return Promise.resolve([[{ id: 1, username: 'testadmin', role: 'admin' }], []]);
+            if (sql.includes('FROM admin_sessions'))
+                return Promise.resolve([[{ id: 'sess1' }], []]);
+            if (sql.includes('FROM admins WHERE username'))
+                return Promise.resolve([[{ id: 1, username: 'testadmin', role: 'admin' }], []]);
             return Promise.resolve([[], []]);
         });
 
@@ -44,13 +46,29 @@ describe('Invoice Admin API', () => {
 
     test('GET /api/admin/invoices returns list with auth', async () => {
         jest.spyOn(db, 'query').mockImplementation((sql) => {
-            if (sql.includes('FROM admin_sessions')) return Promise.resolve([[{ id: 'sess1' }], []]);
-            if (sql.includes('FROM admins WHERE username')) return Promise.resolve([[{ id: 1, username: 'testadmin', role: 'admin' }], []]);
+            if (sql.includes('FROM admin_sessions'))
+                return Promise.resolve([[{ id: 'sess1' }], []]);
+            if (sql.includes('FROM admins WHERE username'))
+                return Promise.resolve([[{ id: 1, username: 'testadmin', role: 'admin' }], []]);
             if (sql.includes('COUNT(*)')) return Promise.resolve([[{ total: 2 }], []]);
-            if (sql.includes('FROM invoices')) return Promise.resolve([[
-                { id: 'inv1', invoice_number: 'INV-2024-0001', status: 'draft', amount_gross: 29.00 },
-                { id: 'inv2', invoice_number: 'INV-2024-0002', status: 'sent', amount_gross: 59.00 }
-            ], []]);
+            if (sql.includes('FROM invoices'))
+                return Promise.resolve([
+                    [
+                        {
+                            id: 'inv1',
+                            invoice_number: 'INV-2024-0001',
+                            status: 'draft',
+                            amount_gross: 29.0,
+                        },
+                        {
+                            id: 'inv2',
+                            invoice_number: 'INV-2024-0002',
+                            status: 'sent',
+                            amount_gross: 59.0,
+                        },
+                    ],
+                    [],
+                ]);
             return Promise.resolve([[], []]);
         });
 
@@ -71,8 +89,10 @@ describe('Invoice Admin API', () => {
 
     test('GET /api/admin/invoices/:id returns 404 for missing invoice', async () => {
         jest.spyOn(db, 'query').mockImplementation((sql) => {
-            if (sql.includes('FROM admin_sessions')) return Promise.resolve([[{ id: 'sess1' }], []]);
-            if (sql.includes('FROM admins WHERE username')) return Promise.resolve([[{ id: 1, username: 'testadmin', role: 'admin' }], []]);
+            if (sql.includes('FROM admin_sessions'))
+                return Promise.resolve([[{ id: 'sess1' }], []]);
+            if (sql.includes('FROM admins WHERE username'))
+                return Promise.resolve([[{ id: 1, username: 'testadmin', role: 'admin' }], []]);
             if (sql.includes('FROM invoices')) return Promise.resolve([[], []]);
             return Promise.resolve([[], []]);
         });
@@ -88,8 +108,10 @@ describe('Invoice Admin API', () => {
 
     test('POST /api/admin/invoices validates required fields', async () => {
         jest.spyOn(db, 'query').mockImplementation((sql) => {
-            if (sql.includes('FROM admin_sessions')) return Promise.resolve([[{ id: 'sess1' }], []]);
-            if (sql.includes('FROM admins WHERE username')) return Promise.resolve([[{ id: 1, username: 'testadmin', role: 'admin' }], []]);
+            if (sql.includes('FROM admin_sessions'))
+                return Promise.resolve([[{ id: 'sess1' }], []]);
+            if (sql.includes('FROM admins WHERE username'))
+                return Promise.resolve([[{ id: 1, username: 'testadmin', role: 'admin' }], []]);
             return Promise.resolve([[], []]);
         });
 
@@ -112,19 +134,22 @@ describe('calculateInvoiceTotals', () => {
 
     test('calculates net, tax, and gross correctly', () => {
         const result = calculateInvoiceTotals(
-            [{ quantity: 2, unit_price: 50 }, { quantity: 1, unit_price: 29 }],
+            [
+                { quantity: 2, unit_price: 50 },
+                { quantity: 1, unit_price: 29 },
+            ],
             19
         );
-        expect(result.amount_net).toBe(129.00);
+        expect(result.amount_net).toBe(129.0);
         expect(result.amount_tax).toBe(24.51);
         expect(result.amount_gross).toBe(153.51);
     });
 
     test('handles zero tax rate', () => {
         const result = calculateInvoiceTotals([{ quantity: 1, unit_price: 100 }], 0);
-        expect(result.amount_net).toBe(100.00);
+        expect(result.amount_net).toBe(100.0);
         expect(result.amount_tax).toBe(0);
-        expect(result.amount_gross).toBe(100.00);
+        expect(result.amount_gross).toBe(100.0);
     });
 
     test('returns zeros for empty items', () => {
@@ -135,7 +160,7 @@ describe('calculateInvoiceTotals', () => {
 
     test('handles float quantities correctly', () => {
         const result = calculateInvoiceTotals([{ quantity: 0.5, unit_price: 100 }], 20);
-        expect(result.amount_net).toBe(50.00);
-        expect(result.amount_gross).toBe(60.00);
+        expect(result.amount_net).toBe(50.0);
+        expect(result.amount_gross).toBe(60.0);
     });
 });

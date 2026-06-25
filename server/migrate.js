@@ -31,12 +31,15 @@ export async function runMigrations(existingDb = null) {
     `);
 
     const appliedVersions = new Set(
-        db.prepare('SELECT version FROM schema_migrations').all().map(r => r.version)
+        db
+            .prepare('SELECT version FROM schema_migrations')
+            .all()
+            .map((r) => r.version)
     );
 
     const files = await readdir(MIGRATIONS_DIR);
     const migrationFiles = files
-        .filter(f => f.endsWith('.js'))
+        .filter((f) => f.endsWith('.js'))
         .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
 
     let count = 0;
@@ -52,7 +55,10 @@ export async function runMigrations(existingDb = null) {
             } else {
                 console.warn(`  ⚠️  Migration ${file} hat keine default oder up Funktion.`);
             }
-            db.prepare('INSERT INTO schema_migrations (version, name) VALUES (?, ?)').run(file, file);
+            db.prepare('INSERT INTO schema_migrations (version, name) VALUES (?, ?)').run(
+                file,
+                file
+            );
             console.log(`  ✅ ${file} applied.`);
             count++;
         } catch (e) {
@@ -62,22 +68,24 @@ export async function runMigrations(existingDb = null) {
         }
     }
 
-    const alreadyApplied = migrationFiles.filter(f => appliedVersions.has(f)).length;
+    const alreadyApplied = migrationFiles.filter((f) => appliedVersions.has(f)).length;
     if (count === 0) {
         console.log('✨ Database is already up to date.');
     } else {
         console.log(`\n🎉 Successfully applied ${count} migration(s).`);
     }
-    console.log(`🗄️  Migrationen: ${count} neu ausgeführt, ${alreadyApplied} bereits vorhanden (gesamt ${migrationFiles.length})`);
+    console.log(
+        `🗄️  Migrationen: ${count} neu ausgeführt, ${alreadyApplied} bereits vorhanden (gesamt ${migrationFiles.length})`
+    );
 
     if (!existingDb) db.close();
 }
 
 // Support direct standalone execution
-const isMain = process.argv[1] && (
-    path.resolve(process.argv[1]) === path.resolve(fileURLToPath(import.meta.url)) ||
-    process.argv[1].endsWith('migrate.js')
-);
+const isMain =
+    process.argv[1] &&
+    (path.resolve(process.argv[1]) === path.resolve(fileURLToPath(import.meta.url)) ||
+        process.argv[1].endsWith('migrate.js'));
 
 if (isMain) {
     runMigrations().catch(() => process.exit(1));

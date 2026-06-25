@@ -5,10 +5,10 @@ import db from './db.js';
 import { RSA_PRIVATE_KEY, RSA_PUBLIC_KEY } from './crypto.js';
 import logger from './logger.js';
 
-const ADMIN_SECRET    = process.env.ADMIN_SECRET || 'change-me-in-production';
+const ADMIN_SECRET = process.env.ADMIN_SECRET || 'change-me-in-production';
 const USE_RS256_ADMIN = !!(RSA_PRIVATE_KEY && RSA_PUBLIC_KEY);
 const ADMIN_IP_WHITELIST = process.env.ADMIN_IP_WHITELIST
-    ? process.env.ADMIN_IP_WHITELIST.split(',').map(ip => ip.trim())
+    ? process.env.ADMIN_IP_WHITELIST.split(',').map((ip) => ip.trim())
     : [];
 
 export const MIN_PASSWORD_LENGTH = 12;
@@ -18,16 +18,21 @@ export const requireIpWhitelist = (req, res, next) => {
     const forwarded = req.headers['x-forwarded-for'];
     const clientIp = forwarded ? forwarded.split(',')[0].trim() : req.socket.remoteAddress;
     const normalizedIp = clientIp.replace(/^::ffff:/, '');
-    const isWhitelisted = ADMIN_IP_WHITELIST.some(ip => ip === '*' || normalizedIp === ip || clientIp === ip);
+    const isWhitelisted = ADMIN_IP_WHITELIST.some(
+        (ip) => ip === '*' || normalizedIp === ip || clientIp === ip
+    );
     if (!isWhitelisted) {
         logger.warn({ clientIp }, 'IP Blocked: attempted to access admin routes');
-        return res.status(403).json({ success: false, message: 'Access denied: IP not whitelisted.' });
+        return res
+            .status(403)
+            .json({ success: false, message: 'Access denied: IP not whitelisted.' });
     }
     next();
 };
 
 export function signAdminToken(payload, expiresIn = '8h') {
-    if (USE_RS256_ADMIN) return jwt.sign(payload, RSA_PRIVATE_KEY, { algorithm: 'RS256', expiresIn });
+    if (USE_RS256_ADMIN)
+        return jwt.sign(payload, RSA_PRIVATE_KEY, { algorithm: 'RS256', expiresIn });
     return jwt.sign(payload, ADMIN_SECRET, { expiresIn });
 }
 
@@ -42,7 +47,8 @@ function verifyAdminToken(token) {
 
 export const requireAuth = async (req, res, next) => {
     const token = req.headers['authorization']?.startsWith('Bearer ')
-        ? req.headers['authorization'].slice(7) : null;
+        ? req.headers['authorization'].slice(7)
+        : null;
     if (!token) return res.status(401).json({ success: false, message: 'No token provided' });
     try {
         const payload = verifyAdminToken(token);
@@ -54,15 +60,19 @@ export const requireAuth = async (req, res, next) => {
                 [tokenHash]
             );
             if (!rows[0]) {
-                return res.status(401).json({ success: false, message: 'Session abgelaufen oder widerrufen.' });
+                return res
+                    .status(401)
+                    .json({ success: false, message: 'Session abgelaufen oder widerrufen.' });
             }
         } catch (dbErr) {
             logger.error({ err: dbErr }, 'requireAuth DB-Fehler');
-            return res.status(500).json({ success: false, message: 'Interner Fehler bei Session-Prüfung.' });
+            return res
+                .status(500)
+                .json({ success: false, message: 'Interner Fehler bei Session-Prüfung.' });
         }
 
-        req.admin          = payload;
-        req.adminToken     = token;
+        req.admin = payload;
+        req.adminToken = token;
         req.adminTokenHash = tokenHash;
         next();
     } catch {
@@ -77,19 +87,40 @@ export const requireSuperAdmin = (req, res, next) => {
 };
 
 export const loginLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, max: 10,
-    message: { success: false, message: 'Too many login attempts. Please wait 15 minutes.' }
+    windowMs: 15 * 60 * 1000,
+    max: 10,
+    message: { success: false, message: 'Too many login attempts. Please wait 15 minutes.' },
 });
 
-export const apiLimiter      = rateLimit({ windowMs: 60 * 1000, max: 60 });
-export const validateLimiter = rateLimit({ windowMs: 60 * 1000, max: 30, message: { status: 'rate_limited', message: 'Too many validation requests.' } });
-export const setupLimiter    = rateLimit({ windowMs: 60 * 60 * 1000, max: 5, message: { success: false, message: 'Too many setup attempts.' } });
-export const offlineTokenLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 20, message: { success: false, message: 'Too many offline token requests. Please wait 15 minutes.' } });
-export const bulkLimiter     = rateLimit({ windowMs: 60 * 1000, max: 10, message: { success: false, message: 'Too many bulk requests. Max 10 per minute.' } });
-export const trialLimiter    = rateLimit({
-    windowMs: 24 * 60 * 60 * 1000, max: 3,
+export const apiLimiter = rateLimit({ windowMs: 60 * 1000, max: 60 });
+export const validateLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 30,
+    message: { status: 'rate_limited', message: 'Too many validation requests.' },
+});
+export const setupLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000,
+    max: 5,
+    message: { success: false, message: 'Too many setup attempts.' },
+});
+export const offlineTokenLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 20,
+    message: {
+        success: false,
+        message: 'Too many offline token requests. Please wait 15 minutes.',
+    },
+});
+export const bulkLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 10,
+    message: { success: false, message: 'Too many bulk requests. Max 10 per minute.' },
+});
+export const trialLimiter = rateLimit({
+    windowMs: 24 * 60 * 60 * 1000,
+    max: 3,
     keyGenerator: (req) => req.headers['x-forwarded-for'] || req.socket.remoteAddress,
-    message: { success: false, message: 'Maximale Trial-Registrierungen pro IP erreicht (3/Tag).' }
+    message: { success: false, message: 'Maximale Trial-Registrierungen pro IP erreicht (3/Tag).' },
 });
 
 import { asyncHandler as actualAsyncHandler } from './helpers.js';

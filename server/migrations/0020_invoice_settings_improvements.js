@@ -1,6 +1,10 @@
 export function up(db) {
     // Bankname-Feld hinzufügen
-    try { db.exec(`ALTER TABLE invoice_settings ADD COLUMN company_bank_name TEXT`); } catch {}
+    try {
+        db.exec(`ALTER TABLE invoice_settings ADD COLUMN company_bank_name TEXT`);
+    } catch {
+        /* Spalte existiert bereits – Migration ist idempotent */
+    }
 
     // Standard-Datensatz anlegen falls noch keiner existiert
     db.exec(`

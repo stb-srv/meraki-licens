@@ -65,30 +65,46 @@ function buildPDFLayout(invoiceData, doc) {
 
     // --- INVOICE DETAILS (Top Right) ---
     doc.fillColor(primaryColor).fontSize(14).font('Helvetica-Bold');
-    const docTypeLabel = invoiceData.type === 'credit_note' ? 'GUTSCHRIFT' :
-                         (invoiceData.type === 'reminder' ? 'MAHNUNG' : 'RECHNUNG');
+    const docTypeLabel =
+        invoiceData.type === 'credit_note'
+            ? 'GUTSCHRIFT'
+            : invoiceData.type === 'reminder'
+              ? 'MAHNUNG'
+              : 'RECHNUNG';
     doc.text(docTypeLabel, 350, 100, { align: 'right', width: 195 });
 
     doc.fillColor(textColor).fontSize(9).font('Helvetica');
     let detailsY = 118;
     doc.text('Rechnungsnr.:', 350, detailsY, { align: 'right', width: 95 });
-    doc.font('Helvetica-Bold').text(safeText(invoiceData.invoice_number), 450, detailsY, { align: 'right', width: 95 });
-    
+    doc.font('Helvetica-Bold').text(safeText(invoiceData.invoice_number), 450, detailsY, {
+        align: 'right',
+        width: 95,
+    });
+
     doc.font('Helvetica');
     detailsY += 14;
     doc.text('Datum:', 350, detailsY, { align: 'right', width: 95 });
-    doc.text(formatDate(invoiceData.created_at || new Date()), 450, detailsY, { align: 'right', width: 95 });
+    doc.text(formatDate(invoiceData.created_at || new Date()), 450, detailsY, {
+        align: 'right',
+        width: 95,
+    });
 
     if (invoiceData.due_date) {
         detailsY += 14;
         doc.text('Fälligkeitsdatum:', 350, detailsY, { align: 'right', width: 95 });
-        doc.font('Helvetica-Bold').text(formatDate(invoiceData.due_date), 450, detailsY, { align: 'right', width: 95 });
+        doc.font('Helvetica-Bold').text(formatDate(invoiceData.due_date), 450, detailsY, {
+            align: 'right',
+            width: 95,
+        });
     }
 
     // --- RECIPIENT INFO ---
     doc.moveTo(50, 140).lineTo(545, 140).strokeColor(borderColor).lineWidth(1).stroke();
 
-    doc.fillColor(lightGray).fontSize(7.5).font('Helvetica-Bold').text('RECHNUNGSEMPFÄNGER', 50, 152);
+    doc.fillColor(lightGray)
+        .fontSize(7.5)
+        .font('Helvetica-Bold')
+        .text('RECHNUNGSEMPFÄNGER', 50, 152);
 
     doc.fillColor(textColor).fontSize(9.5).font('Helvetica-Bold');
     let recipientY = 166;
@@ -106,8 +122,10 @@ function buildPDFLayout(invoiceData, doc) {
     doc.font('Helvetica');
     const billingLines = [
         safeText(invoiceData.customer_billing_street),
-        [safeText(invoiceData.customer_billing_zip), safeText(invoiceData.customer_billing_city)].filter(Boolean).join(' '),
-        safeText(invoiceData.customer_billing_country)
+        [safeText(invoiceData.customer_billing_zip), safeText(invoiceData.customer_billing_city)]
+            .filter(Boolean)
+            .join(' '),
+        safeText(invoiceData.customer_billing_country),
     ].filter(Boolean);
     for (const line of billingLines) {
         doc.text(line.trim(), 50, recipientY);
@@ -153,7 +171,10 @@ function buildPDFLayout(invoiceData, doc) {
     doc.text(formatCurrency(invoiceData.amount_net), 460, tableY, { width: 85, align: 'right' });
 
     tableY += 14;
-    doc.text(`zzgl. ${parseFloat(invoiceData.tax_rate || 19.00).toFixed(1)}% MwSt.:`, 350, tableY, { width: 100, align: 'right' });
+    doc.text(`zzgl. ${parseFloat(invoiceData.tax_rate || 19.0).toFixed(1)}% MwSt.:`, 350, tableY, {
+        width: 100,
+        align: 'right',
+    });
     doc.text(formatCurrency(invoiceData.amount_tax), 460, tableY, { width: 85, align: 'right' });
 
     tableY += 14;
@@ -167,15 +188,21 @@ function buildPDFLayout(invoiceData, doc) {
     // --- EXTRA NOTES ---
     if (invoiceData.notes) {
         tableY += 35;
-        doc.fillColor(lightGray).fontSize(7.5).font('Helvetica-Bold').text('BEMERKUNGEN / HINWEISE', 50, tableY);
+        doc.fillColor(lightGray)
+            .fontSize(7.5)
+            .font('Helvetica-Bold')
+            .text('BEMERKUNGEN / HINWEISE', 50, tableY);
         tableY += 12;
-        doc.fillColor(textColor).fontSize(7.5).font('Helvetica').text(safeText(invoiceData.notes, 1000), 50, tableY, { width: 280 });
+        doc.fillColor(textColor)
+            .fontSize(7.5)
+            .font('Helvetica')
+            .text(safeText(invoiceData.notes, 1000), 50, tableY, { width: 280 });
     }
 
     // --- FOOTER BLOCK ---
     const footerY = 730;
     doc.moveTo(50, footerY).lineTo(545, footerY).strokeColor(borderColor).lineWidth(1).stroke();
-    
+
     const colWidth = 155;
     const footerTextSize = 7.5;
     doc.fillColor(textColor).fontSize(footerTextSize).font('Helvetica');
@@ -183,7 +210,12 @@ function buildPDFLayout(invoiceData, doc) {
     // Column 1: Company details
     doc.text(safeText(invoiceData.company_name) || 'Meraki', 50, footerY + 10, { width: colWidth });
     if (invoiceData.company_tax_id) {
-        doc.text(`Steuernummer / USt-IdNr.: ${safeText(invoiceData.company_tax_id)}`, 50, footerY + 22, { width: colWidth });
+        doc.text(
+            `Steuernummer / USt-IdNr.: ${safeText(invoiceData.company_tax_id)}`,
+            50,
+            footerY + 22,
+            { width: colWidth }
+        );
     }
 
     // Column 2: Bank connection
@@ -203,8 +235,14 @@ function buildPDFLayout(invoiceData, doc) {
     }
 
     // Column 3: Custom footer text or generic message
-    const defaultFooterText = 'Vielen Dank für Ihre Bestellung und das Vertrauen in Meraki Restaurant-Management-System.';
-    doc.fillColor(lightGray).fontSize(6.5).text(safeText(invoiceData.footer_text, 500) || defaultFooterText, 390, footerY + 10, { width: 155, align: 'right' });
+    const defaultFooterText =
+        'Vielen Dank für Ihre Bestellung und das Vertrauen in Meraki Restaurant-Management-System.';
+    doc.fillColor(lightGray)
+        .fontSize(6.5)
+        .text(safeText(invoiceData.footer_text, 500) || defaultFooterText, 390, footerY + 10, {
+            width: 155,
+            align: 'right',
+        });
 }
 
 /**
@@ -217,11 +255,11 @@ export async function getInvoicePDFBuffer(invoiceData) {
         try {
             const doc = new PDFDocument({ margin: 50, size: 'A4' });
             const chunks = [];
-            
-            doc.on('data', chunk => chunks.push(chunk));
+
+            doc.on('data', (chunk) => chunks.push(chunk));
             doc.on('end', () => resolve(Buffer.concat(chunks)));
-            doc.on('error', err => reject(err));
-            
+            doc.on('error', (err) => reject(err));
+
             buildPDFLayout(invoiceData, doc);
             doc.end();
         } catch (err) {
@@ -244,13 +282,13 @@ export async function generateInvoicePDF(invoiceData, outputPath) {
         try {
             const doc = new PDFDocument({ margin: 50, size: 'A4' });
             const writeStream = fs.createWriteStream(outputPath);
-            
+
             doc.pipe(writeStream);
             buildPDFLayout(invoiceData, doc);
             doc.end();
-            
+
             writeStream.on('finish', () => resolve(outputPath));
-            writeStream.on('error', err => reject(err));
+            writeStream.on('error', (err) => reject(err));
         } catch (err) {
             reject(err);
         }

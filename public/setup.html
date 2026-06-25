@@ -1,364 +1,843 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="de" data-theme="dark">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Meraki &ndash; Setup</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;0,900;1,300;1,400&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <style>
-    :root,[data-theme="dark"]{
-      --bg:#0d0f12;--bg2:#131619;--bg3:#181c20;
-      --border:rgba(255,255,255,0.07);
-      --text:#e8eaed;--text2:#8b9099;
-      --accent:#00bfa5;--accent-hover:#00a892;
-      --accent2:#ff5d6c;--accent3:#5fbf6a;
-      --card:#131619;--radius: var(--radius-lg);
-      --shadow:0 8px 32px rgba(0,0,0,.5);
-      --nav-bg:rgba(13,15,18,0.92);
-      --accent-dim:rgba(0,191,165,0.12);
-      --grid-line:rgba(255,255,255,0.03);
-      --font-body: 'Roboto', sans-serif;
-      --font-display: 'Roboto', sans-serif;
-      --font-mono: 'Roboto Mono', monospace;
-      /* Type scale */
-      --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
-      --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
-      --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
-      --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
-      --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
-      --text-2xl: clamp(2rem, 1.2rem + 2.5vw, 3.5rem);
-      /* Spacing (4px base) */
-      --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem;
-      --space-4: 1rem; --space-6: 1.5rem; --space-8: 2rem;
-      --space-10: 2.5rem; --space-12: 3rem; --space-16: 4rem;
-      /* Border radius */
-      --radius-sm: 0.375rem; --radius-md: 0.5rem;
-      --radius-lg: 0.75rem; --radius-xl: 1rem;
-      /* Transitions */
-      --transition-interactive: 180ms cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    [data-theme="light"]{
-      --bg:#f5f5f0;--bg2:#ffffff;--bg3:#f0f0eb;
-      --border:rgba(0,0,0,0.09);
-      --text:#1a1c20;--text2:#6b7280;
-      --accent:#00897b;--accent-hover:#00796b;
-      --accent2:#d64550;--accent3:#3a8a3a;
-      --card:#ffffff;
-      --shadow:0 8px 32px rgba(0,0,0,.1);
-      --nav-bg:rgba(245,245,240,0.92);
-      --accent-dim:rgba(0,137,123,0.10);
-      --grid-line:rgba(0,0,0,0.04);
-    }
-    *{box-sizing:border-box;margin: 0;padding: 0;}
-    body{background:var(--bg);color:var(--text);font-family:var(--font-body);line-height:1.6;min-height:100vh;display:flex;flex-direction:column;transition:background .3s,color .3s;}
-    h1,h2,h3,h4,h5,h6{font-family:var(--font-display);letter-spacing:-0.02em;line-height:1.2;}
-    h1,h2{font-weight:700;}h3,h4{font-weight:500;}
-    input,button,select,textarea{font-family:var(--font-body);}
-    button,label{line-height:1.4;letter-spacing:0.01em;}
-    button{font-weight:500;}
-    .lucide{width:1.05em;height:1.05em;vertical-align:-0.18em;stroke-width:2;flex-shrink:0;}
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Meraki &ndash; Setup</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;0,900;1,300;1,400&family=Roboto+Mono:wght@400;500&display=swap"
+            rel="stylesheet"
+        />
+        <script src="https://unpkg.com/lucide@latest"></script>
+        <style>
+            :root,
+            [data-theme='dark'] {
+                --bg: #0d0f12;
+                --bg2: #131619;
+                --bg3: #181c20;
+                --border: rgba(255, 255, 255, 0.07);
+                --text: #e8eaed;
+                --text2: #8b9099;
+                --accent: #00bfa5;
+                --accent-hover: #00a892;
+                --accent2: #ff5d6c;
+                --accent3: #5fbf6a;
+                --card: #131619;
+                --radius: var(--radius-lg);
+                --shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+                --nav-bg: rgba(13, 15, 18, 0.92);
+                --accent-dim: rgba(0, 191, 165, 0.12);
+                --grid-line: rgba(255, 255, 255, 0.03);
+                --font-body: 'Roboto', sans-serif;
+                --font-display: 'Roboto', sans-serif;
+                --font-mono: 'Roboto Mono', monospace;
+                /* Type scale */
+                --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+                --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+                --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+                --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+                --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+                --text-2xl: clamp(2rem, 1.2rem + 2.5vw, 3.5rem);
+                /* Spacing (4px base) */
+                --space-1: 0.25rem;
+                --space-2: 0.5rem;
+                --space-3: 0.75rem;
+                --space-4: 1rem;
+                --space-6: 1.5rem;
+                --space-8: 2rem;
+                --space-10: 2.5rem;
+                --space-12: 3rem;
+                --space-16: 4rem;
+                /* Border radius */
+                --radius-sm: 0.375rem;
+                --radius-md: 0.5rem;
+                --radius-lg: 0.75rem;
+                --radius-xl: 1rem;
+                /* Transitions */
+                --transition-interactive: 180ms cubic-bezier(0.16, 1, 0.3, 1);
+            }
+            [data-theme='light'] {
+                --bg: #f5f5f0;
+                --bg2: #ffffff;
+                --bg3: #f0f0eb;
+                --border: rgba(0, 0, 0, 0.09);
+                --text: #1a1c20;
+                --text2: #6b7280;
+                --accent: #00897b;
+                --accent-hover: #00796b;
+                --accent2: #d64550;
+                --accent3: #3a8a3a;
+                --card: #ffffff;
+                --shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+                --nav-bg: rgba(245, 245, 240, 0.92);
+                --accent-dim: rgba(0, 137, 123, 0.1);
+                --grid-line: rgba(0, 0, 0, 0.04);
+            }
+            * {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+            body {
+                background: var(--bg);
+                color: var(--text);
+                font-family: var(--font-body);
+                line-height: 1.6;
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                transition:
+                    background 0.3s,
+                    color 0.3s;
+            }
+            h1,
+            h2,
+            h3,
+            h4,
+            h5,
+            h6 {
+                font-family: var(--font-display);
+                letter-spacing: -0.02em;
+                line-height: 1.2;
+            }
+            h1,
+            h2 {
+                font-weight: 700;
+            }
+            h3,
+            h4 {
+                font-weight: 500;
+            }
+            input,
+            button,
+            select,
+            textarea {
+                font-family: var(--font-body);
+            }
+            button,
+            label {
+                line-height: 1.4;
+                letter-spacing: 0.01em;
+            }
+            button {
+                font-weight: 500;
+            }
+            .lucide {
+                width: 1.05em;
+                height: 1.05em;
+                vertical-align: -0.18em;
+                stroke-width: 2;
+                flex-shrink: 0;
+            }
 
-    nav{position:sticky;top:0;z-index:100;background:var(--nav-bg);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding: 0 var(--space-8);display:flex;align-items:center;justify-content:space-between;height:60px;}
-    .nav-logo{display:inline-flex;align-items:center;gap:.45rem;font-size: var(--text-base);font-weight: 700;color:var(--accent);}
-    .nav-logo .lucide{width:1.15em;height:1.15em;}
-    .theme-toggle{display:inline-flex;align-items:center;justify-content:center;background:transparent;border:1px solid var(--border);color:var(--text2);border-radius: var(--radius-md);width:34px;height:34px;cursor:pointer;transition:all .2s;}
-    .theme-toggle:hover{border-color:var(--accent);color:var(--accent);}
+            nav {
+                position: sticky;
+                top: 0;
+                z-index: 100;
+                background: var(--nav-bg);
+                backdrop-filter: blur(12px);
+                border-bottom: 1px solid var(--border);
+                padding: 0 var(--space-8);
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                height: 60px;
+            }
+            .nav-logo {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.45rem;
+                font-size: var(--text-base);
+                font-weight: 700;
+                color: var(--accent);
+            }
+            .nav-logo .lucide {
+                width: 1.15em;
+                height: 1.15em;
+            }
+            .theme-toggle {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                background: transparent;
+                border: 1px solid var(--border);
+                color: var(--text2);
+                border-radius: var(--radius-md);
+                width: 34px;
+                height: 34px;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+            .theme-toggle:hover {
+                border-color: var(--accent);
+                color: var(--accent);
+            }
 
-    .center-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding: var(--space-8);background-image:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(0,191,165,.1),transparent),linear-gradient(var(--grid-line) 1px,transparent 1px),linear-gradient(90deg,var(--grid-line) 1px,transparent 1px);background-size:100% 100%,40px 40px,40px 40px;}
+            .center-wrap {
+                flex: 1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: var(--space-8);
+                background-image:
+                    radial-gradient(
+                        ellipse 80% 60% at 50% -10%,
+                        rgba(0, 191, 165, 0.1),
+                        transparent
+                    ),
+                    linear-gradient(var(--grid-line) 1px, transparent 1px),
+                    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+                background-size:
+                    100% 100%,
+                    40px 40px,
+                    40px 40px;
+            }
 
-    .setup-card{background:var(--card);border:1px solid var(--border);border-radius: var(--radius);width:100%;max-width:460px;box-shadow:var(--shadow);overflow:hidden;}
-    .card-header{padding: var(--space-6) var(--space-8) var(--space-6);border-bottom:1px solid var(--border);}
-    .card-header-row{display:flex;align-items:center;gap:.7rem;}
-    .card-icon{width:38px;height:38px;border-radius: var(--radius-lg);background:var(--accent-dim);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-    .card-icon .lucide{color:var(--accent);width:1.2em;height:1.2em;}
-    .card-title{font-size: var(--text-lg);font-weight: 700;}
-    .card-sub{color:var(--text2);font-size: var(--text-sm);margin-top: .1rem;}
+            .setup-card {
+                background: var(--card);
+                border: 1px solid var(--border);
+                border-radius: var(--radius);
+                width: 100%;
+                max-width: 460px;
+                box-shadow: var(--shadow);
+                overflow: hidden;
+            }
+            .card-header {
+                padding: var(--space-6) var(--space-8) var(--space-6);
+                border-bottom: 1px solid var(--border);
+            }
+            .card-header-row {
+                display: flex;
+                align-items: center;
+                gap: 0.7rem;
+            }
+            .card-icon {
+                width: 38px;
+                height: 38px;
+                border-radius: var(--radius-lg);
+                background: var(--accent-dim);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+            }
+            .card-icon .lucide {
+                color: var(--accent);
+                width: 1.2em;
+                height: 1.2em;
+            }
+            .card-title {
+                font-size: var(--text-lg);
+                font-weight: 700;
+            }
+            .card-sub {
+                color: var(--text2);
+                font-size: var(--text-sm);
+                margin-top: 0.1rem;
+            }
 
-    .card-body{padding: var(--space-6) var(--space-8) var(--space-8);}
+            .card-body {
+                padding: var(--space-6) var(--space-8) var(--space-8);
+            }
 
-    .step-indicator{display:flex;align-items:center;gap:.4rem;margin-bottom: var(--space-6);}
-    .step-dot{width:8px;height:8px;border-radius: 50%;background:var(--border);transition:background .3s;}
-    .step-dot.active{background:var(--accent);}
-    .step-dot.done{background:var(--accent3);}
-    .step-label{font-size: var(--text-xs);color:var(--text2);margin-left: var(--space-1);}
+            .step-indicator {
+                display: flex;
+                align-items: center;
+                gap: 0.4rem;
+                margin-bottom: var(--space-6);
+            }
+            .step-dot {
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                background: var(--border);
+                transition: background 0.3s;
+            }
+            .step-dot.active {
+                background: var(--accent);
+            }
+            .step-dot.done {
+                background: var(--accent3);
+            }
+            .step-label {
+                font-size: var(--text-xs);
+                color: var(--text2);
+                margin-left: var(--space-1);
+            }
 
-    .form-group{margin-bottom: var(--space-4);}
-    .form-group label{display:block;font-size: var(--text-sm);color:var(--text2);margin-bottom: var(--space-1);font-weight:500;}
-    .form-group input{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius: var(--radius-md);padding: var(--space-2) var(--space-4);color:var(--text);font-size: var(--text-sm);outline:none;transition:border-color .2s;font-family:var(--font-body);}
-    .form-group input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim);}
+            .form-group {
+                margin-bottom: var(--space-4);
+            }
+            .form-group label {
+                display: block;
+                font-size: var(--text-sm);
+                color: var(--text2);
+                margin-bottom: var(--space-1);
+                font-weight: 500;
+            }
+            .form-group input {
+                width: 100%;
+                background: var(--bg2);
+                border: 1px solid var(--border);
+                border-radius: var(--radius-md);
+                padding: var(--space-2) var(--space-4);
+                color: var(--text);
+                font-size: var(--text-sm);
+                outline: none;
+                transition: border-color 0.2s;
+                font-family: var(--font-body);
+            }
+            .form-group input:focus {
+                border-color: var(--accent);
+                box-shadow: 0 0 0 3px var(--accent-dim);
+            }
 
-    .pw-strength{height:3px;border-radius: 2px;margin-top: var(--space-2);background:var(--border);overflow:hidden;}
-    .pw-strength-bar{height:100%;width:0;border-radius: 2px;transition:width .3s,background .3s;}
-    .pw-hint{font-size: var(--text-xs);color:var(--text2);margin-top: var(--space-1);min-height:1.1em;}
+            .pw-strength {
+                height: 3px;
+                border-radius: 2px;
+                margin-top: var(--space-2);
+                background: var(--border);
+                overflow: hidden;
+            }
+            .pw-strength-bar {
+                height: 100%;
+                width: 0;
+                border-radius: 2px;
+                transition:
+                    width 0.3s,
+                    background 0.3s;
+            }
+            .pw-hint {
+                font-size: var(--text-xs);
+                color: var(--text2);
+                margin-top: var(--space-1);
+                min-height: 1.1em;
+            }
 
-    .btn{display:inline-flex;justify-content:center;align-items:center;gap:.4rem;padding: var(--space-3) var(--space-4);border-radius: var(--radius-md);border:none;cursor:pointer;font-size: var(--text-sm);font-weight: 500;transition: all var(--transition-interactive);text-decoration:none;width:100%;font-family:var(--font-body);margin-top: var(--space-1);}
-    .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover:not(:disabled){background:var(--accent-hover);}
-    .btn-primary:disabled{opacity:.5;cursor:not-allowed;}
+            .btn {
+                display: inline-flex;
+                justify-content: center;
+                align-items: center;
+                gap: 0.4rem;
+                padding: var(--space-3) var(--space-4);
+                border-radius: var(--radius-md);
+                border: none;
+                cursor: pointer;
+                font-size: var(--text-sm);
+                font-weight: 500;
+                transition: all var(--transition-interactive);
+                text-decoration: none;
+                width: 100%;
+                font-family: var(--font-body);
+                margin-top: var(--space-1);
+            }
+            .btn-primary {
+                background: var(--accent);
+                color: #fff;
+            }
+            .btn-primary:hover:not(:disabled) {
+                background: var(--accent-hover);
+            }
+            .btn-primary:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
 
-    .alert{display:flex;align-items:flex-start;gap:.45rem;padding: var(--space-3) var(--space-4);border-radius: var(--radius-md);font-size: var(--text-sm);margin-bottom: var(--space-4);line-height:1.5;}
-    .alert .lucide{flex-shrink:0;margin-top: .05em;}
-    .alert-error{background:rgba(255,93,108,.1);border:1px solid rgba(255,93,108,.25);color:var(--accent2);}
-    .alert-success{background:rgba(95,191,106,.1);border:1px solid rgba(95,191,106,.25);color:var(--accent3);}
-    .alert-info{background:var(--accent-dim);border:1px solid rgba(0,191,165,.25);color:var(--accent);}
-    .alert-warn{background:rgba(255,190,60,.1);border:1px solid rgba(255,190,60,.25);color:#fbbf24;}
+            .alert {
+                display: flex;
+                align-items: flex-start;
+                gap: 0.45rem;
+                padding: var(--space-3) var(--space-4);
+                border-radius: var(--radius-md);
+                font-size: var(--text-sm);
+                margin-bottom: var(--space-4);
+                line-height: 1.5;
+            }
+            .alert .lucide {
+                flex-shrink: 0;
+                margin-top: 0.05em;
+            }
+            .alert-error {
+                background: rgba(255, 93, 108, 0.1);
+                border: 1px solid rgba(255, 93, 108, 0.25);
+                color: var(--accent2);
+            }
+            .alert-success {
+                background: rgba(95, 191, 106, 0.1);
+                border: 1px solid rgba(95, 191, 106, 0.25);
+                color: var(--accent3);
+            }
+            .alert-info {
+                background: var(--accent-dim);
+                border: 1px solid rgba(0, 191, 165, 0.25);
+                color: var(--accent);
+            }
+            .alert-warn {
+                background: rgba(255, 190, 60, 0.1);
+                border: 1px solid rgba(255, 190, 60, 0.25);
+                color: #fbbf24;
+            }
 
-    .checklist{list-style:none;display:flex;flex-direction:column;gap:.5rem;margin-bottom: var(--space-6);}
-    .checklist li{display:flex;align-items:center;gap:.55rem;font-size: var(--text-sm);color:var(--text2);}
-    .checklist li .lucide{color:var(--accent3);width:.95em;height:.95em;flex-shrink:0;}
+            .checklist {
+                list-style: none;
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+                margin-bottom: var(--space-6);
+            }
+            .checklist li {
+                display: flex;
+                align-items: center;
+                gap: 0.55rem;
+                font-size: var(--text-sm);
+                color: var(--text2);
+            }
+            .checklist li .lucide {
+                color: var(--accent3);
+                width: 0.95em;
+                height: 0.95em;
+                flex-shrink: 0;
+            }
 
-    .divider{border:none;border-top:1px solid var(--border);margin: var(--space-3) 0 var(--space-4);}
+            .divider {
+                border: none;
+                border-top: 1px solid var(--border);
+                margin: var(--space-3) 0 var(--space-4);
+            }
 
-    .success-icon{width:56px;height:56px;border-radius: 50%;background:rgba(95,191,106,.15);border:2px solid rgba(95,191,106,.3);display:flex;align-items:center;justify-content:center;margin: 0 auto var(--space-6);}
-    .success-icon .lucide{color:var(--accent3);width:1.6em;height:1.6em;}
-    .success-title{text-align:center;font-size: var(--text-lg);font-weight: 700;margin-bottom: var(--space-1);}
-    .success-sub{text-align:center;font-size: var(--text-sm);color:var(--text2);margin-bottom: var(--space-6);}
-    .countdown{text-align:center;font-size: var(--text-sm);color:var(--text2);margin-top: var(--space-2);}
-    .countdown span{color:var(--accent);font-weight:700;}
+            .success-icon {
+                width: 56px;
+                height: 56px;
+                border-radius: 50%;
+                background: rgba(95, 191, 106, 0.15);
+                border: 2px solid rgba(95, 191, 106, 0.3);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: 0 auto var(--space-6);
+            }
+            .success-icon .lucide {
+                color: var(--accent3);
+                width: 1.6em;
+                height: 1.6em;
+            }
+            .success-title {
+                text-align: center;
+                font-size: var(--text-lg);
+                font-weight: 700;
+                margin-bottom: var(--space-1);
+            }
+            .success-sub {
+                text-align: center;
+                font-size: var(--text-sm);
+                color: var(--text2);
+                margin-bottom: var(--space-6);
+            }
+            .countdown {
+                text-align: center;
+                font-size: var(--text-sm);
+                color: var(--text2);
+                margin-top: var(--space-2);
+            }
+            .countdown span {
+                color: var(--accent);
+                font-weight: 700;
+            }
 
-    .spinner{display:inline-block;width:1em;height:1em;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius: 50%;animation:spin .6s linear infinite;vertical-align:-.15em;}
-    @keyframes spin{to{transform:rotate(360deg)}}
+            .spinner {
+                display: inline-block;
+                width: 1em;
+                height: 1em;
+                border: 2px solid rgba(255, 255, 255, 0.3);
+                border-top-color: #fff;
+                border-radius: 50%;
+                animation: spin 0.6s linear infinite;
+                vertical-align: -0.15em;
+            }
+            @keyframes spin {
+                to {
+                    transform: rotate(360deg);
+                }
+            }
 
-    .done-card{text-align:center;padding: var(--space-10) var(--space-8);}
-    .done-card .done-icon{width:52px;height:52px;border-radius: 50%;background:var(--accent-dim);border:2px solid rgba(0,191,165,.3);display:flex;align-items:center;justify-content:center;margin: 0 auto var(--space-4);}
-    .done-card .done-icon .lucide{color:var(--accent);width:1.5em;height:1.5em;}
-    .done-title{font-size: var(--text-base);font-weight: 700;margin-bottom: var(--space-2);}
-    .done-sub{color:var(--text2);font-size: var(--text-sm);margin-bottom: var(--space-6);}
-  </style>
-</head>
-<body>
+            .done-card {
+                text-align: center;
+                padding: var(--space-10) var(--space-8);
+            }
+            .done-card .done-icon {
+                width: 52px;
+                height: 52px;
+                border-radius: 50%;
+                background: var(--accent-dim);
+                border: 2px solid rgba(0, 191, 165, 0.3);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: 0 auto var(--space-4);
+            }
+            .done-card .done-icon .lucide {
+                color: var(--accent);
+                width: 1.5em;
+                height: 1.5em;
+            }
+            .done-title {
+                font-size: var(--text-base);
+                font-weight: 700;
+                margin-bottom: var(--space-2);
+            }
+            .done-sub {
+                color: var(--text2);
+                font-size: var(--text-sm);
+                margin-bottom: var(--space-6);
+            }
+        </style>
+    </head>
+    <body>
+        <nav>
+            <span class="nav-logo"><i data-lucide="zap"></i> Meraki</span>
+            <button class="theme-toggle" onclick="toggleTheme()" title="Theme wechseln">
+                <i data-lucide="sun"></i>
+            </button>
+        </nav>
 
-<nav>
-  <span class="nav-logo"><i data-lucide="zap"></i> Meraki</span>
-  <button class="theme-toggle" onclick="toggleTheme()" title="Theme wechseln"><i data-lucide="sun"></i></button>
-</nav>
+        <div class="center-wrap">
+            <div class="setup-card">
+                <!-- Loading -->
+                <div
+                    id="view-loading"
+                    class="card-body"
+                    style="text-align: center; padding: var(--space-12) var(--space-8)"
+                >
+                    <div
+                        style="
+                            width: 38px;
+                            height: 38px;
+                            border: 3px solid var(--border);
+                            border-top-color: var(--accent);
+                            border-radius: 50%;
+                            animation: spin 0.8s linear infinite;
+                            margin: 0 auto var(--space-4);
+                        "
+                    ></div>
+                    <div style="color: var(--text2); font-size: var(--text-sm)">
+                        Setup-Status wird geprüft…
+                    </div>
+                </div>
 
-<div class="center-wrap">
-  <div class="setup-card">
+                <!-- Already done -->
+                <div id="view-done" class="done-card" style="display: none">
+                    <div class="done-icon"><i data-lucide="check-circle-2"></i></div>
+                    <div class="done-title">Setup bereits abgeschlossen</div>
+                    <div class="done-sub">
+                        Der Admin-Account existiert bereits.<br />Du kannst dich jetzt einloggen.
+                    </div>
+                    <a
+                        href="/"
+                        class="btn btn-primary"
+                        style="
+                            display: inline-flex;
+                            width: auto;
+                            padding: var(--space-3) var(--space-8);
+                        "
+                        ><i data-lucide="log-in"></i> Zum Admin-Panel</a
+                    >
+                </div>
 
-    <!-- Loading -->
-    <div id="view-loading" class="card-body" style="text-align:center;padding: var(--space-12) var(--space-8);">
-      <div style="width:38px;height:38px;border:3px solid var(--border);border-top-color:var(--accent);border-radius: 50%;animation:spin .8s linear infinite;margin: 0 auto var(--space-4);"></div>
-      <div style="color:var(--text2);font-size: var(--text-sm);">Setup-Status wird geprüft…</div>
-    </div>
+                <!-- Wizard -->
+                <div id="view-wizard" style="display: none">
+                    <div class="card-header">
+                        <div class="card-header-row">
+                            <div class="card-icon"><i data-lucide="settings-2"></i></div>
+                            <div>
+                                <div class="card-title">Ersteinrichtung</div>
+                                <div class="card-sub">
+                                    Schritt <span id="step-num">1</span> von 2
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="step-indicator">
+                            <div class="step-dot active" id="sdot-1"></div>
+                            <div class="step-dot" id="sdot-2"></div>
+                            <span class="step-label" id="step-label">Überblick</span>
+                        </div>
 
-    <!-- Already done -->
-    <div id="view-done" class="done-card" style="display:none;">
-      <div class="done-icon"><i data-lucide="check-circle-2"></i></div>
-      <div class="done-title">Setup bereits abgeschlossen</div>
-      <div class="done-sub">Der Admin-Account existiert bereits.<br>Du kannst dich jetzt einloggen.</div>
-      <a href="/" class="btn btn-primary" style="display:inline-flex;width:auto;padding: var(--space-3) var(--space-8);"><i data-lucide="log-in"></i> Zum Admin-Panel</a>
-    </div>
+                        <!-- Step 1 -->
+                        <div id="step-1">
+                            <div class="alert alert-success" style="margin-bottom: var(--space-4)">
+                                <i data-lucide="check-circle-2"></i>
+                                <div>
+                                    <strong>Automatisch konfiguriert</strong><br />Alle Secrets
+                                    wurden generiert und in
+                                    <code
+                                        style="
+                                            font-family: var(--font-mono);
+                                            font-size: var(--text-sm);
+                                        "
+                                        >.env</code
+                                    >
+                                    gespeichert.
+                                </div>
+                            </div>
+                            <ul class="checklist">
+                                <li>
+                                    <i data-lucide="check"></i> ADMIN_SECRET generiert (HS256 /
+                                    RS256)
+                                </li>
+                                <li>
+                                    <i data-lucide="check"></i> HMAC_SECRET generiert (Offline-Token
+                                    Signing)
+                                </li>
+                                <li>
+                                    <i data-lucide="check"></i> PORTAL_SECRET generiert
+                                    (Kunden-Portal JWT)
+                                </li>
+                                <li>
+                                    <i data-lucide="check"></i> RSA-Schlüsselpaar generiert
+                                    (2048-bit)
+                                </li>
+                                <li>
+                                    <i data-lucide="check"></i> Datenbank-Migrationen ausgeführt
+                                </li>
+                            </ul>
+                            <hr class="divider" />
+                            <div
+                                style="
+                                    font-size: var(--text-sm);
+                                    color: var(--text2);
+                                    margin-bottom: var(--space-4);
+                                "
+                            >
+                                Im nächsten Schritt erstellst du deinen
+                                <strong>Superadmin-Account</strong>.
+                            </div>
+                            <button class="btn btn-primary" onclick="goStep(2)">
+                                Weiter <i data-lucide="arrow-right"></i>
+                            </button>
+                        </div>
 
-    <!-- Wizard -->
-    <div id="view-wizard" style="display:none;">
-      <div class="card-header">
-        <div class="card-header-row">
-          <div class="card-icon"><i data-lucide="settings-2"></i></div>
-          <div>
-            <div class="card-title">Ersteinrichtung</div>
-            <div class="card-sub">Schritt <span id="step-num">1</span> von 2</div>
-          </div>
+                        <!-- Step 2 -->
+                        <div id="step-2" style="display: none">
+                            <div id="wizard-alert"></div>
+                            <div class="form-group">
+                                <label>Benutzername</label>
+                                <input
+                                    type="text"
+                                    id="inp-username"
+                                    placeholder="admin"
+                                    autocomplete="username"
+                                    autocapitalize="none"
+                                    spellcheck="false"
+                                />
+                            </div>
+                            <div class="form-group">
+                                <label
+                                    >Passwort
+                                    <span style="color: var(--text2); font-weight: 400"
+                                        >(min. 12 Zeichen)</span
+                                    ></label
+                                >
+                                <input
+                                    type="password"
+                                    id="inp-password"
+                                    placeholder="••••••••••••"
+                                    autocomplete="new-password"
+                                    oninput="updateStrength()"
+                                />
+                                <div class="pw-strength">
+                                    <div class="pw-strength-bar" id="pw-bar"></div>
+                                </div>
+                                <div class="pw-hint" id="pw-hint"></div>
+                            </div>
+                            <div class="form-group">
+                                <label>Passwort bestätigen</label>
+                                <input
+                                    type="password"
+                                    id="inp-confirm"
+                                    placeholder="••••••••••••"
+                                    autocomplete="new-password"
+                                />
+                            </div>
+                            <button class="btn btn-primary" id="btn-create" onclick="createAdmin()">
+                                Admin-Account erstellen
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Success -->
+                <div id="view-success" style="display: none">
+                    <div class="card-body">
+                        <div class="success-icon"><i data-lucide="check-circle-2"></i></div>
+                        <div class="success-title">Setup abgeschlossen!</div>
+                        <div class="success-sub">
+                            Superadmin-Account erfolgreich erstellt.<br />Du wirst gleich zum
+                            Admin-Panel weitergeleitet.
+                        </div>
+                        <a href="/" class="btn btn-primary"
+                            ><i data-lucide="layout-dashboard"></i> Zum Admin-Panel</a
+                        >
+                        <div class="countdown">
+                            Automatische Weiterleitung in <span id="countdown-sec">5</span>s
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-      <div class="card-body">
-        <div class="step-indicator">
-          <div class="step-dot active" id="sdot-1"></div>
-          <div class="step-dot" id="sdot-2"></div>
-          <span class="step-label" id="step-label">Überblick</span>
-        </div>
 
-        <!-- Step 1 -->
-        <div id="step-1">
-          <div class="alert alert-success" style="margin-bottom: var(--space-4);">
-            <i data-lucide="check-circle-2"></i>
-            <div><strong>Automatisch konfiguriert</strong><br>Alle Secrets wurden generiert und in <code style="font-family:var(--font-mono);font-size: var(--text-sm)">.env</code> gespeichert.</div>
-          </div>
-          <ul class="checklist">
-            <li><i data-lucide="check"></i> ADMIN_SECRET generiert (HS256 / RS256)</li>
-            <li><i data-lucide="check"></i> HMAC_SECRET generiert (Offline-Token Signing)</li>
-            <li><i data-lucide="check"></i> PORTAL_SECRET generiert (Kunden-Portal JWT)</li>
-            <li><i data-lucide="check"></i> RSA-Schlüsselpaar generiert (2048-bit)</li>
-            <li><i data-lucide="check"></i> Datenbank-Migrationen ausgeführt</li>
-          </ul>
-          <hr class="divider">
-          <div style="font-size: var(--text-sm);color:var(--text2);margin-bottom: var(--space-4);">
-            Im nächsten Schritt erstellst du deinen <strong>Superadmin-Account</strong>.
-          </div>
-          <button class="btn btn-primary" onclick="goStep(2)">
-            Weiter <i data-lucide="arrow-right"></i>
-          </button>
-        </div>
+        <script>
+            (function () {
+                const saved = localStorage.getItem('theme');
+                if (saved === 'light') document.documentElement.setAttribute('data-theme', 'light');
+            })();
 
-        <!-- Step 2 -->
-        <div id="step-2" style="display:none;">
-          <div id="wizard-alert"></div>
-          <div class="form-group">
-            <label>Benutzername</label>
-            <input type="text" id="inp-username" placeholder="admin" autocomplete="username" autocapitalize="none" spellcheck="false">
-          </div>
-          <div class="form-group">
-            <label>Passwort <span style="color:var(--text2);font-weight:400;">(min. 12 Zeichen)</span></label>
-            <input type="password" id="inp-password" placeholder="••••••••••••" autocomplete="new-password" oninput="updateStrength()">
-            <div class="pw-strength"><div class="pw-strength-bar" id="pw-bar"></div></div>
-            <div class="pw-hint" id="pw-hint"></div>
-          </div>
-          <div class="form-group">
-            <label>Passwort bestätigen</label>
-            <input type="password" id="inp-confirm" placeholder="••••••••••••" autocomplete="new-password">
-          </div>
-          <button class="btn btn-primary" id="btn-create" onclick="createAdmin()">
-            Admin-Account erstellen
-          </button>
-        </div>
+            function toggleTheme() {
+                const cur = document.documentElement.getAttribute('data-theme');
+                const next = cur === 'light' ? 'dark' : 'light';
+                document.documentElement.setAttribute('data-theme', next);
+                localStorage.setItem('theme', next);
+                lucide.createIcons();
+            }
 
-      </div>
-    </div>
+            let setupToken = null;
 
-    <!-- Success -->
-    <div id="view-success" style="display:none;">
-      <div class="card-body">
-        <div class="success-icon"><i data-lucide="check-circle-2"></i></div>
-        <div class="success-title">Setup abgeschlossen!</div>
-        <div class="success-sub">Superadmin-Account erfolgreich erstellt.<br>Du wirst gleich zum Admin-Panel weitergeleitet.</div>
-        <a href="/" class="btn btn-primary"><i data-lucide="layout-dashboard"></i> Zum Admin-Panel</a>
-        <div class="countdown">Automatische Weiterleitung in <span id="countdown-sec">5</span>s</div>
-      </div>
-    </div>
+            function show(id) {
+                ['view-loading', 'view-done', 'view-wizard', 'view-success'].forEach((v) => {
+                    const el = document.getElementById(v);
+                    if (el) el.style.display = v === id ? '' : 'none';
+                });
+            }
 
-  </div>
-</div>
+            function goStep(n) {
+                document.getElementById('step-1').style.display = n === 1 ? '' : 'none';
+                document.getElementById('step-2').style.display = n === 2 ? '' : 'none';
+                document.getElementById('step-num').textContent = n;
+                document.getElementById('sdot-1').className =
+                    'step-dot' + (n > 1 ? ' done' : ' active');
+                document.getElementById('sdot-2').className =
+                    'step-dot' + (n === 2 ? ' active' : '');
+                const labels = ['', 'Überblick', 'Admin erstellen'];
+                document.getElementById('step-label').textContent = labels[n] || '';
+                if (n === 2) setTimeout(() => document.getElementById('inp-username').focus(), 50);
+                lucide.createIcons();
+            }
 
-<script>
-  (function () {
-    const saved = localStorage.getItem('theme');
-    if (saved === 'light') document.documentElement.setAttribute('data-theme', 'light');
-  })();
+            function updateStrength() {
+                const pw = document.getElementById('inp-password').value;
+                const bar = document.getElementById('pw-bar');
+                const hint = document.getElementById('pw-hint');
+                let score = 0;
+                if (pw.length >= 12) score++;
+                if (/[A-Z]/.test(pw)) score++;
+                if (/[0-9]/.test(pw)) score++;
+                if (/[^A-Za-z0-9]/.test(pw)) score++;
+                const colors = ['', '#ff5d6c', '#fbbf24', '#00bfa5', '#5fbf6a'];
+                const hints = ['', 'Zu schwach', 'Schwach', 'Gut', 'Sehr stark'];
+                bar.style.width = pw.length ? `${score * 25}%` : '0';
+                bar.style.background = colors[score] || '#ff5d6c';
+                hint.textContent = pw.length ? hints[score] || '' : '';
+                hint.style.color = colors[score] || '';
+            }
 
-  function toggleTheme() {
-    const cur  = document.documentElement.getAttribute('data-theme');
-    const next = cur === 'light' ? 'dark' : 'light';
-    document.documentElement.setAttribute('data-theme', next);
-    localStorage.setItem('theme', next);
-    lucide.createIcons();
-  }
+            function setAlert(type, msg) {
+                const icons = {
+                    error: 'alert-circle',
+                    success: 'check-circle-2',
+                    info: 'info',
+                    warn: 'alert-triangle',
+                };
+                document.getElementById('wizard-alert').innerHTML =
+                    `<div class="alert alert-${type}"><i data-lucide="${icons[type] || 'info'}"></i><div>${msg}</div></div>`;
+                lucide.createIcons();
+            }
 
-  let setupToken = null;
+            async function createAdmin() {
+                document.getElementById('wizard-alert').innerHTML = '';
+                const username = document.getElementById('inp-username').value.trim();
+                const password = document.getElementById('inp-password').value;
+                const confirm = document.getElementById('inp-confirm').value;
 
-  function show(id) {
-    ['view-loading', 'view-done', 'view-wizard', 'view-success'].forEach(v => {
-      const el = document.getElementById(v);
-      if (el) el.style.display = (v === id) ? '' : 'none';
-    });
-  }
+                if (!username) {
+                    setAlert('error', 'Benutzername ist ein Pflichtfeld.');
+                    return;
+                }
+                if (password.length < 12) {
+                    setAlert('error', 'Passwort muss mindestens 12 Zeichen haben.');
+                    return;
+                }
+                if (password !== confirm) {
+                    setAlert('error', 'Passwörter stimmen nicht überein.');
+                    return;
+                }
 
-  function goStep(n) {
-    document.getElementById('step-1').style.display = n === 1 ? '' : 'none';
-    document.getElementById('step-2').style.display = n === 2 ? '' : 'none';
-    document.getElementById('step-num').textContent = n;
-    document.getElementById('sdot-1').className = 'step-dot' + (n > 1 ? ' done' : ' active');
-    document.getElementById('sdot-2').className = 'step-dot' + (n === 2 ? ' active' : '');
-    const labels = ['', 'Überblick', 'Admin erstellen'];
-    document.getElementById('step-label').textContent = labels[n] || '';
-    if (n === 2) setTimeout(() => document.getElementById('inp-username').focus(), 50);
-    lucide.createIcons();
-  }
+                const btn = document.getElementById('btn-create');
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner"></span> Wird erstellt…';
 
-  function updateStrength() {
-    const pw   = document.getElementById('inp-password').value;
-    const bar  = document.getElementById('pw-bar');
-    const hint = document.getElementById('pw-hint');
-    let score  = 0;
-    if (pw.length >= 12) score++;
-    if (/[A-Z]/.test(pw)) score++;
-    if (/[0-9]/.test(pw)) score++;
-    if (/[^A-Za-z0-9]/.test(pw)) score++;
-    const colors = ['', '#ff5d6c', '#fbbf24', '#00bfa5', '#5fbf6a'];
-    const hints  = ['', 'Zu schwach', 'Schwach', 'Gut', 'Sehr stark'];
-    bar.style.width      = pw.length ? `${score * 25}%` : '0';
-    bar.style.background = colors[score] || '#ff5d6c';
-    hint.textContent     = pw.length ? (hints[score] || '') : '';
-    hint.style.color     = colors[score] || '';
-  }
+                try {
+                    const res = await fetch('/api/v1/setup', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ setup_token: setupToken, username, password }),
+                    });
+                    const data = await res.json();
 
-  function setAlert(type, msg) {
-    const icons = { error: 'alert-circle', success: 'check-circle-2', info: 'info', warn: 'alert-triangle' };
-    document.getElementById('wizard-alert').innerHTML =
-      `<div class="alert alert-${type}"><i data-lucide="${icons[type] || 'info'}"></i><div>${msg}</div></div>`;
-    lucide.createIcons();
-  }
+                    if (res.ok && data.success) {
+                        show('view-success');
+                        lucide.createIcons();
+                        let sec = 5;
+                        const t = setInterval(() => {
+                            sec--;
+                            const el = document.getElementById('countdown-sec');
+                            if (el) el.textContent = sec;
+                            if (sec <= 0) {
+                                clearInterval(t);
+                                window.location.href = '/';
+                            }
+                        }, 1000);
+                    } else {
+                        setAlert('error', data.message || 'Fehler beim Erstellen des Accounts.');
+                        btn.disabled = false;
+                        btn.innerHTML = 'Admin-Account erstellen';
+                    }
+                } catch {
+                    setAlert('error', 'Netzwerkfehler – ist der Server erreichbar?');
+                    btn.disabled = false;
+                    btn.innerHTML = 'Admin-Account erstellen';
+                }
+            }
 
-  async function createAdmin() {
-    document.getElementById('wizard-alert').innerHTML = '';
-    const username = document.getElementById('inp-username').value.trim();
-    const password = document.getElementById('inp-password').value;
-    const confirm  = document.getElementById('inp-confirm').value;
+            document.addEventListener('keydown', (e) => {
+                if (
+                    e.key === 'Enter' &&
+                    document.getElementById('step-2').style.display !== 'none'
+                ) {
+                    createAdmin();
+                }
+            });
 
-    if (!username)            { setAlert('error', 'Benutzername ist ein Pflichtfeld.'); return; }
-    if (password.length < 12) { setAlert('error', 'Passwort muss mindestens 12 Zeichen haben.'); return; }
-    if (password !== confirm)  { setAlert('error', 'Passwörter stimmen nicht überein.'); return; }
-
-    const btn = document.getElementById('btn-create');
-    btn.disabled  = true;
-    btn.innerHTML = '<span class="spinner"></span> Wird erstellt…';
-
-    try {
-      const res  = await fetch('/api/v1/setup', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ setup_token: setupToken, username, password }),
-      });
-      const data = await res.json();
-
-      if (res.ok && data.success) {
-        show('view-success');
-        lucide.createIcons();
-        let sec = 5;
-        const t = setInterval(() => {
-          sec--;
-          const el = document.getElementById('countdown-sec');
-          if (el) el.textContent = sec;
-          if (sec <= 0) { clearInterval(t); window.location.href = '/'; }
-        }, 1000);
-      } else {
-        setAlert('error', data.message || 'Fehler beim Erstellen des Accounts.');
-        btn.disabled  = false;
-        btn.innerHTML = 'Admin-Account erstellen';
-      }
-    } catch {
-      setAlert('error', 'Netzwerkfehler – ist der Server erreichbar?');
-      btn.disabled  = false;
-      btn.innerHTML = 'Admin-Account erstellen';
-    }
-  }
-
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && document.getElementById('step-2').style.display !== 'none') {
-      createAdmin();
-    }
-  });
-
-  (async function init() {
-    try {
-      const res  = await fetch('/api/v1/setup-status');
-      const data = await res.json();
-      if (!data.needed) {
-        show('view-done');
-      } else {
-        setupToken = data.setup_token;
-        show('view-wizard');
-        goStep(1);
-      }
-    } catch {
-      show('view-wizard');
-      document.getElementById('wizard-alert').innerHTML =
-        `<div class="alert alert-warn"><i data-lucide="alert-triangle"></i><div>Server nicht erreichbar. Stelle sicher, dass <code style="font-family:var(--font-mono)">npm start</code> läuft.</div></div>`;
-      goStep(1);
-    }
-    lucide.createIcons();
-  })();
-</script>
-</body>
+            (async function init() {
+                try {
+                    const res = await fetch('/api/v1/setup-status');
+                    const data = await res.json();
+                    if (!data.needed) {
+                        show('view-done');
+                    } else {
+                        setupToken = data.setup_token;
+                        show('view-wizard');
+                        goStep(1);
+                    }
+                } catch {
+                    show('view-wizard');
+                    document.getElementById('wizard-alert').innerHTML =
+                        `<div class="alert alert-warn"><i data-lucide="alert-triangle"></i><div>Server nicht erreichbar. Stelle sicher, dass <code style="font-family:var(--font-mono)">npm start</code> läuft.</div></div>`;
+                    goStep(1);
+                }
+                lucide.createIcons();
+            })();
+        </script>
+    </body>
 </html>

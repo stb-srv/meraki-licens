@@ -19,9 +19,14 @@ export async function runExpiryCron() {
                     settings.expiry_warn_days_2 || 30,
                     settings.expiry_warn_days_3 || 7,
                     settings.expiry_warn_days_4 || 1,
-                ].map(Number).filter(n => n > 0).sort((a, b) => b - a);
+                ]
+                    .map(Number)
+                    .filter((n) => n > 0)
+                    .sort((a, b) => b - a);
             }
-        } catch { /* use defaults */ }
+        } catch {
+            /* use defaults */
+        }
 
         const maxDays = intervals[0];
         const [expiring] = db.query(`
@@ -35,12 +40,16 @@ export async function runExpiryCron() {
         for (const lic of expiring) {
             let email = lic.email;
             if (!email && lic.notes) {
-                try { email = JSON.parse(lic.notes).contact_email || null; } catch {}
+                try {
+                    email = JSON.parse(lic.notes).contact_email || null;
+                } catch {
+                    /* notes ist kein gültiges JSON – Kontakt-E-Mail ignorieren */
+                }
             }
             if (!email) continue;
 
             const daysLeft = Math.ceil((new Date(lic.expires_at) - new Date()) / 86400000);
-            const matchedInterval = intervals.find(d => daysLeft <= d);
+            const matchedInterval = intervals.find((d) => daysLeft <= d);
             if (!matchedInterval) continue;
 
             // Idempotency: skip if already sent this reminder level
@@ -53,14 +62,22 @@ export async function runExpiryCron() {
             const template = matchedInterval <= 1 ? 'licenseExpiring7d' : 'licenseExpiringSoon';
             try {
                 await sendTemplateMail(template, email, {
-                    customer_name: lic.customer_name, license_key: lic.license_key,
-                    type: lic.type, expires_at: lic.expires_at, days_left: daysLeft
+                    customer_name: lic.customer_name,
+                    license_key: lic.license_key,
+                    type: lic.type,
+                    expires_at: lic.expires_at,
+                    days_left: daysLeft,
                 });
                 db.query(
                     'INSERT INTO renewal_reminders (license_key, days_before) VALUES (?, ?) ON CONFLICT DO NOTHING',
                     [lic.license_key, matchedInterval]
                 );
-                await addAuditLog('expiry_notification_sent', { license_key: lic.license_key, days_left: daysLeft, interval: matchedInterval, email });
+                await addAuditLog('expiry_notification_sent', {
+                    license_key: lic.license_key,
+                    days_left: daysLeft,
+                    interval: matchedInterval,
+                    email,
+                });
             } catch (e) {
                 console.warn(`📧 Ablauf-Mail fehlgeschlagen für ${lic.license_key}:`, e.message);
             }
@@ -81,10 +98,9 @@ export async function runExpiryCron() {
 
 export async function runNonceCleanup() {
     try {
-        const [nonceResult] = db.query(
-            'DELETE FROM used_nonces WHERE ts < ?',
-            [Date.now() - 2 * 60 * 60 * 1000]
-        );
+        const [nonceResult] = db.query('DELETE FROM used_nonces WHERE ts < ?', [
+            Date.now() - 2 * 60 * 60 * 1000,
+        ]);
         if (nonceResult.affectedRows > 0)
             console.log(`🧹 ${nonceResult.affectedRows} abgelaufene Nonce(s) bereinigt.`);
 
@@ -98,7 +114,9 @@ export async function runNonceCleanup() {
             `DELETE FROM admin_sessions WHERE expires_at < datetime('now') OR revoked = 1`
         );
         if (adminSessResult.affectedRows > 0)
-            console.log(`🧹 ${adminSessResult.affectedRows} abgelaufene Admin-Session(s) bereinigt.`);
+            console.log(
+                `🧹 ${adminSessResult.affectedRows} abgelaufene Admin-Session(s) bereinigt.`
+            );
     } catch (e) {
         console.error('Nonce/Session-Cleanup Fehler:', e.message);
     }
@@ -108,7 +126,7 @@ const DUNNING_TEMPLATE = {
     1: 'invoiceDunning1',
     2: 'invoiceDunning2',
     3: 'invoiceDunning3',
-    4: 'invoiceDunningFinal'
+    4: 'invoiceDunningFinal',
 };
 
 export async function runOverdueInvoiceCron() {
@@ -131,18 +149,21 @@ export async function runOverdueInvoiceCron() {
                 const currentLevel = invoice.dunning_level || 0;
 
                 let targetLevel = currentLevel;
-                if      (daysOverdue >= 30 && currentLevel < 4) targetLevel = 4;
+                if (daysOverdue >= 30 && currentLevel < 4) targetLevel = 4;
                 else if (daysOverdue >= 21 && currentLevel < 3) targetLevel = 3;
-                else if (daysOverdue >= 7  && currentLevel < 2) targetLevel = 2;
-                else if (daysOverdue >= 1  && currentLevel < 1) targetLevel = 1;
+                else if (daysOverdue >= 7 && currentLevel < 2) targetLevel = 2;
+                else if (daysOverdue >= 1 && currentLevel < 1) targetLevel = 1;
 
                 if (targetLevel <= currentLevel) continue;
 
                 db.runTransaction(() => {
-                    db.query("UPDATE invoices SET status = 'overdue', dunning_level = ? WHERE id = ?",
-                        [targetLevel, invoice.id]);
-                    db.query("UPDATE customers SET payment_status = 'overdue' WHERE id = ?",
-                        [invoice.customer_id]);
+                    db.query(
+                        "UPDATE invoices SET status = 'overdue', dunning_level = ? WHERE id = ?",
+                        [targetLevel, invoice.id]
+                    );
+                    db.query("UPDATE customers SET payment_status = 'overdue' WHERE id = ?", [
+                        invoice.customer_id,
+                    ]);
                 });
 
                 if (targetLevel === 4) {
@@ -151,13 +172,18 @@ export async function runOverdueInvoiceCron() {
                         [invoice.customer_id]
                     );
                     if (suspended.affectedRows > 0)
-                        await addAuditLog('licenses_suspended_overdue',
-                            { customer_id: invoice.customer_id, invoice_id: invoice.id });
+                        await addAuditLog('licenses_suspended_overdue', {
+                            customer_id: invoice.customer_id,
+                            invoice_id: invoice.id,
+                        });
                 }
 
                 await addAuditLog('invoice_dunning', {
-                    invoice_id: invoice.id, invoice_number: invoice.invoice_number,
-                    customer_id: invoice.customer_id, dunning_level: targetLevel, days_overdue: daysOverdue
+                    invoice_id: invoice.id,
+                    invoice_number: invoice.invoice_number,
+                    customer_id: invoice.customer_id,
+                    dunning_level: targetLevel,
+                    days_overdue: daysOverdue,
                 });
 
                 if (invoice.email) {
@@ -169,14 +195,20 @@ export async function runOverdueInvoiceCron() {
                             due_date: invoice.due_date,
                             days_overdue: daysOverdue,
                             dunning_level: targetLevel,
-                            invoice_url: `${portalUrl}/portal.html?tab=invoices`
+                            invoice_url: `${portalUrl}/portal.html?tab=invoices`,
                         });
                     } catch (mailErr) {
-                        console.warn(`📧 Dunning-Mail fehlgeschlagen für ${invoice.invoice_number}:`, mailErr.message);
+                        console.warn(
+                            `📧 Dunning-Mail fehlgeschlagen für ${invoice.invoice_number}:`,
+                            mailErr.message
+                        );
                     }
                 }
             } catch (err) {
-                console.error(`Fehler bei Dunning für Rechnung ${invoice.invoice_number}:`, err.message);
+                console.error(
+                    `Fehler bei Dunning für Rechnung ${invoice.invoice_number}:`,
+                    err.message
+                );
             }
         }
     } catch (e) {
@@ -204,11 +236,16 @@ export async function runAutoInvoiceCron() {
             try {
                 const invoiceId = createInvoiceFromLicense(lic.license_key, 'cron');
                 await addAuditLog('invoice_auto_generated', {
-                    license_key: lic.license_key, invoice_id: invoiceId, customer_id: lic.customer_id
+                    license_key: lic.license_key,
+                    invoice_id: invoiceId,
+                    customer_id: lic.customer_id,
                 });
                 console.log(`🧾 Auto-Rechnung (Draft) erstellt für Lizenz: ${lic.license_key}`);
             } catch (err) {
-                console.error(`Fehler bei Auto-Rechnung für Lizenz ${lic.license_key}:`, err.message);
+                console.error(
+                    `Fehler bei Auto-Rechnung für Lizenz ${lic.license_key}:`,
+                    err.message
+                );
             }
         }
     } catch (e) {
@@ -243,7 +280,10 @@ export function startCron() {
 export async function createInvoiceForLicense(licenseId) {
     try {
         const invoiceId = createInvoiceFromLicense(licenseId, 'system');
-        await addAuditLog('invoice_auto_generated', { license_key: licenseId, invoice_id: invoiceId });
+        await addAuditLog('invoice_auto_generated', {
+            license_key: licenseId,
+            invoice_id: invoiceId,
+        });
         console.log(`🧾 Auto-Rechnung (Draft) erstellt für Lizenz bei Erstellung: ${licenseId}`);
         return invoiceId;
     } catch (err) {
@@ -256,8 +296,14 @@ export async function createInvoiceForRenewal(licenseId) {
     try {
         const invoiceId = createInvoiceFromLicense(licenseId, 'system');
         db.query("UPDATE invoices SET type = 'renewal' WHERE id = ?", [invoiceId]);
-        await addAuditLog('invoice_auto_generated', { license_key: licenseId, invoice_id: invoiceId, type: 'renewal' });
-        console.log(`🧾 Auto-Rechnung (Renewal) erstellt für Lizenz bei Verlängerung: ${licenseId}`);
+        await addAuditLog('invoice_auto_generated', {
+            license_key: licenseId,
+            invoice_id: invoiceId,
+            type: 'renewal',
+        });
+        console.log(
+            `🧾 Auto-Rechnung (Renewal) erstellt für Lizenz bei Verlängerung: ${licenseId}`
+        );
         return invoiceId;
     } catch (err) {
         console.error(`Fehler bei Auto-Rechnung (Renewal) für Lizenz ${licenseId}:`, err.message);

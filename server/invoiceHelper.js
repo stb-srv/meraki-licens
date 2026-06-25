@@ -4,19 +4,25 @@ import { PLAN_DEFINITIONS } from './plans.js';
 
 // Fallback prices used only when plan_pricing table has no entry for a plan.
 const FALLBACK_PRICE_MAP = {
-    FREE: 0.00,
-    TRIAL: 0.00,
-    STARTER: 29.00,
-    PRO: 59.00,
-    PRO_PLUS: 89.00,
-    ENTERPRISE: 199.00,
+    FREE: 0.0,
+    TRIAL: 0.0,
+    STARTER: 29.0,
+    PRO: 59.0,
+    PRO_PLUS: 89.0,
+    ENTERPRISE: 199.0,
 };
 
 function getPlanPrice(planType) {
     try {
-        const [[row]] = query('SELECT price, tax_rate FROM plan_pricing WHERE plan_id = ? AND active = 1', [planType]);
-        if (row) return { price: parseFloat(row.price) || 0, taxRate: parseFloat(row.tax_rate) || 19 };
-    } catch { /* DB not ready — fall through */ }
+        const [[row]] = query(
+            'SELECT price, tax_rate FROM plan_pricing WHERE plan_id = ? AND active = 1',
+            [planType]
+        );
+        if (row)
+            return { price: parseFloat(row.price) || 0, taxRate: parseFloat(row.tax_rate) || 19 };
+    } catch {
+        /* DB not ready — fall through */
+    }
     return { price: FALLBACK_PRICE_MAP[planType] ?? 0, taxRate: 19 };
 }
 
@@ -26,11 +32,13 @@ function toDbDate(d) {
 
 export function generateInvoiceNumber() {
     return runTransaction(() => {
-        const [[settings]] = query('SELECT invoice_prefix, next_number FROM invoice_settings WHERE id = 1');
+        const [[settings]] = query(
+            'SELECT invoice_prefix, next_number FROM invoice_settings WHERE id = 1'
+        );
         if (!settings) throw new Error('Invoice settings with ID 1 not found in database.');
 
         const prefix = settings.invoice_prefix || 'INV';
-        const year   = new Date().getFullYear();
+        const year = new Date().getFullYear();
 
         // Start at stored next_number, but never below the actual DB maximum to avoid gaps
         const [[{ maxNum }]] = query(
@@ -44,8 +52,13 @@ export function generateInvoiceNumber() {
         let invoiceNumber;
         for (let i = 0; i < 500; i++) {
             const candidate = `${prefix}-${year}-${String(nextNumber).padStart(4, '0')}`;
-            const [[{ n }]] = query('SELECT COUNT(*) AS n FROM invoices WHERE invoice_number = ?', [candidate]);
-            if (n === 0) { invoiceNumber = candidate; break; }
+            const [[{ n }]] = query('SELECT COUNT(*) AS n FROM invoices WHERE invoice_number = ?', [
+                candidate,
+            ]);
+            if (n === 0) {
+                invoiceNumber = candidate;
+                break;
+            }
             nextNumber++;
         }
         if (!invoiceNumber) throw new Error('Keine freie Rechnungsnummer gefunden.');
@@ -69,14 +82,24 @@ export function calculateInvoiceTotals(items, taxRate) {
     return { amount_net, amount_tax, amount_gross };
 }
 
-export function createInvoiceFromLicense(licenseKey, createdBy = 'system', { discount_pct = 0 } = {}) {
+export function createInvoiceFromLicense(
+    licenseKey,
+    createdBy = 'system',
+    { discount_pct = 0 } = {}
+) {
     return runTransaction(() => {
         const [[license]] = query('SELECT * FROM licenses WHERE license_key = ?', [licenseKey]);
         if (!license) throw new Error(`License with key ${licenseKey} not found.`);
-        if (!license.customer_id) throw new Error(`License with key ${licenseKey} has no customer linked.`);
+        if (!license.customer_id)
+            throw new Error(`License with key ${licenseKey} has no customer linked.`);
 
-        const [[customer]] = query('SELECT name, currency FROM customers WHERE id = ?', [license.customer_id]);
-        if (!customer) throw new Error(`Customer with ID ${license.customer_id} linked to license ${licenseKey} not found.`);
+        const [[customer]] = query('SELECT name, currency FROM customers WHERE id = ?', [
+            license.customer_id,
+        ]);
+        if (!customer)
+            throw new Error(
+                `Customer with ID ${license.customer_id} linked to license ${licenseKey} not found.`
+            );
 
         const planType = license.type || 'FREE';
         const planDetails = PLAN_DEFINITIONS[planType] || { label: planType };
@@ -85,9 +108,10 @@ export function createInvoiceFromLicense(licenseKey, createdBy = 'system', { dis
         const discountFactor = 1 - Math.min(100, Math.max(0, parseFloat(discount_pct) || 0)) / 100;
         const unit_price = parseFloat((basePrice * discountFactor).toFixed(2));
 
-        const description = discount_pct > 0
-            ? `Lizenzgebühr ${planDetails.label || planType} (${discount_pct}% Rabatt)`
-            : `Lizenzgebühr ${planDetails.label || planType}`;
+        const description =
+            discount_pct > 0
+                ? `Lizenzgebühr ${planDetails.label || planType} (${discount_pct}% Rabatt)`
+                : `Lizenzgebühr ${planDetails.label || planType}`;
 
         const items = [{ description, quantity: 1, unit_price }];
         const { amount_net, amount_tax, amount_gross } = calculateInvoiceTotals(items, taxRate);
@@ -103,9 +127,20 @@ export function createInvoiceFromLicense(licenseKey, createdBy = 'system', { dis
                 amount_net, amount_tax, amount_gross, tax_rate, currency,
                 due_date, created_by, discount_pct
             ) VALUES (?, ?, ?, ?, 'draft', 'invoice', ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [invoiceId, invoiceNumber, license.customer_id, licenseKey,
-             amount_net, amount_tax, amount_gross, taxRate, currency, dueDate, createdBy,
-             parseFloat(discount_pct) || 0]
+            [
+                invoiceId,
+                invoiceNumber,
+                license.customer_id,
+                licenseKey,
+                amount_net,
+                amount_tax,
+                amount_gross,
+                taxRate,
+                currency,
+                dueDate,
+                createdBy,
+                parseFloat(discount_pct) || 0,
+            ]
         );
 
         query(

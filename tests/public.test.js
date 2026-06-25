@@ -6,7 +6,7 @@ import { jest } from '@jest/globals';
 // DB Mock
 jest.spyOn(db, 'query').mockImplementation((sql, params) => {
     if (sql.includes('SELECT 1')) {
-        return Promise.resolve([[{ '1': 1 }], []]);
+        return Promise.resolve([[{ 1: 1 }], []]);
     }
     if (sql.includes('SELECT * FROM licenses')) {
         return Promise.resolve([[], []]);

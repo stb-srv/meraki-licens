@@ -20,29 +20,30 @@ export function buildTransporter(cfg) {
     const secure = cfg.secure === true || cfg.secure === 'true' || port === 465;
 
     // Hostname für den EHLO/HELO-Gruß: from-Domain > user-Domain > SMTP_HOSTNAME env > smtp host
-    const greeting = domainFromAddress(cfg.from)
-        || domainFromAddress(cfg.user)
-        || process.env.SMTP_HOSTNAME
-        || cfg.host;
+    const greeting =
+        domainFromAddress(cfg.from) ||
+        domainFromAddress(cfg.user) ||
+        process.env.SMTP_HOSTNAME ||
+        cfg.host;
 
     const options = {
         host: cfg.host,
         port,
-        secure,                          // true = SSL direkt (465), false = STARTTLS (587)
+        secure, // true = SSL direkt (465), false = STARTTLS (587)
         auth: {
             user: cfg.user,
-            pass: cfg.pass
+            pass: cfg.pass,
         },
-        name: greeting,                  // Verhindert @localhost in der MessageId
+        name: greeting, // Verhindert @localhost in der MessageId
         requireTLS: !secure && port === 587,
         connectionTimeout: 10000,
         greetingTimeout: 10000,
         socketTimeout: 15000,
         tls: {
-            rejectUnauthorized: false
+            rejectUnauthorized: false,
         },
         logger: false,
-        debug: false
+        debug: false,
     };
 
     console.log(`[Mailer] Transporter: ${cfg.host}:${port} secure=${secure} name=${greeting}`);
@@ -62,7 +63,7 @@ export async function getActiveSmtpConfig() {
                 user: cfg.smtp_user,
                 pass: cfg.smtp_pass,
                 from: cfg.smtp_from || cfg.smtp_user,
-                source: 'database'
+                source: 'database',
             };
         }
     } catch (e) {
@@ -78,7 +79,7 @@ export async function getActiveSmtpConfig() {
             user: process.env.SMTP_USER,
             pass: process.env.SMTP_PASS,
             from: process.env.SMTP_FROM || process.env.SMTP_USER,
-            source: 'env'
+            source: 'env',
         };
     }
 
@@ -95,7 +96,8 @@ export async function verifySmtp(cfg) {
 // ── Generische Mail senden ─────────────────────────────────────────────────
 export async function sendMail({ to, subject, html, text, attachments }) {
     const cfg = await getActiveSmtpConfig();
-    if (!cfg) throw new Error('SMTP nicht konfiguriert. Bitte zuerst SMTP-Einstellungen speichern.');
+    if (!cfg)
+        throw new Error('SMTP nicht konfiguriert. Bitte zuerst SMTP-Einstellungen speichern.');
 
     const transporter = buildTransporter(cfg);
 
@@ -105,10 +107,12 @@ export async function sendMail({ to, subject, html, text, attachments }) {
         subject,
         html,
         text: text || subject,
-        attachments: attachments || []
+        attachments: attachments || [],
     });
 
-    console.log(`[Mailer] E-Mail gesendet an ${to} | MessageId: ${info.messageId} | SMTP: ${cfg.source}`);
+    console.log(
+        `[Mailer] E-Mail gesendet an ${to} | MessageId: ${info.messageId} | SMTP: ${cfg.source}`
+    );
     return info;
 }
 
