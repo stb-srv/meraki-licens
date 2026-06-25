@@ -1,6 +1,6 @@
 import express from 'express';
 import db from '../db.js';
-import { requireAuth } from '../middleware.js';
+import { requireAuth, requireSuperAdmin } from '../middleware.js';
 import { asyncHandler, addAuditLog } from '../helpers.js';
 import {
     generateInvoiceNumber,
@@ -55,7 +55,13 @@ router.get(
             [...params, limit, offset]
         );
 
-        res.json({ invoices: rows, total: parseInt(total), page, pages: Math.ceil(total / limit) });
+        res.json({
+            success: true,
+            invoices: rows,
+            total: parseInt(total),
+            page,
+            pages: Math.ceil(total / limit),
+        });
     })
 );
 
@@ -525,6 +531,7 @@ router.get(
 router.delete(
     '/invoices/:id',
     requireAuth,
+    requireSuperAdmin,
     asyncHandler(async (req, res) => {
         const [[invoice]] = db.query(
             'SELECT status, invoice_number, pdf_path FROM invoices WHERE id = ?',

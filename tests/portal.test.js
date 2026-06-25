@@ -27,12 +27,10 @@ describe('Customer Portal API', () => {
     });
 
     test('GET /api/portal/me should return customer data when logged in', async () => {
-        const mockDb = jest.spyOn(db, 'query').mockImplementation((sql, params) => {
-            if (sql.includes('FROM customer_sessions')) {
-                return Promise.resolve([[{ id: 'sess1' }], []]);
-            }
-            if (sql.includes('FROM customers WHERE id = ?')) {
-                return Promise.resolve([
+        const mockDb = jest.spyOn(db, 'query').mockImplementation((sql) => {
+            if (sql.includes('customer_sessions')) return [[{ id: 'sess1' }]];
+            if (sql.includes('FROM customers WHERE id')) {
+                return [
                     [
                         {
                             id: 'cust1',
@@ -41,10 +39,9 @@ describe('Customer Portal API', () => {
                             must_change_password: 0,
                         },
                     ],
-                    [],
-                ]);
+                ];
             }
-            return Promise.resolve([[], []]);
+            return [[]];
         });
 
         const res = await request(app)
@@ -58,11 +55,10 @@ describe('Customer Portal API', () => {
     });
 
     test('PATCH /api/portal/licenses/:key/domain should validate domain format', async () => {
-        jest.spyOn(db, 'query').mockImplementation((sql, params) => {
-            if (sql.includes('FROM customer_sessions'))
-                return Promise.resolve([[{ id: 's1' }], []]);
-            if (sql.includes('FROM customers')) return Promise.resolve([[{ id: 'cust1' }], []]);
-            return Promise.resolve([[], []]);
+        jest.spyOn(db, 'query').mockImplementation((sql) => {
+            if (sql.includes('customer_sessions')) return [[{ id: 's1' }]];
+            if (sql.includes('FROM customers WHERE id')) return [[{ id: 'cust1' }]];
+            return [[]];
         });
 
         const res = await request(app)
@@ -75,11 +71,10 @@ describe('Customer Portal API', () => {
     });
 
     test('PATCH /api/portal/update-profile should validate billing fields', async () => {
-        jest.spyOn(db, 'query').mockImplementation((sql, params) => {
-            if (sql.includes('FROM customer_sessions'))
-                return Promise.resolve([[{ id: 's1' }], []]);
-            if (sql.includes('FROM customers')) return Promise.resolve([[{ id: 'cust1' }], []]);
-            return Promise.resolve([[], []]);
+        jest.spyOn(db, 'query').mockImplementation((sql) => {
+            if (sql.includes('customer_sessions')) return [[{ id: 's1' }]];
+            if (sql.includes('FROM customers WHERE id')) return [[{ id: 'cust1' }]];
+            return [[]];
         });
 
         // 1. Invalid zip code (letters/numbers only, max 10 chars)
@@ -100,11 +95,10 @@ describe('Customer Portal API', () => {
     });
 
     test('PATCH /api/portal/update-profile should update billing fields when valid', async () => {
-        const mockDb = jest.spyOn(db, 'query').mockImplementation((sql, params) => {
-            if (sql.includes('FROM customer_sessions'))
-                return Promise.resolve([[{ id: 's1' }], []]);
-            if (sql.includes('FROM customers WHERE id = ?')) {
-                return Promise.resolve([
+        const mockDb = jest.spyOn(db, 'query').mockImplementation((sql) => {
+            if (sql.includes('customer_sessions')) return [[{ id: 's1' }]];
+            if (sql.includes('FROM customers WHERE id')) {
+                return [
                     [
                         {
                             id: 'cust1',
@@ -117,10 +111,9 @@ describe('Customer Portal API', () => {
                             tax_id: 'DE123456789',
                         },
                     ],
-                    [],
-                ]);
+                ];
             }
-            return Promise.resolve([[], []]);
+            return [[]];
         });
 
         const res = await request(app)
@@ -144,9 +137,9 @@ describe('Customer Portal API', () => {
     });
 
     test('POST /api/portal/login should reject unverified customer', async () => {
-        const mockDb = jest.spyOn(db, 'query').mockImplementation((sql, params) => {
+        const mockDb = jest.spyOn(db, 'query').mockImplementation((sql) => {
             if (sql.includes('FROM customers')) {
-                return Promise.resolve([
+                return [
                     [
                         {
                             id: 'cust1',
@@ -156,10 +149,9 @@ describe('Customer Portal API', () => {
                             verified: 0,
                         },
                     ],
-                    [],
-                ]);
+                ];
             }
-            return Promise.resolve([[], []]);
+            return [[]];
         });
         const mockCompare = jest.spyOn(bcrypt, 'compare').mockResolvedValue(true);
 
@@ -175,15 +167,15 @@ describe('Customer Portal API', () => {
     });
 
     test('POST /api/portal/register should validate and register user', async () => {
-        const mockDb = jest.spyOn(db, 'query').mockImplementation((sql, params) => {
-            if (sql.includes('SELECT id FROM customers WHERE email = ?')) {
-                return Promise.resolve([[], []]); // email not taken
+        const mockDb = jest.spyOn(db, 'query').mockImplementation((sql) => {
+            if (sql.includes('FROM customers WHERE email')) {
+                return [[]]; // email not taken
             }
-            if (sql.includes('SELECT COUNT(*) AS n FROM customers WHERE portal_username = ?')) {
-                return Promise.resolve([[{ n: 0 }], []]);
+            if (sql.includes('portal_username')) {
+                return [[{ n: 0 }]];
             }
-            if (sql.includes('FROM smtp_config')) {
-                return Promise.resolve([
+            if (sql.includes('smtp_config')) {
+                return [
                     [
                         {
                             id: 1,
@@ -194,10 +186,9 @@ describe('Customer Portal API', () => {
                             smtp_from: 'test@test.de',
                         },
                     ],
-                    [],
-                ]);
+                ];
             }
-            return Promise.resolve([[], []]);
+            return [[]];
         });
         const mockCreateTransport = jest.spyOn(nodemailer, 'createTransport').mockReturnValue({
             sendMail: jest.fn().mockResolvedValue({ messageId: 'mock-id' }),
@@ -224,11 +215,11 @@ describe('Customer Portal API', () => {
     });
 
     test('POST /api/portal/verify-email should verify token', async () => {
-        const mockDb = jest.spyOn(db, 'query').mockImplementation((sql, params) => {
-            if (sql.includes('SELECT id FROM customers WHERE email_verify_token = ?')) {
-                return Promise.resolve([[{ id: 'cust1' }], []]);
+        const mockDb = jest.spyOn(db, 'query').mockImplementation((sql) => {
+            if (sql.includes('email_verify_token')) {
+                return [[{ id: 'cust1' }]];
             }
-            return Promise.resolve([[], []]);
+            return [[]];
         });
 
         const res = await request(app)
@@ -242,6 +233,32 @@ describe('Customer Portal API', () => {
     });
 
     test('GET /api/portal/plans should return active plans', async () => {
+        const mockDb = jest.spyOn(db, 'query').mockImplementation((sql) => {
+            if (sql.includes('plan_pricing')) {
+                return [
+                    [
+                        {
+                            id: 'PRO',
+                            plan_id: 'PRO',
+                            price: 59,
+                            active: 1,
+                            sort_order: 1,
+                            features: '[]',
+                        },
+                        {
+                            id: 'STARTER',
+                            plan_id: 'STARTER',
+                            price: 29,
+                            active: 1,
+                            sort_order: 0,
+                            features: '[]',
+                        },
+                    ],
+                ];
+            }
+            return [[]];
+        });
+
         const res = await request(app).get('/api/portal/plans');
         expect(res.statusCode).toBe(200);
         expect(res.body.success).toBe(true);
@@ -249,50 +266,41 @@ describe('Customer Portal API', () => {
         expect(res.body.plans.length).toBeGreaterThan(0);
         expect(res.body.plans[0]).toHaveProperty('id');
         expect(res.body.plans[0]).toHaveProperty('price');
+
+        mockDb.mockRestore();
     });
 
     test('POST /api/portal/licenses/book should book license and create invoice', async () => {
-        const mockDb = jest.spyOn(db, 'query').mockImplementation((sql, params) => {
-            if (sql.includes('FROM customer_sessions'))
-                return Promise.resolve([[{ id: 's1' }], []]);
-            if (sql.includes('FROM customers WHERE id = ?')) {
-                return Promise.resolve([
-                    [{ id: 'cust1', name: 'Max', email: 'max@test.de', verified: 1 }],
-                    [],
-                ]);
+        // createInvoiceFromLicense runs inside db.runTransaction; execute the fn inline.
+        const mockTx = jest.spyOn(db, 'runTransaction').mockImplementation((fn) => fn());
+        const mockDb = jest.spyOn(db, 'query').mockImplementation((sql) => {
+            if (sql.includes('customer_sessions')) return [[{ id: 's1' }]];
+            if (sql.includes('FROM customers WHERE id')) {
+                return [
+                    [
+                        {
+                            id: 'cust1',
+                            name: 'Max',
+                            email: 'max@test.de',
+                            currency: 'EUR',
+                            verified: 1,
+                        },
+                    ],
+                ];
             }
-            return Promise.resolve([[], []]);
+            if (sql.includes('FROM licenses WHERE license_key')) {
+                return [
+                    [{ license_key: 'MERAKI-PRO-TEST-2026', customer_id: 'cust1', type: 'PRO' }],
+                ];
+            }
+            if (sql.includes('plan_pricing')) return [[{ price: 59, tax_rate: 19 }]];
+            if (sql.includes('FROM invoice_settings')) {
+                return [[{ invoice_prefix: 'INV', next_number: 1 }]];
+            }
+            if (sql.includes('AS maxNum')) return [[{ maxNum: 0 }]];
+            if (sql.includes('COUNT(*) AS n FROM invoices')) return [[{ n: 0 }]];
+            return [[]];
         });
-
-        // Mock db.getConnection for transaction in createInvoiceFromLicense
-        const mockConn = {
-            beginTransaction: jest.fn().mockResolvedValue(true),
-            commit: jest.fn().mockResolvedValue(true),
-            rollback: jest.fn().mockResolvedValue(true),
-            release: jest.fn().mockResolvedValue(true),
-            query: jest.fn().mockImplementation((sql, params) => {
-                if (sql.includes('SELECT invoice_prefix, next_number FROM invoice_settings')) {
-                    return Promise.resolve([[{ invoice_prefix: 'INV', next_number: 1 }], []]);
-                }
-                if (sql.includes('SELECT * FROM licenses WHERE license_key = ?')) {
-                    return Promise.resolve([
-                        [
-                            {
-                                license_key: 'MERAKI-PRO-1234-2026',
-                                customer_id: 'cust1',
-                                type: 'PRO',
-                            },
-                        ],
-                        [],
-                    ]);
-                }
-                if (sql.includes('SELECT name, currency FROM customers WHERE id = ?')) {
-                    return Promise.resolve([[{ name: 'Max', currency: 'EUR' }], []]);
-                }
-                return Promise.resolve([[], []]);
-            }),
-        };
-        const mockGetConnection = jest.spyOn(db, 'getConnection').mockResolvedValue(mockConn);
 
         const res = await request(app)
             .post('/api/portal/licenses/book')
@@ -305,7 +313,7 @@ describe('Customer Portal API', () => {
         expect(res.body.invoice_id).toBeDefined();
 
         mockDb.mockRestore();
-        mockGetConnection.mockRestore();
+        mockTx.mockRestore();
     });
 
     // ── Upgrade endpoint (B4) ─────────────────────────────────────────────────
@@ -319,15 +327,11 @@ describe('Customer Portal API', () => {
 
     test('POST /api/portal/licenses/:key/upgrade rejects downgrade', async () => {
         jest.spyOn(db, 'query').mockImplementation((sql) => {
-            if (sql.includes('FROM customer_sessions'))
-                return Promise.resolve([[{ id: 's1' }], []]);
-            if (sql.includes('FROM customers'))
-                return Promise.resolve([
-                    [{ id: 'cust1', name: 'Test', email: 'test@example.com' }],
-                    [],
-                ]);
+            if (sql.includes('customer_sessions')) return [[{ id: 's1' }]];
+            if (sql.includes('FROM customers WHERE id'))
+                return [[{ id: 'cust1', name: 'Test', email: 'test@example.com' }]];
             if (sql.includes('FROM licenses WHERE license_key')) {
-                return Promise.resolve([
+                return [
                     [
                         {
                             license_key: 'K1',
@@ -337,10 +341,9 @@ describe('Customer Portal API', () => {
                             expires_at: '2025-12-31',
                         },
                     ],
-                    [],
-                ]);
+                ];
             }
-            return Promise.resolve([[], []]);
+            return [[]];
         });
 
         const res = await request(app)
@@ -354,14 +357,10 @@ describe('Customer Portal API', () => {
 
     test('POST /api/portal/licenses/:key/upgrade rejects invalid plan type', async () => {
         jest.spyOn(db, 'query').mockImplementation((sql) => {
-            if (sql.includes('FROM customer_sessions'))
-                return Promise.resolve([[{ id: 's1' }], []]);
-            if (sql.includes('FROM customers'))
-                return Promise.resolve([
-                    [{ id: 'cust1', name: 'Test', email: 'test@example.com' }],
-                    [],
-                ]);
-            return Promise.resolve([[], []]);
+            if (sql.includes('customer_sessions')) return [[{ id: 's1' }]];
+            if (sql.includes('FROM customers WHERE id'))
+                return [[{ id: 'cust1', name: 'Test', email: 'test@example.com' }]];
+            return [[]];
         });
 
         const res = await request(app)
@@ -374,15 +373,11 @@ describe('Customer Portal API', () => {
 
     test('POST /api/portal/licenses/:key/upgrade returns 404 when license not found', async () => {
         jest.spyOn(db, 'query').mockImplementation((sql) => {
-            if (sql.includes('FROM customer_sessions'))
-                return Promise.resolve([[{ id: 's1' }], []]);
-            if (sql.includes('FROM customers'))
-                return Promise.resolve([
-                    [{ id: 'cust1', name: 'Test', email: 'test@example.com' }],
-                    [],
-                ]);
-            if (sql.includes('FROM licenses WHERE license_key')) return Promise.resolve([[], []]);
-            return Promise.resolve([[], []]);
+            if (sql.includes('customer_sessions')) return [[{ id: 's1' }]];
+            if (sql.includes('FROM customers WHERE id'))
+                return [[{ id: 'cust1', name: 'Test', email: 'test@example.com' }]];
+            if (sql.includes('FROM licenses WHERE license_key')) return [[]];
+            return [[]];
         });
 
         const res = await request(app)
@@ -402,21 +397,11 @@ describe('Customer Portal API', () => {
 
     test('GET /api/portal/stats returns stats object when authenticated', async () => {
         jest.spyOn(db, 'query').mockImplementation((sql) => {
-            if (sql.includes('FROM customer_sessions'))
-                return Promise.resolve([[{ id: 's1' }], []]);
-            if (sql.includes('FROM customers'))
-                return Promise.resolve([
-                    [{ id: 'cust1', name: 'Test', email: 'test@example.com' }],
-                    [],
-                ]);
-            if (sql.includes('SUM(usage_count)')) {
-                return Promise.resolve([[{ total_validations: 42, active_licenses: 2 }], []]);
-            }
-            if (sql.includes('license_devices')) {
-                return Promise.resolve([[{ active_devices: 5 }], []]);
-            }
-            if (sql.includes('analytics_features')) return Promise.resolve([[], []]);
-            return Promise.resolve([[], []]);
+            if (sql.includes('customer_sessions')) return [[{ id: 's1' }]];
+            if (sql.includes('FROM customers WHERE id'))
+                return [[{ id: 'cust1', name: 'Test', email: 'test@example.com' }]];
+            if (sql.includes('license_devices')) return [[{ cnt: 5 }]];
+            return [[]];
         });
 
         const res = await request(app)

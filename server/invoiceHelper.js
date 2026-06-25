@@ -1,6 +1,9 @@
 import crypto from 'crypto';
-import { query, runTransaction } from './db.js';
+import db from './db.js';
 import { PLAN_DEFINITIONS } from './plans.js';
+
+// Call db.query / db.runTransaction via the default export at call time so the
+// same references stay interceptable in tests via jest.spyOn(db, ...).
 
 // Fallback prices used only when plan_pricing table has no entry for a plan.
 const FALLBACK_PRICE_MAP = {
@@ -14,7 +17,7 @@ const FALLBACK_PRICE_MAP = {
 
 function getPlanPrice(planType) {
     try {
-        const [[row]] = query(
+        const [[row]] = db.query(
             'SELECT price, tax_rate FROM plan_pricing WHERE plan_id = ? AND active = 1',
             [planType]
         );
@@ -31,8 +34,8 @@ function toDbDate(d) {
 }
 
 export function generateInvoiceNumber() {
-    return runTransaction(() => {
-        const [[settings]] = query(
+    return db.runTransaction(() => {
+        const [[settings]] = db.query(
             'SELECT invoice_prefix, next_number FROM invoice_settings WHERE id = 1'
         );
         if (!settings) throw new Error('Invoice settings with ID 1 not found in database.');
@@ -41,7 +44,7 @@ export function generateInvoiceNumber() {
         const year = new Date().getFullYear();
 
         // Start at stored next_number, but never below the actual DB maximum to avoid gaps
-        const [[{ maxNum }]] = query(
+        const [[{ maxNum }]] = db.query(
             `SELECT COALESCE(MAX(CAST(SUBSTR(invoice_number, -4) AS INTEGER)), 0) AS maxNum
              FROM invoices WHERE invoice_number LIKE ?`,
             [`${prefix}-${year}-%`]
@@ -52,9 +55,10 @@ export function generateInvoiceNumber() {
         let invoiceNumber;
         for (let i = 0; i < 500; i++) {
             const candidate = `${prefix}-${year}-${String(nextNumber).padStart(4, '0')}`;
-            const [[{ n }]] = query('SELECT COUNT(*) AS n FROM invoices WHERE invoice_number = ?', [
-                candidate,
-            ]);
+            const [[{ n }]] = db.query(
+                'SELECT COUNT(*) AS n FROM invoices WHERE invoice_number = ?',
+                [candidate]
+            );
             if (n === 0) {
                 invoiceNumber = candidate;
                 break;
@@ -63,7 +67,7 @@ export function generateInvoiceNumber() {
         }
         if (!invoiceNumber) throw new Error('Keine freie Rechnungsnummer gefunden.');
 
-        query('UPDATE invoice_settings SET next_number = ? WHERE id = 1', [nextNumber + 1]);
+        db.query('UPDATE invoice_settings SET next_number = ? WHERE id = 1', [nextNumber + 1]);
         return invoiceNumber;
     });
 }
@@ -87,13 +91,13 @@ export function createInvoiceFromLicense(
     createdBy = 'system',
     { discount_pct = 0 } = {}
 ) {
-    return runTransaction(() => {
-        const [[license]] = query('SELECT * FROM licenses WHERE license_key = ?', [licenseKey]);
+    return db.runTransaction(() => {
+        const [[license]] = db.query('SELECT * FROM licenses WHERE license_key = ?', [licenseKey]);
         if (!license) throw new Error(`License with key ${licenseKey} not found.`);
         if (!license.customer_id)
             throw new Error(`License with key ${licenseKey} has no customer linked.`);
 
-        const [[customer]] = query('SELECT name, currency FROM customers WHERE id = ?', [
+        const [[customer]] = db.query('SELECT name, currency FROM customers WHERE id = ?', [
             license.customer_id,
         ]);
         if (!customer)
@@ -121,7 +125,7 @@ export function createInvoiceFromLicense(
         const dueDate = toDbDate(new Date(Date.now() + 14 * 86400000));
         const currency = customer.currency || 'EUR';
 
-        query(
+        db.query(
             `INSERT INTO invoices (
                 id, invoice_number, customer_id, license_key, status, type,
                 amount_net, amount_tax, amount_gross, tax_rate, currency,
@@ -143,7 +147,7 @@ export function createInvoiceFromLicense(
             ]
         );
 
-        query(
+        db.query(
             `INSERT INTO invoice_items (invoice_id, description, quantity, unit_price, total, sort_order)
              VALUES (?, ?, ?, ?, ?, 0)`,
             [invoiceId, description, 1, unit_price, amount_net]
@@ -154,7 +158,7 @@ export function createInvoiceFromLicense(
 }
 
 export function getInvoiceWithItems(invoiceId) {
-    const [[invoice]] = query(
+    const [[invoice]] = db.query(
         `SELECT i.*,
                 c.name AS customer_name,
                 c.email AS customer_email,
@@ -172,7 +176,7 @@ export function getInvoiceWithItems(invoiceId) {
     );
     if (!invoice) return null;
 
-    const [items] = query(
+    const [items] = db.query(
         `SELECT * FROM invoice_items WHERE invoice_id = ? ORDER BY sort_order ASC, id ASC`,
         [invoiceId]
     );

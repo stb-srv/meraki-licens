@@ -22,10 +22,10 @@ describe('Admin API', () => {
     test('POST /api/admin/login should work with correct credentials', async () => {
         const passwordHash = await bcrypt.hash('password123', 12);
 
-        // Mock DB for login
-        const mockQuery = jest.spyOn(db, 'query').mockImplementation((sql, params) => {
+        // Mock DB for login (better-sqlite3 adapter is synchronous: returns [rows])
+        const mockQuery = jest.spyOn(db, 'query').mockImplementation((sql) => {
             if (sql.includes('FROM admins WHERE username = ?')) {
-                return Promise.resolve([
+                return [
                     [
                         {
                             id: 1,
@@ -35,16 +35,15 @@ describe('Admin API', () => {
                             two_factor_enabled: 0,
                         },
                     ],
-                    [],
-                ]);
+                ];
             }
             if (sql.includes('INSERT INTO admin_sessions')) {
-                return Promise.resolve([{ affectedRows: 1 }, []]);
+                return [{ affectedRows: 1 }];
             }
             if (sql.includes('INSERT INTO audit_log')) {
-                return Promise.resolve([{ affectedRows: 1 }, []]);
+                return [{ affectedRows: 1 }];
             }
-            return Promise.resolve([[], []]);
+            return [[]];
         });
 
         const res = await request(app)
@@ -65,18 +64,17 @@ describe('Admin API', () => {
 
     test('GET /api/admin/licenses should work with valid token', async () => {
         // Mock DB for session check and license list
-        const mockDb = jest.spyOn(db, 'query').mockImplementation((sql, params) => {
-            // console.log('SQL:', sql); // Debug
+        const mockDb = jest.spyOn(db, 'query').mockImplementation((sql) => {
             if (sql.includes('FROM admin_sessions')) {
-                return Promise.resolve([[{ id: 'sess1' }], []]);
+                return [[{ id: 'sess1' }]];
             }
             if (sql.includes('COUNT(*)')) {
-                return Promise.resolve([[{ total: 1 }], []]);
+                return [[{ total: 1 }]];
             }
             if (sql.includes('SELECT * FROM licenses')) {
-                return Promise.resolve([[{ license_key: 'TEST-KEY', type: 'PRO' }], []]);
+                return [[{ license_key: 'TEST-KEY', type: 'PRO' }]];
             }
-            return Promise.resolve([[], []]);
+            return [[]];
         });
 
         const res = await request(app)
@@ -95,12 +93,12 @@ describe('Admin API', () => {
     });
 
     test('GET /api/admin/stats/invoices should return correct KPIs', async () => {
-        const mockDb = jest.spyOn(db, 'query').mockImplementation((sql, params) => {
+        const mockDb = jest.spyOn(db, 'query').mockImplementation((sql) => {
             if (sql.includes('FROM admin_sessions')) {
-                return Promise.resolve([[{ id: 'sess1' }], []]);
+                return [[{ id: 'sess1' }]];
             }
             if (sql.includes('total_invoiced')) {
-                return Promise.resolve([
+                return [
                     [
                         {
                             total_invoiced: 250.0,
@@ -113,14 +111,13 @@ describe('Admin API', () => {
                             count_paid: 1,
                         },
                     ],
-                    [],
-                ]);
+                ];
             }
             if (sql.includes('mrr')) {
-                return Promise.resolve([[{ mrr: 150.0 }], []]);
+                return [[{ mrr: 150.0 }]];
             }
             if (sql.includes('days_overdue')) {
-                return Promise.resolve([
+                return [
                     [
                         {
                             invoice_number: 'INV-2026-0001',
@@ -130,11 +127,10 @@ describe('Admin API', () => {
                             days_overdue: 18,
                         },
                     ],
-                    [],
-                ]);
+                ];
             }
             if (sql.includes('paid_at')) {
-                return Promise.resolve([
+                return [
                     [
                         {
                             invoice_number: 'INV-2026-0002',
@@ -143,10 +139,9 @@ describe('Admin API', () => {
                             paid_at: '2026-05-18',
                         },
                     ],
-                    [],
-                ]);
+                ];
             }
-            return Promise.resolve([[], []]);
+            return [[]];
         });
 
         const res = await request(app)
