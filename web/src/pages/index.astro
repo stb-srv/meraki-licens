@@ -648,6 +648,13 @@ import '../styles/tokens.css';
                 gap: 0.6rem;
                 padding: 0 var(--space-2);
             }
+            .sidebar-brand img {
+                background: #fff;
+                padding: 4px 8px;
+                border-radius: var(--radius-md, 8px);
+                border: 1px solid var(--border);
+                box-sizing: content-box;
+            }
             .sidebar-user {
                 font-size: var(--text-sm);
                 color: var(--text2);
@@ -1885,7 +1892,10 @@ import '../styles/tokens.css';
                                         color: var(--text);
                                     "
                                 >
-                                    📈 Lizenz-Validierungen (letzte 30 Tage)
+                                    <i
+                                        data-lucide="trending-up"
+                                        style="width: 1em; height: 1em; vertical-align: -0.15em; color: var(--accent); margin-right: 0.4em;"
+                                    ></i>Lizenz-Validierungen (letzte 30 Tage)
                                 </h3>
                                 <div style="height: 300px">
                                     <canvas id="validationsChart"></canvas>
@@ -1899,7 +1909,10 @@ import '../styles/tokens.css';
                                         color: var(--text);
                                     "
                                 >
-                                    📊 Lizenz-Pläne
+                                    <i
+                                        data-lucide="pie-chart"
+                                        style="width: 1em; height: 1em; vertical-align: -0.15em; color: var(--accent); margin-right: 0.4em;"
+                                    ></i>Lizenz-Pläne
                                 </h3>
                                 <div style="height: 300px"><canvas id="typesChart"></canvas></div>
                             </div>
@@ -1921,7 +1934,10 @@ import '../styles/tokens.css';
                                         color: var(--text);
                                     "
                                 >
-                                    🛠 Feature-Nutzung
+                                    <i
+                                        data-lucide="bar-chart-3"
+                                        style="width: 1em; height: 1em; vertical-align: -0.15em; color: var(--accent); margin-right: 0.4em;"
+                                    ></i>Feature-Nutzung
                                 </h3>
                                 <div style="height: 250px">
                                     <canvas id="featuresChart"></canvas>
@@ -1935,7 +1951,10 @@ import '../styles/tokens.css';
                                         color: var(--text);
                                     "
                                 >
-                                    🔘 Lizenz-Status
+                                    <i
+                                        data-lucide="circle-dot"
+                                        style="width: 1em; height: 1em; vertical-align: -0.15em; color: var(--accent); margin-right: 0.4em;"
+                                    ></i>Lizenz-Status
                                 </h3>
                                 <div style="height: 250px"><canvas id="statusChart"></canvas></div>
                             </div>
@@ -1947,7 +1966,10 @@ import '../styles/tokens.css';
                                         color: var(--text);
                                     "
                                 >
-                                    � Top Kunden
+                                    <i
+                                        data-lucide="users"
+                                        style="width: 1em; height: 1em; vertical-align: -0.15em; color: var(--accent); margin-right: 0.4em;"
+                                    ></i>Top Kunden
                                 </h3>
                                 <div
                                     id="top-customers-list"
@@ -1972,7 +1994,10 @@ import '../styles/tokens.css';
                                         color: var(--text);
                                     "
                                 >
-                                    🏆 Top 10 Lizenzen nach Nutzung
+                                    <i
+                                        data-lucide="trophy"
+                                        style="width: 1em; height: 1em; vertical-align: -0.15em; color: var(--accent); margin-right: 0.4em;"
+                                    ></i>Top 10 Lizenzen nach Nutzung
                                 </h3>
                                 <div class="table-wrap" id="top-licenses">
                                     <div class="loading"><div class="spinner"></div></div>
@@ -1986,7 +2011,10 @@ import '../styles/tokens.css';
                                         color: var(--text);
                                     "
                                 >
-                                    ⚠️ Bald ablaufend (30 Tage)
+                                    <i
+                                        data-lucide="alert-triangle"
+                                        style="width: 1em; height: 1em; vertical-align: -0.15em; color: var(--warning, #f5a623); margin-right: 0.4em;"
+                                    ></i>Bald ablaufend (30 Tage)
                                 </h3>
                                 <div class="table-wrap" id="expiring-licenses">
                                     <div class="loading"><div class="spinner"></div></div>
@@ -2853,7 +2881,12 @@ import '../styles/tokens.css';
         <!-- Modal für neue Rechnung -->
         <div class="modal-overlay" id="modal-new-invoice">
             <div class="modal" style="max-width: 560px">
-                <h3>🧾 Neue Rechnung erstellen</h3>
+                <h3>
+                    <i
+                        data-lucide="receipt"
+                        style="width: 1em; height: 1em; vertical-align: -0.15em; color: var(--accent); margin-right: 0.4em;"
+                    ></i>Neue Rechnung erstellen
+                </h3>
                 <div class="form-group">
                     <label>Kunde *</label>
                     <select id="ni-customer-id" onchange="onInvoiceCustomerChange()">
@@ -2941,7 +2974,12 @@ import '../styles/tokens.css';
         <!-- Modal für Rechnungs-Details -->
         <div class="modal-overlay" id="modal-view-invoice">
             <div class="modal" style="max-width: 700px">
-                <h3>🧾 Rechnungs-Details</h3>
+                <h3>
+                    <i
+                        data-lucide="receipt"
+                        style="width: 1em; height: 1em; vertical-align: -0.15em; color: var(--accent); margin-right: 0.4em;"
+                    ></i>Rechnungs-Details
+                </h3>
                 <div
                     id="modal-view-invoice-content"
                     style="max-height: 70vh; overflow-y: auto; padding-right: var(--space-1)"
@@ -2957,7 +2995,12 @@ import '../styles/tokens.css';
         <!-- Modal für Rechnungs-Einstellungen -->
         <div class="modal-overlay" id="modal-invoice-settings">
             <div class="modal" style="max-width: 620px">
-                <h3>⚙️ Rechnungs-Einstellungen</h3>
+                <h3>
+                    <i
+                        data-lucide="settings"
+                        style="width: 1em; height: 1em; vertical-align: -0.15em; color: var(--accent); margin-right: 0.4em;"
+                    ></i>Rechnungs-Einstellungen
+                </h3>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem">
                     <div class="form-group">
@@ -3015,7 +3058,10 @@ import '../styles/tokens.css';
                             padding: 0 var(--space-2);
                         "
                     >
-                        🏦 Bankverbindung
+                        <i
+                            data-lucide="landmark"
+                            style="width: 1em; height: 1em; vertical-align: -0.15em; color: var(--accent); margin-right: 0.4em;"
+                        ></i>Bankverbindung
                     </legend>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem">
                         <div class="form-group" style="margin-bottom: var(--space-2)">
@@ -6159,7 +6205,9 @@ import '../styles/tokens.css';
             "
         >
             <div style="display: flex; align-items: center; gap: 0.8rem">
-                <span style="font-size: var(--text-xl)">🍪</span>
+                <span style="display: inline-flex; color: var(--accent)"
+                    ><i data-lucide="cookie" style="width: 1.4em; height: 1.4em"></i
+                ></span>
                 <div style="flex: 1">
                     <strong
                         style="
@@ -6355,7 +6403,9 @@ import '../styles/tokens.css';
         <!-- Fehler-Modal -->
         <div class="modal-overlay" id="modal-error">
             <div class="modal" style="max-width: 420px; text-align: center">
-                <div style="font-size: var(--text-xl); margin-bottom: var(--space-3)">⚠️</div>
+                <div style="margin-bottom: var(--space-3); color: var(--warning, #f5a623)">
+                    <i data-lucide="alert-triangle" style="width: 1.6em; height: 1.6em"></i>
+                </div>
                 <h3 id="modal-error-title" style="margin-bottom: var(--space-2)">Fehler</h3>
                 <p
                     id="modal-error-msg"
@@ -6374,7 +6424,9 @@ import '../styles/tokens.css';
         <!-- Bestätigungs-Modal -->
         <div class="modal-overlay" id="modal-confirm">
             <div class="modal" style="max-width: 420px; text-align: center">
-                <div style="font-size: var(--text-xl); margin-bottom: var(--space-3)">❓</div>
+                <div style="margin-bottom: var(--space-3); color: var(--accent)">
+                    <i data-lucide="help-circle" style="width: 1.6em; height: 1.6em"></i>
+                </div>
                 <h3 id="modal-confirm-title" style="margin-bottom: var(--space-2)">Bestätigung</h3>
                 <p
                     id="modal-confirm-msg"
