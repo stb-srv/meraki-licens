@@ -4242,6 +4242,20 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             function fmtEur(v) {
                 return v != null ? parseFloat(v).toFixed(2) + ' \u20AC' : '\u2014';
             }
+            function skeletonTable(cols, rows) {
+                rows = rows || 5;
+                var cell = '<td><div class="skeleton" style="height:13px;width:75%;border-radius:4px">&nbsp;</div></td>';
+                var row = '<tr>' + cell.repeat(cols) + '</tr>';
+                return '<table class="data-table"><tbody>' + row.repeat(rows) + '</tbody></table>';
+            }
+            function emptyState(icon, title, text, btnLabel, btnAction) {
+                return '<div class="empty-state">' +
+                    '<i data-lucide="' + icon + '"></i>' +
+                    '<h3>' + title + '</h3>' +
+                    '<p>' + text + '</p>' +
+                    (btnLabel ? '<button class="btn btn-primary btn-sm" onclick="' + btnAction + '">' + btnLabel + '</button>' : '') +
+                    '</div>';
+            }
 
             function safeParse(val, fallback) {
                 if (Array.isArray(val)) return val;
@@ -4676,8 +4690,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
             function loadLicenses(page) {
                 if (page !== undefined) licPage = page;
-                document.getElementById('lic-table').innerHTML =
-                    '<div class="loading"><div class="spinner"></div></div>';
+                document.getElementById('lic-table').innerHTML = skeletonTable(7);
                 var url =
                     '/admin/licenses?page=' +
                     licPage +
@@ -4736,7 +4749,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                                   .join('') +
                               '</tbody></table>' +
                               renderPagination(pg, 'loadLicenses')
-                            : '<div class="loading">Keine Lizenzen gefunden.</div>';
+                            : emptyState('key', 'Keine Lizenzen', 'Erstelle deine erste Lizenz, um loszulegen.', '+ Lizenz erstellen', 'openNewLicenseModal()');
                         document.getElementById('lic-table').innerHTML = html;
                         if (window.lucide) window.lucide.createIcons();
                     })
@@ -4895,6 +4908,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             // ── Customers ────────────────────────────────────────────────────────────────
             function loadCustomers(page) {
                 if (page !== undefined) custPage = page;
+                document.getElementById('cust-table').innerHTML = skeletonTable(6);
                 var showArchived =
                     document.getElementById('cust-show-archived') &&
                     document.getElementById('cust-show-archived').checked;
@@ -4974,7 +4988,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                               }).join('') +
                               '</tbody></table>' +
                               renderPagination(pag, 'loadCustomers')
-                            : '<div class="loading">Keine Kunden gefunden.</div>';
+                            : emptyState('users', 'Keine Kunden', 'Lege deinen ersten Kunden an.', '+ Kunden anlegen', 'openNewCustomerModal()');
                         document.getElementById('cust-table').innerHTML = html;
                     })
                     .catch(function (e) {
@@ -5215,6 +5229,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
             function loadDevices(page) {
                 if (page !== undefined) devPage = page;
+                document.getElementById('dev-table').innerHTML = skeletonTable(5);
                 var url = '/admin/devices?page=' + devPage + '&limit=25';
                 if (devSearch) url += '&search=' + encodeURIComponent(devSearch);
 
@@ -5264,7 +5279,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                                   .join('') +
                               '</tbody></table>' +
                               renderPagination(pg, 'loadDevices')
-                            : '<div class="loading">Keine Geräte gefunden.</div>';
+                            : emptyState('monitor', 'Keine Geräte', 'Noch keine Geräte registriert.');
                         document.getElementById('dev-table').innerHTML = html;
                         if (window.lucide) window.lucide.createIcons();
                     })
@@ -5340,7 +5355,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                                   })
                                   .join('') +
                               '</tbody></table></div>'
-                            : '<div class="loading">Keine Login-Einträge gefunden.</div>';
+                            : emptyState('shield-off', 'Keine Login-Einträge', 'Es wurden noch keine Logins aufgezeichnet.');
                     })
                     .catch(function (e) {
                         document.getElementById('login-log-list').innerHTML =
@@ -5351,8 +5366,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             }
 
             function loadAudit() {
-                document.getElementById('audit-list').innerHTML =
-                    '<div class="loading"><div class="spinner"></div></div>';
+                document.getElementById('audit-list').innerHTML = skeletonTable(4);
                 var action = document.getElementById('audit-search')
                     ? document.getElementById('audit-search').value
                     : '';
@@ -5429,7 +5443,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                                       );
                                   })
                                   .join('')
-                            : '<div class="loading">Keine Einträge gefunden.</div>';
+                            : emptyState('file-search', 'Kein Audit-Log', 'Es wurden noch keine Aktionen protokolliert.');
                         if (window.lucide) window.lucide.createIcons();
                     })
                     .catch(function (e) {
@@ -5441,8 +5455,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             }
 
             function loadPurchaseHistory() {
-                document.getElementById('ph-table').innerHTML =
-                    '<div class="loading"><div class="spinner"></div></div>';
+                document.getElementById('ph-table').innerHTML = skeletonTable(5);
                 var search = document.getElementById('ph-search-customer')
                     ? document.getElementById('ph-search-customer').value
                     : '';
@@ -5496,7 +5509,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                                   })
                                   .join('') +
                               '</tbody></table>'
-                            : '<div class="loading">Keine Kaufhistorie gefunden.</div>';
+                            : emptyState('shopping-cart', 'Keine Kaufhistorie', 'Noch keine Käufe vorhanden.');
                     })
                     .catch(function (e) {
                         document.getElementById('ph-table').innerHTML =
@@ -5597,7 +5610,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                                   })
                                   .join('') +
                               '</tbody></table>'
-                            : '<div class="loading">Keine User gefunden.</div>';
+                            : emptyState('user-x', 'Keine Admin-User', 'Lege einen weiteren Admin-Benutzer an.');
                     })
                     .catch(function (e) {
                         document.getElementById('users-table').innerHTML =
@@ -5905,13 +5918,13 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             // ── Pläne & Preise (Admin) ────────────────────────────────────────────────────
             function loadAdminPlans() {
                 var el = document.getElementById('admin-plans-content');
-                el.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+                el.innerHTML = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem">' + '<div class="skeleton" style="height:180px;border-radius:var(--radius-lg)"></div>'.repeat(3) + '</div>';
                 API('/admin/plan-pricing')
                     .then(function (d) {
                         var plans = d.plans || [];
                         if (!plans.length) {
                             el.innerHTML =
-                                '<p style="color:var(--text2)">Keine Pläne gefunden.</p>';
+                                emptyState('package', 'Keine Pläne', 'Noch keine Pläne definiert.');
                             return;
                         }
                         el.innerHTML =
