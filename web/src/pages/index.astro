@@ -1131,9 +1131,60 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                     white-space: nowrap;
                 }
             }
+            /* Mobile nav hamburger */
+            .nav-hamburger {
+                display: none;
+                background: transparent;
+                border: 1px solid var(--border);
+                color: var(--text2);
+                border-radius: var(--radius-md);
+                padding: var(--space-2);
+                cursor: pointer;
+                align-items: center;
+                justify-content: center;
+            }
+            .nav-hamburger svg {
+                width: 20px;
+                height: 20px;
+            }
+            .nav-mobile-menu {
+                display: none;
+                position: fixed;
+                top: var(--nav-height);
+                left: 0;
+                right: 0;
+                background: var(--bg2);
+                border-bottom: 1px solid var(--border);
+                padding: var(--space-4);
+                flex-direction: column;
+                gap: var(--space-2);
+                z-index: 90;
+                box-shadow: var(--shadow-md);
+            }
+            .nav-mobile-menu.open {
+                display: flex;
+            }
+            .nav-mobile-menu a {
+                color: var(--text);
+                text-decoration: none;
+                font-size: var(--text-base);
+                padding: var(--space-3) var(--space-2);
+                border-radius: var(--radius-md);
+                display: flex;
+                align-items: center;
+                gap: var(--space-3);
+                cursor: pointer;
+            }
+            .nav-mobile-menu a:hover {
+                background: var(--bg3);
+                color: var(--primary);
+            }
             @media (max-width: 600px) {
                 .nav-links a {
                     display: none;
+                }
+                .nav-hamburger {
+                    display: inline-flex;
                 }
                 .hero {
                     padding-bottom: 200px;
@@ -1256,6 +1307,18 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                     style="height: 28px; width: auto; display: block"
                 />
             </span>
+            <button
+                class="nav-hamburger"
+                id="nav-hamburger"
+                aria-label="Menü öffnen"
+                aria-expanded="false"
+                aria-controls="nav-mobile-menu"
+                onclick="toggleMobileMenu()"
+            >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="18" y2="18"/>
+                </svg>
+            </button>
             <div class="nav-links">
                 <a onclick="showPublicPage('home')">Start</a>
                 <a onclick="showPublicPage('features')">Funktionen</a>
@@ -1286,6 +1349,17 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                 </button>
             </div>
         </nav>
+
+        <!-- Mobile navigation menu (shown below nav on < 600px) -->
+        <div id="nav-mobile-menu" class="nav-mobile-menu" role="navigation" aria-label="Mobile Navigation">
+            <a onclick="showPublicPage('home'); closeMobileMenu()"><i data-lucide="home"></i> Start</a>
+            <a onclick="showPublicPage('features'); closeMobileMenu()"><i data-lucide="zap"></i> Funktionen</a>
+            <a onclick="showPublicPage('pricing'); closeMobileMenu()"><i data-lucide="tag"></i> Preise</a>
+            <a onclick="showPublicPage('faq'); closeMobileMenu()"><i data-lucide="help-circle"></i> FAQ</a>
+            <a onclick="showPublicPage('api'); closeMobileMenu()"><i data-lucide="code-2"></i> API</a>
+            <a onclick="showPublicPage('legal'); closeMobileMenu()"><i data-lucide="scale"></i> Rechtliches</a>
+            <a onclick="window.location.href='/login'; closeMobileMenu()" style="color:var(--primary)"><i data-lucide="log-in"></i> Login</a>
+        </div>
 
         <div id="public-pages">
             <div id="pub-home" class="page active">
@@ -3142,6 +3216,27 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             window.addEventListener('DOMContentLoaded', function () {
                 updateThemeBtn(localStorage.getItem('theme') || document.documentElement.getAttribute('data-theme') || 'dark');
                 if (window.lucide) window.lucide.createIcons();
+            });
+
+            function toggleMobileMenu() {
+                var menu = document.getElementById('nav-mobile-menu');
+                var btn = document.getElementById('nav-hamburger');
+                var open = menu.classList.toggle('open');
+                btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+                if (open && window.lucide) window.lucide.createIcons();
+            }
+            function closeMobileMenu() {
+                var menu = document.getElementById('nav-mobile-menu');
+                var btn = document.getElementById('nav-hamburger');
+                menu.classList.remove('open');
+                if (btn) btn.setAttribute('aria-expanded', 'false');
+            }
+            document.addEventListener('click', function (e) {
+                var menu = document.getElementById('nav-mobile-menu');
+                var btn = document.getElementById('nav-hamburger');
+                if (menu && menu.classList.contains('open') && !menu.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
+                    closeMobileMenu();
+                }
             });
 
             function updateThemeBtn(theme) {
@@ -6476,5 +6571,4 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       window.Chart = Chart;
       window.lucide = { createIcons: () => createIcons({ icons }) };
     </script>
-    </body>
-</html>
+</BaseLayout>

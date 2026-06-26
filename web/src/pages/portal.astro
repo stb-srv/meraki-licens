@@ -1,18 +1,7 @@
 ---
-import '../styles/tokens.css';
+import BaseLayout from '../layouts/BaseLayout.astro';
 ---
-<!doctype html>
-<html lang="de" data-theme="dark">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Meraki &ndash; Kunden-Portal</title>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link
-            href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;0,900;1,300;1,400&family=Roboto+Mono:wght@400;500&display=swap"
-            rel="stylesheet"
-        />
+<BaseLayout title="Meraki – Kunden-Portal">
         <style is:global>
             /* design tokens provided globally by tokens.css */
             * {
@@ -575,6 +564,65 @@ import '../styles/tokens.css';
                     padding: var(--space-4);
                 }
             }
+            /* Off-canvas sidebar for phones */
+            .sidebar-backdrop {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.45);
+                z-index: 98;
+            }
+            .sidebar-backdrop.open {
+                display: block;
+            }
+            .nav-hamburger {
+                display: none;
+                background: transparent;
+                border: 1px solid var(--border);
+                color: var(--text2);
+                border-radius: var(--radius-md);
+                padding: var(--space-2);
+                cursor: pointer;
+                align-items: center;
+                justify-content: center;
+            }
+            .nav-hamburger svg {
+                width: 20px;
+                height: 20px;
+            }
+            @media (max-width: 500px) {
+                .sidebar {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    height: 100%;
+                    width: var(--sidebar-width) !important;
+                    z-index: 99;
+                    transform: translateX(-100%);
+                    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+                }
+                .sidebar-brand span,
+                .sidebar-user,
+                .sidebar-menu li a span {
+                    display: unset;
+                }
+                .sidebar-menu li a {
+                    justify-content: flex-start;
+                    padding: var(--space-3) var(--space-4);
+                }
+                .sidebar.open {
+                    transform: translateX(0);
+                }
+                .app-shell {
+                    flex-direction: column;
+                }
+                .main-area {
+                    padding: var(--space-4);
+                }
+                .nav-hamburger {
+                    display: inline-flex;
+                }
+            }
             /* Shop / Plan-Cards */
             .plan-grid {
                 display: grid;
@@ -814,8 +862,6 @@ import '../styles/tokens.css';
                 margin-top: var(--space-1);
             }
         </style>
-    </head>
-    <body>
         <nav id="portal-nav" style="display: none">
             <span
                 class="nav-logo"
@@ -830,6 +876,17 @@ import '../styles/tokens.css';
                 <span style="font-size: var(--text-sm)">Kunden-Portal</span></span
             >
             <div class="nav-right">
+                <button
+                    class="nav-hamburger"
+                    id="portal-hamburger"
+                    aria-label="Seitenmenü öffnen"
+                    aria-expanded="false"
+                    onclick="togglePortalSidebar()"
+                >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="18" y2="18"/>
+                    </svg>
+                </button>
                 <button
                     class="theme-toggle"
                     onclick="toggleTheme()"
@@ -847,6 +904,7 @@ import '../styles/tokens.css';
                 </button>
             </div>
         </nav>
+        <div class="sidebar-backdrop" id="sidebar-backdrop" onclick="closePortalSidebar()"></div>
 
         <!-- LOGIN PAGE (redirect to login.html) -->
         <div id="page-login" class="page active">
@@ -1034,7 +1092,7 @@ import '../styles/tokens.css';
         <!-- DASHBOARD -->
         <div id="page-dashboard" class="page">
             <div class="dashboard">
-                <aside class="sidebar">
+                <aside class="sidebar" id="portal-sidebar">
                     <div class="sidebar-brand">
                         <img
                             src="/Meraki_RMS_CMS.png"
@@ -1258,6 +1316,26 @@ import '../styles/tokens.css';
                 document.documentElement.setAttribute('data-theme', t);
                 setThemeIcon(t);
             })();
+            function togglePortalSidebar() {
+                var sidebar = document.getElementById('portal-sidebar');
+                var backdrop = document.getElementById('sidebar-backdrop');
+                var btn = document.getElementById('portal-hamburger');
+                if (!sidebar) return;
+                var open = sidebar.classList.toggle('open');
+                backdrop.classList.toggle('open', open);
+                btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+                document.body.style.overflow = open ? 'hidden' : '';
+            }
+            function closePortalSidebar() {
+                var sidebar = document.getElementById('portal-sidebar');
+                var backdrop = document.getElementById('sidebar-backdrop');
+                var btn = document.getElementById('portal-hamburger');
+                if (sidebar) sidebar.classList.remove('open');
+                if (backdrop) backdrop.classList.remove('open');
+                if (btn) btn.setAttribute('aria-expanded', 'false');
+                document.body.style.overflow = '';
+            }
+
             function toggleTheme() {
                 var cur = document.documentElement.getAttribute('data-theme') || 'dark';
                 var next = cur === 'dark' ? 'light' : 'dark';
@@ -2350,5 +2428,4 @@ import '../styles/tokens.css';
       import { createIcons, icons } from 'lucide';
       window.lucide = { createIcons: () => createIcons({ icons }) };
     </script>
-    </body>
-</html>
+</BaseLayout>
