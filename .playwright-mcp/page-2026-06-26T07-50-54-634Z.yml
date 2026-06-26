@@ -1,0 +1,25 @@
+- generic [active] [ref=e1]:
+  - navigation [ref=e2]:
+    - generic "Zur Startseite" [ref=e3] [cursor=pointer]:
+      - img "Meraki" [ref=e4]
+    - button "Theme wechseln" [ref=e5] [cursor=pointer]:
+      - img [ref=e6]
+  - generic [ref=e13]:
+    - generic [ref=e14]:
+      - button "Kunden-Portal" [ref=e15] [cursor=pointer]
+      - button "Admin" [ref=e16] [cursor=pointer]
+    - generic [ref=e18]:
+      - generic [ref=e19]:
+        - img [ref=e20]
+        - text: Anmelden
+      - generic [ref=e23]: Melde dich mit deiner E-Mail oder deinem Benutzernamen an.
+      - generic [ref=e24]:
+        - generic [ref=e25]: E-Mail / Benutzername
+        - textbox [ref=e26]
+      - generic [ref=e27]:
+        - generic [ref=e28]: Passwort
+        - textbox [ref=e29]
+      - button "Einloggen" [ref=e30] [cursor=pointer]
+      - generic [ref=e31]:
+        - generic [ref=e32]: Noch kein Konto? Jetzt registrieren
+        - generic [ref=e33] [cursor=pointer]: Passwort vergessen?

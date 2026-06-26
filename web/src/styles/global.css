@@ -1,0 +1,142 @@
+/*
+ * Global base styles shared across every page. Extracted from public/index.html
+ * (reset + body + typography + button family + theme toggle). Page-specific CSS
+ * stays inline in each .astro page (lift-and-shift) — only genuinely shared rules
+ * live here. Depends on tokens.css for all custom properties.
+ */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    line-height: 1.6;
+    transition:
+        background 0.3s,
+        color 0.3s;
+    overflow-x: hidden;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.nav-logo,
+.sidebar-brand {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+}
+h1,
+h2 {
+    font-weight: 700;
+}
+h3,
+h4 {
+    font-weight: 500;
+}
+input,
+button,
+select,
+textarea {
+    font-family: var(--font-body);
+}
+button,
+label {
+    line-height: 1.4;
+    letter-spacing: 0.01em;
+}
+button {
+    font-weight: 500;
+}
+
+/* Button family */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: var(--space-2) var(--space-6);
+    border-radius: var(--radius-md);
+    border: none;
+    cursor: pointer;
+    font-size: var(--text-sm);
+    font-family: var(--font-body);
+    font-weight: 500;
+    transition: all var(--transition-interactive);
+    text-decoration: none;
+    white-space: nowrap;
+}
+.btn-primary {
+    background: var(--primary);
+    color: #fff;
+}
+.btn-primary:hover {
+    background: var(--primary-hover);
+}
+.btn-danger {
+    background: var(--danger);
+    color: #fff;
+}
+.btn-danger:hover {
+    opacity: 0.9;
+}
+.btn-success {
+    background: var(--success);
+    color: #fff;
+}
+.btn-success:hover {
+    opacity: 0.9;
+}
+.btn-ghost {
+    background: transparent;
+    color: var(--text2);
+    border: 1px solid var(--border);
+}
+.btn-ghost:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+.btn-warning {
+    background: var(--warning);
+    color: var(--bg);
+}
+.btn-warning:hover {
+    opacity: 0.9;
+}
+.btn-sm {
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--text-sm);
+    border-radius: var(--radius-sm);
+}
+.btn-xs {
+    padding: var(--space-1) var(--space-2);
+    font-size: var(--text-xs);
+    border-radius: var(--radius-sm);
+}
+
+/* Theme toggle */
+.theme-toggle {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text2);
+    border-radius: var(--radius-md);
+    padding: var(--space-2);
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.theme-toggle:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+.theme-toggle svg {
+    width: 18px;
+    height: 18px;
+}

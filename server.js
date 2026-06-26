@@ -275,10 +275,14 @@ app.get('/docs', (req, res) => {
 </body></html>`);
 });
 
-app.get('/setup', (req, res) => res.sendFile(path.join(__dirname, 'public', 'setup.html')));
+app.get('/setup', (req, res) =>
+    res.sendFile(path.join(__dirname, 'web', 'dist', 'setup', 'index.html'))
+);
 
 // ── Static Files ──────────────────────────────────────────────────────────────
-app.use(express.static(path.join(__dirname, 'public')));
+// Serves the built Astro frontend (web/dist). The legacy public/ pages have been
+// migrated to Astro; rebuild with `npm run build` inside web/ after changes.
+app.use(express.static(path.join(__dirname, 'web', 'dist')));
 
 // ── Favicon Fallback ─────────────────────────────────────────────────────────
 app.get('/favicon.ico', (req, res) => res.status(204).end());

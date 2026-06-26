@@ -1,0 +1,791 @@
+---
+/*
+ * Login page — ported 1:1 from public/login.html (lift-and-shift).
+ * Unified customer + admin login (tabs), register, forgot-password, admin 2FA.
+ *
+ * Changes vs the original:
+ *   - The duplicated :root/[data-theme] token block is removed; tokens come from
+ *     the global tokens.css imported by BaseLayout.
+ *   - CDN Lucide is replaced by the bundled initIcons() from src/lib/icons.js.
+ *   - Redirect targets use Astro routes: 'portal.html' -> '/portal',
+ *     'index.html' -> '/'.
+ *   - The <style> is is:global because alerts are injected at runtime via
+ *     innerHTML and would not receive Astro's scoped data attributes.
+ *   - onclick-referenced functions are exposed on window (the page script is a
+ *     module and otherwise scoped).
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Meraki – Login">
+    <nav>
+        <span
+            class="nav-logo"
+            onclick="window.location.href = '/'"
+            style="cursor: pointer"
+            title="Zur Startseite"
+            ><img src="/Meraki_RMS_CMS.png" alt="Meraki" style="height: 26px; width: auto; display: block" /></span
+        >
+        <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn" title="Theme wechseln">
+            <i data-lucide="sun"></i>
+        </button>
+    </nav>
+
+    <div class="center-wrap">
+        <div class="auth-card">
+            <!-- Tab-Leiste -->
+            <div class="login-tabs">
+                <button class="login-tab active" id="tab-customer" onclick="setMode('customer')">
+                    Kunden-Portal
+                </button>
+                <button class="login-tab" id="tab-admin" onclick="setMode('admin')">Admin</button>
+            </div>
+
+            <div class="card-body">
+                <!-- Kunden: Login -->
+                <div id="panel-cust-login" class="panel active">
+                    <div class="panel-title"><i data-lucide="log-in"></i> Anmelden</div>
+                    <div class="panel-sub">
+                        Melde dich mit deiner E-Mail oder deinem Benutzernamen an.
+                    </div>
+                    <div id="cust-login-alert"></div>
+                    <div class="form-group">
+                        <label>E-Mail / Benutzername</label><input
+                            type="text"
+                            id="cust-email"
+                            autocomplete="username"
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label>Passwort</label><input
+                            type="password"
+                            id="cust-pass"
+                            autocomplete="current-password"
+                        />
+                    </div>
+                    <button class="btn btn-primary" onclick="doCustomerLogin()">Einloggen</button>
+                    <div class="links-row">
+                        <span
+                            >Noch kein Konto?
+                            <a class="link" onclick="showPanel('cust', 'register')"
+                                >Jetzt registrieren</a
+                            ></span
+                        >
+                        <a class="link" onclick="showPanel('cust', 'forgot')">Passwort vergessen?</a>
+                    </div>
+                </div>
+
+                <!-- Kunden: Registrieren -->
+                <div id="panel-cust-register" class="panel">
+                    <div class="panel-title"><i data-lucide="user-plus"></i> Registrieren</div>
+                    <div class="panel-sub">Erstelle ein neues Kunden-Konto.</div>
+                    <div id="cust-reg-alert"></div>
+                    <div class="form-group">
+                        <label>Name *</label><input type="text" id="reg-name" />
+                    </div>
+                    <div class="form-group">
+                        <label>E-Mail *</label><input type="email" id="reg-email" />
+                    </div>
+                    <div class="form-group">
+                        <label
+                            >Passwort *
+                            <span style="font-weight: 400">(min. 10 Zeichen)</span></label
+                        ><input type="password" id="reg-pass" />
+                    </div>
+                    <div class="form-group">
+                        <label>Passwort wiederholen *</label><input type="password" id="reg-pass2" />
+                    </div>
+                    <div class="form-group">
+                        <label>Firma <span style="font-weight: 400">(optional)</span></label><input
+                            type="text"
+                            id="reg-company"
+                        />
+                    </div>
+                    <div class="form-group" style="display: flex; gap: 0.5rem; align-items: flex-start">
+                        <input
+                            type="checkbox"
+                            id="reg-agb"
+                            style="width: auto; margin-top: var(--space-1); flex-shrink: 0"
+                        />
+                        <label
+                            for="reg-agb"
+                            style="margin: 0; font-size: var(--text-sm); line-height: 1.4"
+                            >Ich akzeptiere die AGB und Datenschutzbestimmungen *</label
+                        >
+                    </div>
+                    <button class="btn btn-primary" style="margin-top: var(--space-2)" onclick="doRegister()">
+                        Konto erstellen
+                    </button>
+                    <div class="links-row">
+                        <a class="link" onclick="showPanel('cust', 'login')">&#8592; Zurück zum Login</a>
+                    </div>
+                </div>
+
+                <!-- Kunden: Passwort vergessen -->
+                <div id="panel-cust-forgot" class="panel">
+                    <div class="panel-title"><i data-lucide="key-round"></i> Passwort vergessen</div>
+                    <div class="panel-sub">
+                        Gib deine E-Mail-Adresse ein – du erhältst einen Reset-Link.
+                    </div>
+                    <div id="cust-forgot-alert"></div>
+                    <div class="form-group">
+                        <label>E-Mail-Adresse</label><input type="email" id="forgot-email" />
+                    </div>
+                    <button class="btn btn-primary" onclick="doForgotPassword()">Reset-Link senden</button>
+                    <div class="links-row">
+                        <a class="link" onclick="showPanel('cust', 'login')">&#8592; Zurück zum Login</a>
+                    </div>
+                </div>
+
+                <!-- Admin: Login -->
+                <div id="panel-admin-login" class="panel">
+                    <div class="panel-title"><i data-lucide="shield"></i> Anmelden</div>
+                    <div class="panel-sub">Administration des Lizenzservers.</div>
+                    <div id="admin-login-alert"></div>
+                    <div class="form-group">
+                        <label>Benutzername</label><input
+                            type="text"
+                            id="admin-user"
+                            autocomplete="username"
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label>Passwort</label><input
+                            type="password"
+                            id="admin-pass"
+                            autocomplete="current-password"
+                        />
+                    </div>
+                    <button class="btn btn-primary" onclick="doAdminLogin()">Einloggen</button>
+                </div>
+
+                <!-- Admin: 2FA -->
+                <div id="panel-admin-2fa" class="panel">
+                    <div class="panel-title"><i data-lucide="shield-check"></i> Zwei-Faktor</div>
+                    <div class="panel-sub">Bitte den 6-stelligen Authenticator-Code eingeben.</div>
+                    <div id="admin-2fa-alert"></div>
+                    <div class="form-group">
+                        <label>Code</label><input
+                            type="text"
+                            id="admin-code"
+                            class="otp-input"
+                            autocomplete="one-time-code"
+                            maxlength="6"
+                            inputmode="numeric"
+                        />
+                    </div>
+                    <button class="btn btn-primary" onclick="doAdmin2FA()">Verifizieren</button>
+                    <div class="links-row">
+                        <a class="link" onclick="showPanel('admin', 'login')">Abbrechen</a>
+                    </div>
+                </div>
+            </div>
+            <!-- /card-body -->
+        </div>
+        <!-- /auth-card -->
+    </div>
+</BaseLayout>
+
+<style is:global>
+    /* Page base styles ported from public/login.html (minus the token block, which
+       now lives in tokens.css). is:global because runtime-injected .alert markup
+       must be matched. */
+    body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--font-body);
+        line-height: 1.6;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        transition:
+            background 0.3s,
+            color 0.3s;
+    }
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        font-family: var(--font-display);
+        letter-spacing: -0.02em;
+        line-height: 1.2;
+    }
+    input,
+    button,
+    select,
+    textarea {
+        font-family: var(--font-body);
+    }
+    .lucide {
+        width: 1.05em;
+        height: 1.05em;
+        vertical-align: -0.18em;
+        stroke-width: 2;
+        flex-shrink: 0;
+    }
+
+    nav {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: var(--nav-bg);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--border);
+        padding: 0 var(--space-8);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 60px;
+    }
+    .nav-logo {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        font-size: var(--text-base);
+        font-weight: 700;
+        color: var(--accent);
+        font-family: var(--font-display);
+    }
+    .nav-logo .lucide {
+        width: 1.15em;
+        height: 1.15em;
+    }
+    .theme-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--text2);
+        border-radius: var(--radius-md);
+        width: 34px;
+        height: 34px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .theme-toggle:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+    }
+
+    .center-wrap {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: var(--space-8);
+        background-color: var(--bg);
+        background-image:
+            radial-gradient(ellipse 80% 60% at 50% -10%, rgba(0, 191, 165, 0.1), transparent),
+            linear-gradient(var(--grid-line) 1px, transparent 1px),
+            linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+        background-size:
+            100% 100%,
+            40px 40px,
+            40px 40px;
+    }
+
+    .auth-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 0;
+        width: 100%;
+        max-width: 400px;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+    }
+
+    /* Tab bar */
+    .login-tabs {
+        display: flex;
+        border-bottom: 1px solid var(--border);
+    }
+    .login-tab {
+        flex: 1;
+        padding: var(--space-3) var(--space-4);
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        font-size: var(--text-sm);
+        font-weight: 500;
+        color: var(--text2);
+        font-family: var(--font-body);
+        transition: all 0.2s;
+        border-bottom: 2px solid transparent;
+        margin-bottom: -1px;
+    }
+    .login-tab.active {
+        color: var(--accent);
+        border-bottom-color: var(--accent);
+    }
+    .login-tab:hover:not(.active) {
+        color: var(--text);
+        background: var(--bg3);
+    }
+
+    .card-body {
+        padding: var(--space-8);
+    }
+
+    .panel {
+        display: none;
+    }
+    .panel.active {
+        display: block;
+    }
+    .panel-title {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: var(--text-lg);
+        font-weight: 700;
+        margin-bottom: var(--space-1);
+    }
+    .panel-title .lucide {
+        color: var(--accent);
+        width: 1.1em;
+        height: 1.1em;
+    }
+    .panel-sub {
+        color: var(--text2);
+        font-size: var(--text-sm);
+        margin-bottom: var(--space-6);
+    }
+
+    .form-group {
+        margin-bottom: var(--space-4);
+    }
+    .form-group label {
+        display: block;
+        font-size: var(--text-sm);
+        color: var(--text2);
+        margin-bottom: var(--space-1);
+        font-weight: 500;
+    }
+    .form-group input {
+        width: 100%;
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: var(--space-2) var(--space-4);
+        color: var(--text);
+        font-size: var(--text-sm);
+        outline: none;
+        transition: border-color 0.2s;
+        font-family: var(--font-body);
+    }
+    .form-group input:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-dim);
+    }
+
+    .btn {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.4rem;
+        padding: var(--space-3) var(--space-4);
+        border-radius: var(--radius-md);
+        border: none;
+        cursor: pointer;
+        font-size: var(--text-sm);
+        font-weight: 500;
+        transition: all var(--transition-interactive);
+        text-decoration: none;
+        width: 100%;
+        font-family: var(--font-body);
+        margin-top: var(--space-1);
+    }
+    .btn-primary {
+        background: var(--accent);
+        color: #fff;
+    }
+    .btn-primary:hover {
+        background: var(--accent-hover);
+    }
+    .btn-ghost {
+        background: transparent;
+        color: var(--text2);
+        border: 1px solid var(--border);
+        width: auto;
+        font-size: var(--text-sm);
+    }
+    .btn-ghost:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+    }
+
+    .alert {
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: var(--space-3) var(--space-4);
+        border-radius: var(--radius-md);
+        font-size: var(--text-sm);
+        margin-bottom: var(--space-4);
+    }
+    .alert-error {
+        background: rgba(255, 93, 108, 0.1);
+        border: 1px solid rgba(255, 93, 108, 0.25);
+        color: var(--accent2);
+    }
+    .alert-success {
+        background: rgba(95, 191, 106, 0.1);
+        border: 1px solid rgba(95, 191, 106, 0.25);
+        color: var(--accent3);
+    }
+    .alert-info {
+        background: var(--accent-dim);
+        border: 1px solid rgba(0, 191, 165, 0.25);
+        color: var(--accent);
+    }
+
+    .link {
+        color: var(--accent);
+        text-decoration: none;
+        cursor: pointer;
+        font-size: var(--text-sm);
+    }
+    .link:hover {
+        text-decoration: underline;
+    }
+    .links-row {
+        text-align: center;
+        margin-top: var(--space-4);
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        color: var(--text2);
+        font-size: var(--text-sm);
+    }
+
+    .otp-input {
+        text-align: center;
+        font-size: var(--text-xl);
+        letter-spacing: 8px;
+        font-family: var(--font-mono);
+    }
+</style>
+
+<script>
+    import { makeIconRenderer } from '../lib/icons.js';
+    import {
+        Sun,
+        Moon,
+        LogIn,
+        UserPlus,
+        KeyRound,
+        Shield,
+        ShieldCheck,
+        CheckCircle,
+    } from 'lucide';
+
+    // Only the icons this page actually uses — keeps the bundle small.
+    const initIcons = makeIconRenderer({
+        Sun,
+        Moon,
+        LogIn,
+        UserPlus,
+        KeyRound,
+        Shield,
+        ShieldCheck,
+        CheckCircle,
+    });
+
+    // Render Lucide icons now and re-render whenever new data-lucide markup is
+    // inserted (alerts, panel swaps). Replaces the old CDN lucide.createIcons().
+    (function () {
+        let pending = false;
+        function refresh() {
+            if (pending) return;
+            pending = true;
+            requestAnimationFrame(function () {
+                pending = false;
+                initIcons();
+            });
+        }
+        function start() {
+            initIcons();
+            new MutationObserver(refresh).observe(document.body, {
+                childList: true,
+                subtree: true,
+            });
+        }
+        if (document.readyState !== 'loading') start();
+        else document.addEventListener('DOMContentLoaded', start);
+    })();
+
+    function setThemeIcon(theme) {
+        const btn = document.getElementById('theme-btn');
+        if (btn) {
+            btn.innerHTML =
+                theme === 'dark' ? '<i data-lucide="sun"></i>' : '<i data-lucide="moon"></i>';
+        }
+        initIcons();
+    }
+
+    (function () {
+        // Forward password-reset / verify tokens to the portal page.
+        const p = new URLSearchParams(window.location.search);
+        if (p.get('reset')) {
+            window.location.href = '/portal?token=' + encodeURIComponent(p.get('reset'));
+            return;
+        }
+        if (p.get('verify')) {
+            window.location.href = '/portal?verify=' + encodeURIComponent(p.get('verify'));
+            return;
+        }
+
+        // Theme (BaseLayout already set data-theme; sync the button icon).
+        const t = localStorage.getItem('theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', t);
+        setThemeIcon(t);
+
+        // Hash routing
+        if (window.location.hash === '#register') {
+            setMode('customer');
+            showPanel('cust', 'register');
+        }
+        if (window.location.hash === '#forgot') {
+            setMode('customer');
+            showPanel('cust', 'forgot');
+        }
+        if (window.location.hash === '#admin') {
+            setMode('admin');
+        }
+    })();
+
+    function toggleTheme() {
+        const n =
+            document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', n);
+        localStorage.setItem('theme', n);
+        setThemeIcon(n);
+    }
+
+    let _mode = 'customer';
+
+    function setMode(m) {
+        _mode = m;
+        document.getElementById('tab-customer').classList.toggle('active', m === 'customer');
+        document.getElementById('tab-admin').classList.toggle('active', m === 'admin');
+        if (m === 'customer') showPanel('cust', 'login');
+        else showPanel('admin', 'login');
+    }
+
+    function showPanel(prefix, name) {
+        document.querySelectorAll('.panel').forEach(function (el) {
+            el.classList.remove('active');
+        });
+        document.getElementById('panel-' + prefix + '-' + name).classList.add('active');
+    }
+
+    function esc(s) {
+        return String(s || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    }
+
+    function showAlert(id, msg, type) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.innerHTML = '<div class="alert alert-' + (type || 'error') + '">' + msg + '</div>';
+    }
+    function clearAlerts() {
+        document.querySelectorAll('.alert').forEach(function (el) {
+            el.innerHTML = '';
+        });
+    }
+
+    // Kunden Login
+    function doCustomerLogin() {
+        const email = document.getElementById('cust-email').value.trim();
+        const pass = document.getElementById('cust-pass').value;
+        if (!email || !pass)
+            return showAlert('cust-login-alert', 'E-Mail/Benutzername und Passwort eingeben.');
+        fetch('/api/portal/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: email, password: pass }),
+        })
+            .then(function (r) {
+                return r.json().then(function (d) {
+                    if (!r.ok) throw d;
+                    return d;
+                });
+            })
+            .then(function (d) {
+                sessionStorage.setItem('portal_token', d.token);
+                window.location.href = '/portal';
+            })
+            .catch(function (e) {
+                if (e.must_change_password) {
+                    sessionStorage.setItem('portal_token', e.token || '');
+                    window.location.href = '/portal';
+                    return;
+                }
+                showAlert('cust-login-alert', esc(e.message || 'Login fehlgeschlagen.'));
+            });
+    }
+
+    // Registrieren
+    function doRegister() {
+        const name = document.getElementById('reg-name').value.trim();
+        const email = document.getElementById('reg-email').value.trim();
+        const pass = document.getElementById('reg-pass').value;
+        const pass2 = document.getElementById('reg-pass2').value;
+        const company = document.getElementById('reg-company').value.trim();
+        const agb = document.getElementById('reg-agb').checked;
+        if (!name || !email || !pass)
+            return showAlert('cust-reg-alert', 'Bitte alle Pflichtfelder ausfüllen.');
+        if (pass !== pass2) return showAlert('cust-reg-alert', 'Passwörter stimmen nicht überein.');
+        if (pass.length < 10)
+            return showAlert('cust-reg-alert', 'Passwort muss mindestens 10 Zeichen lang sein.');
+        if (!agb) return showAlert('cust-reg-alert', 'Bitte akzeptiere die AGB.');
+        fetch('/api/portal/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: name, email: email, password: pass, company: company }),
+        })
+            .then(function (r) {
+                return r.json().then(function (d) {
+                    if (!r.ok) throw d;
+                    return d;
+                });
+            })
+            .then(function (d) {
+                showAlert(
+                    'cust-reg-alert',
+                    '<i data-lucide="check-circle"></i> ' + esc(d.message),
+                    'success'
+                );
+                ['reg-name', 'reg-email', 'reg-pass', 'reg-pass2', 'reg-company'].forEach(function (
+                    id
+                ) {
+                    document.getElementById(id).value = '';
+                });
+                document.getElementById('reg-agb').checked = false;
+            })
+            .catch(function (e) {
+                showAlert('cust-reg-alert', esc(e.message || 'Registrierung fehlgeschlagen.'));
+            });
+    }
+
+    // Passwort vergessen
+    function doForgotPassword() {
+        const email = document.getElementById('forgot-email').value.trim();
+        if (!email) return showAlert('cust-forgot-alert', 'Bitte E-Mail eingeben.');
+        fetch('/api/portal/forgot-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: email }),
+        })
+            .then(function (r) {
+                return r.json().then(function (d) {
+                    if (!r.ok) throw d;
+                    return d;
+                });
+            })
+            .then(function (d) {
+                showAlert(
+                    'cust-forgot-alert',
+                    '<i data-lucide="check-circle"></i> ' + esc(d.message),
+                    'success'
+                );
+            })
+            .catch(function (e) {
+                showAlert('cust-forgot-alert', esc(e.message || 'Fehler.'));
+            });
+    }
+
+    // Admin Login
+    let _adminTempToken = '';
+    function doAdminLogin() {
+        const user = document.getElementById('admin-user').value.trim();
+        const pass = document.getElementById('admin-pass').value;
+        if (!user || !pass)
+            return showAlert('admin-login-alert', 'Benutzername und Passwort eingeben.');
+        fetch('/api/admin/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: user, password: pass }),
+        })
+            .then(function (r) {
+                return r.json().then(function (d) {
+                    if (!r.ok) throw d;
+                    return d;
+                });
+            })
+            .then(function (d) {
+                if (d.two_factor_required) {
+                    _adminTempToken = d.temp_token;
+                    showPanel('admin', '2fa');
+                } else {
+                    sessionStorage.setItem('admin_token', d.token);
+                    sessionStorage.setItem('admin_role', d.role || '');
+                    sessionStorage.setItem('admin_user', d.username || '');
+                    window.location.href = '/';
+                }
+            })
+            .catch(function (e) {
+                showAlert('admin-login-alert', esc(e.message || 'Login fehlgeschlagen.'));
+            });
+    }
+
+    function doAdmin2FA() {
+        const code = document.getElementById('admin-code').value.trim();
+        if (!code) return showAlert('admin-2fa-alert', 'Code eingeben.');
+        fetch('/api/admin/login/2fa', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ temp_token: _adminTempToken, code: code }),
+        })
+            .then(function (r) {
+                return r.json().then(function (d) {
+                    if (!r.ok) throw d;
+                    return d;
+                });
+            })
+            .then(function (d) {
+                sessionStorage.setItem('admin_token', d.token);
+                sessionStorage.setItem('admin_role', d.role || '');
+                sessionStorage.setItem('admin_user', d.username || '');
+                window.location.href = '/';
+            })
+            .catch(function (e) {
+                showAlert('admin-2fa-alert', esc(e.message || 'Code ungültig.'));
+            });
+    }
+
+    // Enter key submits the active panel
+    document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Enter') return;
+        const active = document.querySelector('.panel.active');
+        if (!active) return;
+        const id = active.id;
+        if (id === 'panel-cust-login') doCustomerLogin();
+        else if (id === 'panel-cust-register') doRegister();
+        else if (id === 'panel-cust-forgot') doForgotPassword();
+        else if (id === 'panel-admin-login') doAdminLogin();
+        else if (id === 'panel-admin-2fa') doAdmin2FA();
+    });
+
+    // Expose handlers referenced by inline onclick attributes (module scripts are
+    // otherwise scoped, so these must be global).
+    Object.assign(window, {
+        toggleTheme,
+        setMode,
+        showPanel,
+        doCustomerLogin,
+        doRegister,
+        doForgotPassword,
+        doAdminLogin,
+        doAdmin2FA,
+        clearAlerts,
+    });
+</script>

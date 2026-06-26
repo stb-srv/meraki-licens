@@ -8,6 +8,8 @@
     "node": ">=18"
   },
   "scripts": {
+    "build:web": "npm --prefix web install && npm --prefix web run build",
+    "prestart": "npm run build:web",
     "start": "node init.js && node server.js",
     "dev": "node init.js && node --watch server.js",
     "setup-db": "node setup-db.js",

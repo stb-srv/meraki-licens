@@ -1,0 +1,50 @@
+---
+/*
+ * BaseLayout — the shared HTML shell for every page.
+ * Renders <html data-theme>, the <head> (fonts + design tokens), and slots the
+ * page body. Only tokens.css (pure CSS variables) is imported here — it is
+ * conflict-free and needed by every page. The shared base styles (global.css,
+ * the index/admin button + reset family) are imported per-page by index/portal,
+ * because login/setup carry their own slightly different base styles inline.
+ *
+ * Props:
+ *   title       — document <title>
+ *   description  — optional meta description
+ *   bodyClass    — optional class applied to <body>
+ */
+import '../styles/tokens.css';
+
+const { title = 'Meraki', description = '', bodyClass = '' } = Astro.props;
+---
+
+<!doctype html>
+<html lang="de" data-theme="dark">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>{title}</title>
+        {description && <meta name="description" content={description} />}
+
+        <!--
+          FOUC guard: set the persisted theme on <html> before first paint.
+          Ported from public/index.html:3150-3153. Must run inline & synchronously,
+          so it is is:inline (not bundled/deferred by Astro).
+        -->
+        <script is:inline>
+            (function () {
+                var saved = localStorage.getItem('theme') || 'dark';
+                document.documentElement.setAttribute('data-theme', saved);
+            })();
+        </script>
+
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;0,900;1,300;1,400&family=Roboto+Mono:wght@400;500&display=swap"
+            rel="stylesheet"
+        />
+    </head>
+    <body class={bodyClass}>
+        <slot />
+    </body>
+</html>

@@ -1,0 +1,49 @@
+---
+/*
+ * ThemeToggle — dark/light switch button.
+ * Renders the button + #theme-svg icon target used by theme.js. The client
+ * script wires the click handler and syncs the icon on load.
+ *
+ * Props:
+ *   onChangeGlobal — optional name of a global function to call after a theme
+ *                    switch, e.g. "rerenderCharts". Passed via data attribute so
+ *                    the bundled module script (with imports) can read it. Lets
+ *                    the heavy index page re-render Chart.js without this
+ *                    component importing it.
+ */
+const { onChangeGlobal = '' } = Astro.props;
+---
+
+<button
+    class="theme-toggle"
+    id="theme-toggle"
+    aria-label="Theme umschalten"
+    title="Theme umschalten"
+    data-on-change={onChangeGlobal}
+>
+    <svg
+        id="theme-svg"
+        xmlns="http://www.w3.org/2000/svg"
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"></svg>
+</button>
+
+<script>
+    import { toggleTheme, initThemeButton } from '../lib/theme.js';
+
+    initThemeButton();
+    const btn = document.getElementById('theme-toggle');
+    if (btn) {
+        btn.addEventListener('click', () => {
+            const name = btn.getAttribute('data-on-change');
+            const cb = name && window[name];
+            toggleTheme(typeof cb === 'function' ? cb : undefined);
+        });
+    }
+</script>

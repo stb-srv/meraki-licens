@@ -1,0 +1,17 @@
+- generic [active] [ref=e1]:
+  - navigation [ref=e2]:
+    - generic [ref=e3]:
+      - img [ref=e4]
+      - text: Meraki
+    - button "Theme wechseln" [ref=e6] [cursor=pointer]:
+      - img [ref=e7]
+  - generic [ref=e15]:
+    - img [ref=e17]
+    - generic [ref=e20]: Setup bereits abgeschlossen
+    - generic [ref=e21]:
+      - text: Der Admin-Account existiert bereits.
+      - text: Du kannst dich jetzt einloggen.
+    - link "Zum Admin-Panel" [ref=e22] [cursor=pointer]:
+      - /url: /
+      - img [ref=e23]
+      - text: Zum Admin-Panel
