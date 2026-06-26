@@ -13,6 +13,12 @@ router.get(
     '/analytics',
     requireAuth,
     asyncHandler(async (req, res) => {
+        const VALID_PERIODS = [7, 30, 90, 365];
+        const period = VALID_PERIODS.includes(Number(req.query.period))
+            ? Number(req.query.period)
+            : 30;
+        const interval = `-${period} days`;
+
         const [topLics] = db.query(
             'SELECT license_key, customer_name, type, usage_count, last_validated FROM licenses ORDER BY usage_count DESC LIMIT 10'
         );
@@ -21,8 +27,9 @@ router.get(
         );
         const [typeStats] = db.query('SELECT type, COUNT(*) as count FROM licenses GROUP BY type');
 
-        const [[{ count_30d }]] = db.query(
-            `SELECT COUNT(*) as count_30d FROM licenses WHERE created_at >= datetime('now', '-30 days')`
+        const [[{ count_period }]] = db.query(
+            `SELECT COUNT(*) as count_period FROM licenses WHERE created_at >= datetime('now', ?)`,
+            [interval]
         );
         const [[{ count_7d }]] = db.query(
             `SELECT COUNT(*) as count_7d FROM licenses WHERE created_at >= datetime('now', '-7 days')`
@@ -49,8 +56,9 @@ router.get(
         const [[{ revenue_month }]] = db.query(
             `SELECT SUM(amount) as revenue_month FROM purchase_history WHERE created_at >= strftime('%Y-%m-01', 'now')`
         );
-        const [[{ revenue_30d }]] = db.query(
-            `SELECT SUM(amount) as revenue_30d FROM purchase_history WHERE created_at >= datetime('now', '-30 days')`
+        const [[{ revenue_period }]] = db.query(
+            `SELECT SUM(amount) as revenue_period FROM purchase_history WHERE created_at >= datetime('now', ?)`,
+            [interval]
         );
 
         const [topCustomers] = db.query(
@@ -60,21 +68,22 @@ router.get(
         const validations_per_day = Object.entries(daily)
             .map(([date, count]) => ({ date, count }))
             .sort((a, b) => a.date.localeCompare(b.date))
-            .slice(-30);
+            .slice(-period);
 
         res.json({
             success: true,
+            period,
             top_licenses: topLics,
             validations_per_day,
             status_distribution: statusStats,
             type_distribution: typeStats,
             feature_usage: features,
-            growth: { last_7d: count_7d, last_30d: count_30d },
+            growth: { last_7d: count_7d, last_period: count_period },
             devices: { total: total_devices, active: active_devices },
             revenue: {
                 total: revenue_total || 0,
                 month: revenue_month || 0,
-                last_30d: revenue_30d || 0,
+                last_period: revenue_period || 0,
             },
             top_customers: topCustomers,
         });

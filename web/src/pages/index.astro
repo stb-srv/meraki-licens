@@ -700,6 +700,58 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                 overflow-y: auto;
                 padding: var(--space-8) var(--space-10);
             }
+            /* Skip-to-content link for keyboard users */
+            .skip-link {
+                position: absolute;
+                left: -999px;
+                top: auto;
+                width: 1px;
+                height: 1px;
+                overflow: hidden;
+            }
+            .skip-link:focus {
+                position: fixed;
+                top: var(--space-4);
+                left: var(--space-4);
+                width: auto;
+                height: auto;
+                padding: var(--space-2) var(--space-4);
+                background: var(--primary);
+                color: #fff;
+                border-radius: var(--radius-md);
+                z-index: 9999;
+                font-size: var(--text-sm);
+                font-weight: 500;
+                text-decoration: none;
+            }
+
+            /* Period filter pills */
+            .period-pills {
+                display: flex;
+                gap: var(--space-2);
+                flex-wrap: wrap;
+            }
+            .period-pill {
+                padding: var(--space-1) var(--space-3);
+                border-radius: 999px;
+                border: 1px solid var(--border);
+                background: transparent;
+                color: var(--text2);
+                font-size: var(--text-xs);
+                font-weight: 500;
+                cursor: pointer;
+                transition: all var(--transition-interactive);
+            }
+            .period-pill:hover {
+                border-color: var(--primary);
+                color: var(--primary);
+            }
+            .period-pill.active {
+                background: var(--primary);
+                border-color: var(--primary);
+                color: #fff;
+            }
+
             .dash-header {
                 display: flex;
                 align-items: center;
@@ -1294,7 +1346,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                 color: var(--text2);
             }
         </style>
-        <nav id="main-nav">
+        <a href="#main-content" class="skip-link">Zum Inhalt springen</a>
+        <nav id="main-nav" role="navigation" aria-label="Hauptnavigation">
             <span
                 class="nav-logo"
                 onclick="showPublicPage('home')"
@@ -1957,9 +2010,17 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                     </ul>
                 </aside>
 
-                <main class="main-area">
+                <main class="main-area" id="main-content">
                     <div id="tab-overview" class="tab-panel active">
-                        <div class="dash-header"><h2>Dashboard</h2></div>
+                        <div class="dash-header">
+                            <h2>Dashboard</h2>
+                            <div class="period-pills" role="group" aria-label="Zeitraum wählen">
+                                <button class="period-pill active" onclick="setPeriod(7)" data-period="7">7T</button>
+                                <button class="period-pill" onclick="setPeriod(30)" data-period="30">30T</button>
+                                <button class="period-pill" onclick="setPeriod(90)" data-period="90">90T</button>
+                                <button class="period-pill" onclick="setPeriod(365)" data-period="365">12M</button>
+                            </div>
+                        </div>
                         <div class="stats-row" id="stats-row">
                             <div class="loading"><div class="spinner"></div></div>
                         </div>
@@ -4587,35 +4648,46 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                 }
             }
 
+            var overviewPeriod = 30;
+            function setPeriod(p) {
+                overviewPeriod = p;
+                document.querySelectorAll('.period-pill').forEach(function (btn) {
+                    btn.classList.toggle('active', Number(btn.dataset.period) === p);
+                });
+                loadOverview();
+            }
+
             function loadOverview() {
+                document.getElementById('stats-row').innerHTML = skeletonTable(6, 1);
                 API('/admin/licenses?limit=10')
                     .then(function (lic) {
-                        return API('/admin/analytics').then(function (ana) {
+                        return API('/admin/analytics?period=' + overviewPeriod).then(function (ana) {
                             var s = lic.stats || {};
-                            var rev = ana.revenue || { total: 0, month: 0, last_30d: 0 };
-                            var val30d = (ana.validations_per_day || []).reduce(function (a, b) {
+                            var rev = ana.revenue || { total: 0, last_period: 0 };
+                            var valTotal = (ana.validations_per_day || []).reduce(function (a, b) {
                                 return a + b.count;
                             }, 0);
+                            var periodLabel = overviewPeriod === 365 ? '12M' : overviewPeriod + 'T';
 
-                            var g30 = ana.growth.last_30d || 0;
+                            var gp = ana.growth.last_period || 0;
                             var g7 = ana.growth.last_7d || 0;
                             document.getElementById('stats-row').innerHTML =
                                 '<div class="stat-card"><div class="stat-label"><i data-lucide="key-round"></i> Gesamt Lizenzen</div><div class="stat-value">' +
                                 (s.total || 0) +
-                                '</div><div class="stat-trend' + (g30 >= 0 ? '' : ' down') + '"><i data-lucide="' + (g30 >= 0 ? 'trending-up' : 'trending-down') + '"></i> ' + (g30 >= 0 ? '+' : '') +
-                                g30 +
-                                ' mtl.</div></div>' +
+                                '</div><div class="stat-trend' + (gp >= 0 ? '' : ' down') + '"><i data-lucide="' + (gp >= 0 ? 'trending-up' : 'trending-down') + '"></i> ' + (gp >= 0 ? '+' : '') +
+                                gp +
+                                ' in ' + periodLabel + '</div></div>' +
                                 '<div class="stat-card"><div class="stat-label"><i data-lucide="check-circle-2"></i> Aktive Lizenzen</div><div class="stat-value" style="color:var(--success)">' +
                                 (s.active || 0) +
                                 '</div></div>' +
-                                '<div class="stat-card"><div class="stat-label"><i data-lucide="shield-check"></i> Validierungen (30d)</div><div class="stat-value">' +
-                                val30d +
+                                '<div class="stat-card"><div class="stat-label"><i data-lucide="shield-check"></i> Validierungen (' + periodLabel + ')</div><div class="stat-value">' +
+                                valTotal +
                                 '</div></div>' +
-                                '<div class="stat-card"><div class="stat-label"><i data-lucide="banknote"></i> Umsatz (30d)</div><div class="stat-value" style="color:var(--primary)">' +
-                                fmtEur(rev.last_30d) +
+                                '<div class="stat-card"><div class="stat-label"><i data-lucide="banknote"></i> Umsatz (' + periodLabel + ')</div><div class="stat-value" style="color:var(--primary)">' +
+                                fmtEur(rev.last_period) +
                                 '</div><div class="stat-trend' + (g7 >= 0 ? '' : ' down') + '"><i data-lucide="' + (g7 >= 0 ? 'trending-up' : 'trending-down') + '"></i> ' + (g7 >= 0 ? '+' : '') +
                                 g7 +
-                                ' neue Verkäufe (7d)</div></div>' +
+                                ' neue (7d)</div></div>' +
                                 '<div class="stat-card"><div class="stat-label"><i data-lucide="wallet"></i> Umsatz (Gesamt)</div><div class="stat-value" style="color:var(--warning)">' +
                                 fmtEur(rev.total) +
                                 '</div></div>' +
