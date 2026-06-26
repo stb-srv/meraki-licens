@@ -29,6 +29,10 @@ debug-admin.js
 # Test Coverage
 coverage/
 
+# Playwright MCP artifacts (screenshots, snapshots)
+.playwright-mcp/
+**/.playwright-mcp/
+
 # SQLite Datenbankdateien
 data/*.db
 data/*.db-shm
