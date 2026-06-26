@@ -140,3 +140,40 @@ button {
     width: 18px;
     height: 18px;
 }
+
+/* Accessibility: visible focus ring for keyboard navigation */
+:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+}
+
+/* Form focus: consistent shadow across all pages */
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-hl);
+    outline: none;
+}
+
+/* Skeleton loader shimmer */
+.skeleton {
+    background: linear-gradient(
+        90deg,
+        var(--bg3) 25%,
+        var(--border) 50%,
+        var(--bg3) 75%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.4s infinite;
+    border-radius: var(--radius-sm);
+    color: transparent;
+    pointer-events: none;
+    user-select: none;
+}
+@keyframes skeleton-shimmer {
+    to {
+        background-position: -200% 0;
+    }
+}

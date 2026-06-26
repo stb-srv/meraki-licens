@@ -1,18 +1,7 @@
 ---
-import '../styles/tokens.css';
+import BaseLayout from '../layouts/BaseLayout.astro';
 ---
-<!doctype html>
-<html lang="de" data-theme="dark">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Meraki &ndash; Lizenzserver</title>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link
-            href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;0,900;1,300;1,400&family=Roboto+Mono:wght@400;500&display=swap"
-            rel="stylesheet"
-        />
+<BaseLayout title="Meraki – Lizenzserver">
         <style is:global>
             /* design tokens provided globally by tokens.css */
             * {
@@ -77,7 +66,7 @@ import '../styles/tokens.css';
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
-                height: 64px;
+                height: var(--nav-height);
             }
             .nav-logo {
                 font-size: var(--text-lg);
@@ -369,10 +358,15 @@ import '../styles/tokens.css';
                 border-bottom: none;
             }
             .plan-features li::before {
-                content: '✓ ';
-                color: var(--success);
+                content: '';
+                display: inline-block;
+                width: 14px;
+                height: 14px;
                 margin-right: var(--space-2);
-                font-weight: bold;
+                flex-shrink: 0;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%233a8a3a' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
+                background-repeat: no-repeat;
+                background-size: contain;
             }
 
             .api-table {
@@ -604,7 +598,7 @@ import '../styles/tokens.css';
             }
             .toast-out {
                 opacity: 0;
-                transform: translateY(8px);
+                transform: translateX(calc(100% + 2rem));
             }
             .toast-success {
                 background: var(--success-hl);
@@ -629,7 +623,7 @@ import '../styles/tokens.css';
                 background: var(--bg);
             }
             .sidebar {
-                width: 240px;
+                width: var(--sidebar-width);
                 background: var(--bg2);
                 border-right: 1px solid var(--border);
                 padding: var(--space-6) var(--space-4);
@@ -1081,7 +1075,29 @@ import '../styles/tokens.css';
                 align-items: center;
                 text-align: center;
                 padding: var(--space-16) var(--space-8);
+                gap: var(--space-3);
                 color: var(--text2);
+            }
+            .empty-state svg,
+            .empty-state i[data-lucide] {
+                width: 44px;
+                height: 44px;
+                color: var(--text3);
+                margin-bottom: var(--space-2);
+            }
+            .empty-state h3 {
+                color: var(--text);
+                font-size: var(--text-base);
+                margin: 0;
+            }
+            .empty-state p {
+                font-size: var(--text-sm);
+                max-width: 36ch;
+                line-height: 1.6;
+                margin: 0;
+            }
+            .empty-state .btn {
+                margin-top: var(--space-2);
             }
 
             @media (max-width: 768px) {
@@ -1227,8 +1243,6 @@ import '../styles/tokens.css';
                 color: var(--text2);
             }
         </style>
-    </head>
-    <body>
         <nav id="main-nav">
             <span
                 class="nav-logo"
@@ -3120,12 +3134,13 @@ import '../styles/tokens.css';
 
         <script is:inline>
             (function () {
-                var saved = localStorage.getItem('theme') || 'dark';
-                document.documentElement.setAttribute('data-theme', saved);
+                var saved = localStorage.getItem('theme');
+                var preferred = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                document.documentElement.setAttribute('data-theme', saved || preferred);
             })();
 
             window.addEventListener('DOMContentLoaded', function () {
-                updateThemeBtn(localStorage.getItem('theme') || 'dark');
+                updateThemeBtn(localStorage.getItem('theme') || document.documentElement.getAttribute('data-theme') || 'dark');
                 if (window.lucide) window.lucide.createIcons();
             });
 
@@ -4473,31 +4488,34 @@ import '../styles/tokens.css';
                                 return a + b.count;
                             }, 0);
 
+                            var g30 = ana.growth.last_30d || 0;
+                            var g7 = ana.growth.last_7d || 0;
                             document.getElementById('stats-row').innerHTML =
-                                '<div class="stat-card"><div class="stat-label">Gesamt Lizenzen</div><div class="stat-value">' +
+                                '<div class="stat-card"><div class="stat-label"><i data-lucide="key-round"></i> Gesamt Lizenzen</div><div class="stat-value">' +
                                 (s.total || 0) +
-                                '</div><div class="stat-trend">+' +
-                                ana.growth.last_30d +
+                                '</div><div class="stat-trend' + (g30 >= 0 ? '' : ' down') + '"><i data-lucide="' + (g30 >= 0 ? 'trending-up' : 'trending-down') + '"></i> ' + (g30 >= 0 ? '+' : '') +
+                                g30 +
                                 ' mtl.</div></div>' +
-                                '<div class="stat-card"><div class="stat-label">Aktive Lizenzen</div><div class="stat-value" style="color:var(--success)">' +
+                                '<div class="stat-card"><div class="stat-label"><i data-lucide="check-circle-2"></i> Aktive Lizenzen</div><div class="stat-value" style="color:var(--success)">' +
                                 (s.active || 0) +
                                 '</div></div>' +
-                                '<div class="stat-card"><div class="stat-label">Validierungen (30d)</div><div class="stat-value">' +
+                                '<div class="stat-card"><div class="stat-label"><i data-lucide="shield-check"></i> Validierungen (30d)</div><div class="stat-value">' +
                                 val30d +
                                 '</div></div>' +
-                                '<div class="stat-card"><div class="stat-label">Umsatz (30d)</div><div class="stat-value" style="color:var(--primary)">' +
+                                '<div class="stat-card"><div class="stat-label"><i data-lucide="banknote"></i> Umsatz (30d)</div><div class="stat-value" style="color:var(--primary)">' +
                                 fmtEur(rev.last_30d) +
-                                '</div><div class="stat-trend">+' +
-                                ana.growth.last_7d +
+                                '</div><div class="stat-trend' + (g7 >= 0 ? '' : ' down') + '"><i data-lucide="' + (g7 >= 0 ? 'trending-up' : 'trending-down') + '"></i> ' + (g7 >= 0 ? '+' : '') +
+                                g7 +
                                 ' neue Verkäufe (7d)</div></div>' +
-                                '<div class="stat-card"><div class="stat-label">Umsatz (Gesamt)</div><div class="stat-value" style="color:var(--warning)">' +
+                                '<div class="stat-card"><div class="stat-label"><i data-lucide="wallet"></i> Umsatz (Gesamt)</div><div class="stat-value" style="color:var(--warning)">' +
                                 fmtEur(rev.total) +
                                 '</div></div>' +
-                                '<div class="stat-card"><div class="stat-label">Geräte</div><div class="stat-value">' +
+                                '<div class="stat-card"><div class="stat-label"><i data-lucide="monitor"></i> Geräte</div><div class="stat-value">' +
                                 ana.devices.total +
-                                '</div><div class="stat-trend">' +
+                                '</div><div class="stat-trend"><i data-lucide="activity"></i> ' +
                                 ana.devices.active +
                                 ' aktiv</div></div>';
+                            if (window.lucide) window.lucide.createIcons();
 
                             var top = ana.top_licenses || [];
                             document.getElementById('top-licenses').innerHTML = top.length

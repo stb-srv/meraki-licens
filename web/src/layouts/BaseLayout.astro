@@ -1,18 +1,14 @@
 ---
 /*
  * BaseLayout — the shared HTML shell for every page.
- * Renders <html data-theme>, the <head> (fonts + design tokens), and slots the
- * page body. Only tokens.css (pure CSS variables) is imported here — it is
- * conflict-free and needed by every page. The shared base styles (global.css,
- * the index/admin button + reset family) are imported per-page by index/portal,
- * because login/setup carry their own slightly different base styles inline.
  *
  * Props:
- *   title       — document <title>
+ *   title        — document <title>
  *   description  — optional meta description
  *   bodyClass    — optional class applied to <body>
  */
 import '../styles/tokens.css';
+import '../styles/global.css';
 
 const { title = 'Meraki', description = '', bodyClass = '' } = Astro.props;
 ---
@@ -32,8 +28,9 @@ const { title = 'Meraki', description = '', bodyClass = '' } = Astro.props;
         -->
         <script is:inline>
             (function () {
-                var saved = localStorage.getItem('theme') || 'dark';
-                document.documentElement.setAttribute('data-theme', saved);
+                var saved = localStorage.getItem('theme');
+                var preferred = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                document.documentElement.setAttribute('data-theme', saved || preferred);
             })();
         </script>
 

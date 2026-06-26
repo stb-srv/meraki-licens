@@ -55,6 +55,10 @@
     --radius-md: 0.5rem;
     --radius-lg: 0.75rem;
     --radius-xl: 1rem;
+    /* Layout */
+    --nav-height: 64px;
+    --sidebar-width: 240px;
+    --sidebar-width-collapsed: 72px;
     /* Transitions */
     --transition-interactive: 180ms cubic-bezier(0.16, 1, 0.3, 1);
 

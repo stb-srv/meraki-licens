@@ -20,11 +20,12 @@ export function getTheme() {
     return localStorage.getItem(THEME_KEY) || DEFAULT_THEME;
 }
 
-/** Swap the toggle button's icon to match the active theme. */
+/** Swap the toggle button's icon and aria-pressed to match the active theme. */
 export function updateThemeBtn(theme) {
     const svg = document.getElementById('theme-svg');
-    if (!svg) return;
-    svg.innerHTML = theme === 'dark' ? SUN_ICON : MOON_ICON;
+    if (svg) svg.innerHTML = theme === 'dark' ? SUN_ICON : MOON_ICON;
+    const btn = document.getElementById('theme-toggle');
+    if (btn) btn.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
 }
 
 /**

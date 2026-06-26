@@ -81,7 +81,7 @@ import '../styles/tokens.css';
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
-                height: 60px;
+                height: var(--nav-height);
             }
             .nav-logo {
                 display: inline-flex;
@@ -145,10 +145,6 @@ import '../styles/tokens.css';
             }
             .btn-danger:hover {
                 opacity: 0.85;
-            }
-            .btn-sm {
-                padding: var(--space-1) var(--space-3);
-                font-size: var(--text-sm);
             }
             .btn-success {
                 background: var(--accent3);
@@ -238,13 +234,13 @@ import '../styles/tokens.css';
                 color: inherit;
             }
             .alert-error {
-                background: rgba(255, 93, 108, 0.1);
-                border: 1px solid rgba(255, 93, 108, 0.25);
+                background: var(--danger-hl);
+                border: 1px solid var(--danger);
                 color: var(--accent2);
             }
             .alert-success {
-                background: rgba(95, 191, 106, 0.1);
-                border: 1px solid rgba(95, 191, 106, 0.25);
+                background: var(--success-hl);
+                border: 1px solid var(--success);
                 color: var(--accent3);
             }
             .alert-info {
@@ -258,7 +254,7 @@ import '../styles/tokens.css';
                 min-height: calc(100vh - 60px);
             }
             .sidebar {
-                width: 210px;
+                width: var(--sidebar-width);
                 background: var(--bg2);
                 border-right: 1px solid var(--border);
                 padding: var(--space-4) 0;
@@ -380,10 +376,13 @@ import '../styles/tokens.css';
                 user-select: all;
                 position: relative;
             }
-            .lic-key:hover::after {
-                content: 'Kopiert!';
+            .lic-key:hover {
+                opacity: 0.85;
+            }
+            .lic-key.copied::after {
+                content: '✓ Kopiert!';
                 position: absolute;
-                top: -24px;
+                top: -28px;
                 left: 50%;
                 transform: translateX(-50%);
                 background: var(--accent);
@@ -485,7 +484,7 @@ import '../styles/tokens.css';
             .badge-cancelled,
             .badge-suspended,
             .badge-expired {
-                background: rgba(255, 93, 108, 0.15);
+                background: var(--danger-hl);
                 color: var(--accent2);
             }
             .badge-FREE {
@@ -520,7 +519,7 @@ import '../styles/tokens.css';
             }
             .badge-downgrade,
             .badge-cancellation {
-                background: rgba(255, 93, 108, 0.15);
+                background: var(--danger-hl);
                 color: var(--accent2);
             }
             .loading {
@@ -652,13 +651,18 @@ import '../styles/tokens.css';
                 gap: 0.4rem;
             }
             .plan-features li::before {
-                content: '✓ ';
-                color: var(--accent3);
-                font-weight: 700;
+                content: '';
+                display: inline-block;
+                width: 14px;
+                height: 14px;
+                margin-right: var(--space-2);
+                flex-shrink: 0;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%235fbf6a' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
+                background-repeat: no-repeat;
+                background-size: contain;
             }
             .plan-features li.no::before {
-                content: '✗ ';
-                color: var(--text2);
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 6 6 18M6 6l12 12'/%3E%3C/svg%3E");
             }
             .plan-features li.no {
                 color: var(--text2);
@@ -731,16 +735,16 @@ import '../styles/tokens.css';
             }
             .toast-out {
                 opacity: 0;
-                transform: translateY(8px);
+                transform: translateX(calc(100% + 2rem));
             }
             .toast-success {
-                background: rgba(95, 191, 106, 0.15);
-                border: 1px solid rgba(95, 191, 106, 0.35);
+                background: var(--success-hl);
+                border: 1px solid var(--success);
                 color: var(--accent3);
             }
             .toast-error {
-                background: rgba(255, 93, 108, 0.15);
-                border: 1px solid rgba(255, 93, 108, 0.35);
+                background: var(--danger-hl);
+                border: 1px solid var(--danger);
                 color: var(--accent2);
             }
             .toast-info {
@@ -1248,7 +1252,9 @@ import '../styles/tokens.css';
             }
 
             (function () {
-                var t = localStorage.getItem('theme') || 'dark';
+                var saved = localStorage.getItem('theme');
+                var preferred = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                var t = saved || preferred;
                 document.documentElement.setAttribute('data-theme', t);
                 setThemeIcon(t);
             })();
@@ -1827,10 +1833,9 @@ import '../styles/tokens.css';
                 navigator.clipboard
                     .writeText(key)
                     .then(function () {
-                        var orig = el.textContent;
-                        el.textContent = '✓ Kopiert!';
+                        el.classList.add('copied');
                         setTimeout(function () {
-                            el.textContent = orig;
+                            el.classList.remove('copied');
                         }, 1500);
                     })
                     .catch(function () {});
