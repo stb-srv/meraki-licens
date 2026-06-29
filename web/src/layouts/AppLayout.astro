@@ -1,0 +1,71 @@
+---
+/*
+ * AppLayout — standard page shell: BaseLayout + Header + Footer.
+ *
+ * Use this for pages that need a shared header/footer out of the box.
+ * For SPA-style pages that manage their own nav (index, portal), use
+ * BaseLayout directly and include <Header> inline instead.
+ *
+ * Props:
+ *   title           — <title> element (passed to BaseLayout)
+ *   description     — meta description (passed to BaseLayout)
+ *   bodyClass       — optional class on <body>
+ *   headerHref      — logo link target (default: '/')
+ *   headerSubtitle  — subtitle text next to logo
+ *   headerId        — id on the <nav> element
+ *   headerStyle     — inline style forwarded to <nav>
+ *   showHeader      — render the Header? (default: true)
+ *   showFooter      — render the Footer? (default: true)
+ *
+ * Named slots:
+ *   nav             — items inside the Header (between logo and right edge)
+ *   footer-links    — link elements inside the Footer
+ *   (default slot)  — page content
+ */
+import BaseLayout from './BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+
+interface Props {
+    title?: string;
+    description?: string;
+    bodyClass?: string;
+    headerHref?: string;
+    headerSubtitle?: string;
+    headerId?: string;
+    headerStyle?: string;
+    showHeader?: boolean;
+    showFooter?: boolean;
+}
+
+const {
+    title,
+    description,
+    bodyClass,
+    headerHref,
+    headerSubtitle,
+    headerId,
+    headerStyle,
+    showHeader = true,
+    showFooter = true,
+} = Astro.props;
+---
+
+<BaseLayout title={title} description={description} bodyClass={bodyClass}>
+    {showHeader && (
+        <Header
+            href={headerHref}
+            subtitle={headerSubtitle}
+            id={headerId}
+            style={headerStyle}
+        >
+            <slot name="nav" />
+        </Header>
+    )}
+    <slot />
+    {showFooter && (
+        <Footer>
+            <slot name="footer-links" />
+        </Footer>
+    )}
+</BaseLayout>

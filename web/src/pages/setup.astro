@@ -14,15 +14,15 @@
  *   - onclick/oninput handlers exposed on window (module scripts are scoped).
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
 ---
 
 <BaseLayout title="Meraki – Setup">
-    <nav>
-        <span class="nav-logo"><i data-lucide="zap"></i> Meraki</span>
+    <Header>
         <button class="theme-toggle" onclick="toggleTheme()" title="Theme wechseln">
             <i data-lucide="sun"></i>
         </button>
-    </nav>
+    </Header>
 
     <div class="center-wrap">
         <div class="setup-card">

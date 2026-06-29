@@ -1,0 +1,27 @@
+---
+/*
+ * Footer — shared page footer for every page.
+ *
+ * Props:
+ *   id   — id on the <footer> element (default: 'main-footer')
+ *   year — copyright year (default: current year)
+ *
+ * Slot: link elements rendered after the copyright text.
+ *       Falls back to static Impressum/Datenschutz links when no slot is passed.
+ *
+ * To change footer layout or styling for ALL pages: edit global.css (footer selector).
+ */
+interface Props {
+    id?: string;
+    year?: number;
+}
+const { id = 'main-footer', year = new Date().getFullYear() } = Astro.props;
+---
+
+<footer id={id}>
+    &copy; {year} Meraki Lizenzserver &nbsp;|&nbsp;
+    <slot>
+        <a href="/legal">Impressum</a>
+        <a href="/legal">Datenschutz</a>
+    </slot>
+</footer>

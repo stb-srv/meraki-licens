@@ -111,6 +111,69 @@ Die `.env` wird beim ersten `npm start` **automatisch mit sicheren Zufallswerten
 
 ---
 
+## Frontend (Astro)
+
+Das Frontend ist in Astro gebaut und produziert einen statischen Build unter `web/dist/`, den Express automatisch serviert.
+
+### Architektur
+
+```
+web/src/
+├── components/
+│   ├── Header.astro       ← zentrale Nav-Leiste für alle Seiten
+│   ├── Footer.astro       ← zentrale Fußzeile für alle Seiten
+│   └── ThemeToggle.astro
+├── layouts/
+│   ├── BaseLayout.astro   ← HTML-Shell (head, fonts, FOUC-Guard, tokens)
+│   ├── AppLayout.astro    ← BaseLayout + Header + Footer (für neue Seiten)
+│   └── AdminLayout.astro  ← BaseLayout + Auth-Guard
+├── pages/
+│   ├── index.astro        ← Admin-Panel (SPA)
+│   ├── portal.astro       ← Kunden-Portal (SPA)
+│   ├── login.astro        ← Login (Admin + Kunde)
+│   └── setup.astro        ← Ersteinrichtungs-Wizard
+└── styles/
+    ├── tokens.css         ← Design-Tokens (Farben, Spacing, Typografie)
+    └── global.css         ← Globale Styles (Buttons, nav, footer, Icons)
+```
+
+### Zentrale Änderungen — einmal ändern, überall wirksam
+
+| Was ändern | Datei |
+|---|---|
+| Logo-Bild / Logo-Link | `web/src/components/Header.astro` |
+| Nav-Styling (Hintergrund, Höhe, Blur) | `web/src/styles/global.css` → `nav { }` |
+| Footer-Copyright / Standard-Links | `web/src/components/Footer.astro` |
+| Footer-Styling | `web/src/styles/global.css` → `footer { }` |
+| Farben, Spacing, Typografie | `web/src/styles/tokens.css` |
+
+### Neue Seite erstellen
+
+```astro
+---
+import AppLayout from '../layouts/AppLayout.astro';
+---
+<AppLayout title="Meine Seite">
+  <Fragment slot="nav">
+    <div class="nav-links"><a href="/">Start</a></div>
+  </Fragment>
+
+  <main>Seiteninhalt</main>
+</AppLayout>
+```
+
+### Frontend bauen & entwickeln
+
+```bash
+cd web
+npm run dev     # Astro Dev-Server (Port 4321, Hot Reload)
+npm run build   # Statischer Build → web/dist/
+```
+
+Nach `npm run build` ist der neue Stand sofort über den Express-Server aktiv (kein Neustart nötig).
+
+---
+
 ## Entwicklung
 
 ```bash

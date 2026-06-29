@@ -1,8 +1,7 @@
 /*
- * Global base styles shared across every page. Extracted from public/index.html
- * (reset + body + typography + button family + theme toggle). Page-specific CSS
- * stays inline in each .astro page (lift-and-shift) — only genuinely shared rules
- * live here. Depends on tokens.css for all custom properties.
+ * Global base styles — single source of truth for all pages.
+ * Imported via BaseLayout.astro. Page-specific styles stay inline in each page.
+ * Depends on tokens.css for all custom properties.
  */
 * {
     box-sizing: border-box;
@@ -14,6 +13,7 @@ body {
     color: var(--text);
     font-family: var(--font-body);
     line-height: 1.6;
+    min-height: 100vh;
     transition:
         background 0.3s,
         color 0.3s;
@@ -136,9 +136,27 @@ button {
     border-color: var(--primary);
     color: var(--primary);
 }
-.theme-toggle svg {
+.theme-toggle svg,
+.theme-toggle i[data-lucide] {
     width: 18px;
     height: 18px;
+}
+
+/* Lucide icon inline sizing */
+.lucide {
+    width: 1.05em;
+    height: 1.05em;
+    vertical-align: -0.18em;
+    stroke-width: 2;
+    flex-shrink: 0;
+}
+
+/* SPA page visibility (show/hide via JS) */
+.page {
+    display: none;
+}
+.page.active {
+    display: block;
 }
 
 /* Accessibility: visible focus ring for keyboard navigation */
@@ -176,4 +194,173 @@ button {
     to {
         background-position: -200% 0;
     }
+}
+
+/* ── Navigation shell ───────────────────────────────────────────────────── */
+/*
+ * Single source of truth for all nav styling.
+ * To change logo, subtitle, or slot content: edit Header.astro.
+ * To change nav visuals (background, height, spacing): edit here.
+ */
+nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--nav-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 var(--space-8);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: var(--nav-height);
+}
+.nav-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: var(--text-lg);
+    font-weight: 700;
+    color: var(--primary);
+    font-family: var(--font-display);
+    text-decoration: none;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+/* Logo image pill (white background ensures visibility on any page bg) */
+.nav-logo img {
+    background: #fff;
+    padding: 4px 8px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    box-sizing: content-box;
+}
+/* Optional subtitle text next to logo (e.g. "Kunden-Portal") */
+.nav-logo-subtitle {
+    font-size: var(--text-sm);
+    color: var(--text2);
+    font-weight: 400;
+}
+/* Sidebar brand image uses the same pill style as nav logo */
+.sidebar-brand img {
+    background: #fff;
+    padding: 4px 8px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    box-sizing: content-box;
+}
+/* Horizontal desktop nav links */
+.nav-links {
+    display: flex;
+    gap: 1.8rem;
+    align-items: center;
+}
+.nav-links a {
+    color: var(--text2);
+    text-decoration: none;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    transition: color 0.2s;
+    cursor: pointer;
+}
+.nav-links a:hover {
+    color: var(--text);
+}
+/* Right-aligned nav cluster (used by portal) */
+.nav-right {
+    display: flex;
+    gap: 0.8rem;
+    align-items: center;
+}
+/* Hamburger — hidden on desktop, shown on mobile via media query */
+.nav-hamburger {
+    display: none;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text2);
+    border-radius: var(--radius-md);
+    padding: var(--space-2);
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.2s, color 0.2s;
+}
+.nav-hamburger:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+.nav-hamburger svg {
+    width: 20px;
+    height: 20px;
+}
+/* Mobile dropdown menu */
+.nav-mobile-menu {
+    display: none;
+    position: fixed;
+    top: var(--nav-height);
+    left: 0;
+    right: 0;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: var(--space-4);
+    flex-direction: column;
+    gap: var(--space-2);
+    z-index: 90;
+    box-shadow: var(--shadow-md);
+}
+.nav-mobile-menu.open {
+    display: flex;
+}
+.nav-mobile-menu a {
+    color: var(--text);
+    text-decoration: none;
+    font-size: var(--text-base);
+    padding: var(--space-3) var(--space-2);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    cursor: pointer;
+}
+.nav-mobile-menu a:hover {
+    background: var(--bg3);
+    color: var(--primary);
+}
+@media (max-width: 600px) {
+    nav {
+        padding: 0 var(--space-4);
+    }
+    .nav-logo {
+        white-space: nowrap;
+    }
+    .nav-links > a {
+        display: none;
+    }
+    .nav-hamburger {
+        display: inline-flex;
+    }
+}
+
+/* ── Footer ─────────────────────────────────────────────────────────────── */
+/*
+ * Single source of truth for footer styling.
+ * To change copyright text or default links: edit Footer.astro.
+ */
+footer {
+    text-align: center;
+    padding: var(--space-8);
+    color: var(--text3);
+    font-size: var(--text-sm);
+    border-top: 1px solid var(--border);
+}
+footer a {
+    color: var(--text2);
+    text-decoration: none;
+    margin: 0 var(--space-2);
+    transition: color 0.2s;
+}
+footer a:hover {
+    color: var(--primary);
 }

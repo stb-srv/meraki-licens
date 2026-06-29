@@ -1,0 +1,46 @@
+---
+/*
+ * Header — shared nav shell for every page.
+ *
+ * Props:
+ *   href       — where the logo links to (default: '/')
+ *   subtitle   — optional text next to logo (e.g. 'Kunden-Portal')
+ *   id         — id on the <nav> element (default: 'main-nav')
+ *   ariaLabel  — aria-label on <nav> (default: 'Hauptnavigation')
+ *   style      — optional inline style forwarded to <nav>
+ *                (e.g. 'display: none' for SPAs that show/hide the nav via JS)
+ *
+ * Slot: everything between logo and right edge (hamburger, nav-links,
+ *       theme-toggle, user info, logout …). Each page controls its own
+ *       nav content; only the shell (logo + nav wrapper) is centralised here.
+ *
+ * To change logo, height, or subtitle style for ALL pages: edit this file.
+ * To change nav background/spacing: edit global.css (.nav-logo, nav selector).
+ */
+interface Props {
+    href?: string;
+    subtitle?: string;
+    id?: string;
+    ariaLabel?: string;
+    style?: string;
+}
+const {
+    href = '/',
+    subtitle,
+    id = 'main-nav',
+    ariaLabel = 'Hauptnavigation',
+    style,
+} = Astro.props;
+---
+
+<nav id={id} role="navigation" aria-label={ariaLabel} style={style}>
+    <a class="nav-logo" href={href} title="Zur Startseite">
+        <img
+            src="/Meraki_RMS_CMS.png"
+            alt="Meraki"
+            style="height: 26px; width: auto; display: block"
+        />
+        {subtitle && <span class="nav-logo-subtitle">{subtitle}</span>}
+    </a>
+    <slot />
+</nav>

@@ -1,153 +1,11 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
 ---
 <BaseLayout title="Meraki – Kunden-Portal">
         <style is:global>
-            /* design tokens provided globally by tokens.css */
-            * {
-                box-sizing: border-box;
-                margin: 0;
-                padding: 0;
-            }
-            body {
-                background: var(--bg);
-                color: var(--text);
-                font-family: var(--font-body);
-                line-height: 1.6;
-                min-height: 100vh;
-                transition:
-                    background 0.3s,
-                    color 0.3s;
-            }
-            h1,
-            h2,
-            h3,
-            h4,
-            h5,
-            h6 {
-                font-family: var(--font-display);
-                letter-spacing: -0.02em;
-                line-height: 1.2;
-            }
-            h1,
-            h2 {
-                font-weight: 700;
-            }
-            h3,
-            h4 {
-                font-weight: 500;
-            }
-            input,
-            button,
-            select,
-            textarea {
-                font-family: var(--font-body);
-            }
-            button,
-            label {
-                line-height: 1.4;
-                letter-spacing: 0.01em;
-            }
-            button {
-                font-weight: 500;
-            }
-            .lucide {
-                width: 1.05em;
-                height: 1.05em;
-                vertical-align: -0.18em;
-                stroke-width: 2;
-                flex-shrink: 0;
-            }
-            nav {
-                position: sticky;
-                top: 0;
-                z-index: 100;
-                background: var(--nav-bg);
-                backdrop-filter: blur(12px);
-                -webkit-backdrop-filter: blur(12px);
-                border-bottom: 1px solid var(--border);
-                padding: 0 var(--space-8);
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                height: var(--nav-height);
-            }
-            .nav-logo {
-                display: inline-flex;
-                align-items: center;
-                gap: 0.4rem;
-                font-size: var(--text-lg);
-                font-weight: 700;
-                color: var(--accent);
-                font-family: var(--font-display);
-            }
-            .nav-logo img,
-            .sidebar-brand img {
-                background: #fff;
-                padding: 4px 8px;
-                border-radius: var(--radius-md, 8px);
-                border: 1px solid var(--border);
-                box-sizing: content-box;
-            }
-            .nav-logo .lucide {
-                width: 1.15em;
-                height: 1.15em;
-            }
-            .nav-right {
-                display: flex;
-                gap: 0.8rem;
-                align-items: center;
-            }
-            .btn {
-                display: inline-flex;
-                align-items: center;
-                gap: 0.4rem;
-                padding: var(--space-2) var(--space-4);
-                border-radius: var(--radius-md);
-                border: none;
-                cursor: pointer;
-                font-size: var(--text-sm);
-                font-weight: 500;
-                transition: all var(--transition-interactive);
-                text-decoration: none;
-                font-family: var(--font-body);
-            }
-            .btn-primary {
-                background: var(--accent);
-                color: #fff;
-            }
-            .btn-primary:hover {
-                background: var(--accent-hover);
-            }
-            .btn-ghost {
-                background: transparent;
-                color: var(--text2);
-                border: 1px solid var(--border);
-            }
-            .btn-ghost:hover {
-                border-color: var(--accent);
-                color: var(--accent);
-            }
-            .btn-danger {
-                background: var(--accent2);
-                color: #fff;
-            }
-            .btn-danger:hover {
-                opacity: 0.85;
-            }
-            .btn-success {
-                background: var(--accent3);
-                color: #fff;
-            }
-            .btn-success:hover {
-                opacity: 0.85;
-            }
-            .page {
-                display: none;
-            }
-            .page.active {
-                display: block;
-            }
+            /* nav, .nav-logo, .nav-right, .nav-hamburger → global.css */
+            /* btn family, .page / .page.active → global.css via BaseLayout */
             /* Login & Setup */
             .center-wrap {
                 min-height: 100vh;
@@ -530,23 +388,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                     transform: rotate(360deg);
                 }
             }
-            .theme-toggle {
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                background: transparent;
-                border: 1px solid var(--border);
-                color: var(--text2);
-                border-radius: var(--radius-md);
-                width: 32px;
-                height: 32px;
-                cursor: pointer;
-                transition: all 0.2s;
-            }
-            .theme-toggle:hover {
-                border-color: var(--accent);
-                color: var(--accent);
-            }
+            /* theme-toggle → global.css */
             @media (max-width: 650px) {
                 .sidebar {
                     width: 46px;
@@ -575,21 +417,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             .sidebar-backdrop.open {
                 display: block;
             }
-            .nav-hamburger {
-                display: none;
-                background: transparent;
-                border: 1px solid var(--border);
-                color: var(--text2);
-                border-radius: var(--radius-md);
-                padding: var(--space-2);
-                cursor: pointer;
-                align-items: center;
-                justify-content: center;
-            }
-            .nav-hamburger svg {
-                width: 20px;
-                height: 20px;
-            }
+            /* .nav-hamburger → global.css */
             @media (max-width: 500px) {
                 .sidebar {
                     position: fixed;
@@ -619,9 +447,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                 .main-area {
                     padding: var(--space-4);
                 }
-                .nav-hamburger {
-                    display: inline-flex;
-                }
+                /* .nav-hamburger display → global.css */
             }
             /* Shop / Plan-Cards */
             .plan-grid {
@@ -862,19 +688,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                 margin-top: var(--space-1);
             }
         </style>
-        <nav id="portal-nav" style="display: none">
-            <span
-                class="nav-logo"
-                onclick="window.location.href = '/'"
-                style="cursor: pointer"
-                title="Zur Startseite"
-                ><img
-                    src="/Meraki_RMS_CMS.png"
-                    alt="Meraki"
-                    style="height: 26px; width: auto; display: block"
-                />
-                <span style="font-size: var(--text-sm)">Kunden-Portal</span></span
-            >
+        <Header subtitle="Kunden-Portal" id="portal-nav" style="display: none">
             <div class="nav-right">
                 <button
                     class="nav-hamburger"
@@ -903,7 +717,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                     <i data-lucide="log-out"></i> Logout
                 </button>
             </div>
-        </nav>
+        </Header>
         <div class="sidebar-backdrop" id="sidebar-backdrop" onclick="closePortalSidebar()"></div>
 
         <!-- LOGIN PAGE (redirect to login.html) -->

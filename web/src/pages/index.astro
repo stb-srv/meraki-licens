@@ -1,194 +1,12 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
 ---
 <BaseLayout title="Meraki – Lizenzserver">
         <style is:global>
-            /* design tokens provided globally by tokens.css */
-            * {
-                box-sizing: border-box;
-                margin: 0;
-                padding: 0;
-            }
-            body {
-                background: var(--bg);
-                color: var(--text);
-                font-family: var(--font-body);
-                line-height: 1.6;
-                transition:
-                    background 0.3s,
-                    color 0.3s;
-                overflow-x: hidden;
-            }
-            h1,
-            h2,
-            h3,
-            h4,
-            h5,
-            h6,
-            .nav-logo,
-            .sidebar-brand {
-                font-family: var(--font-display);
-                letter-spacing: -0.02em;
-                line-height: 1.2;
-            }
-            h1,
-            h2 {
-                font-weight: 700;
-            }
-            h3,
-            h4 {
-                font-weight: 500;
-            }
-            input,
-            button,
-            select,
-            textarea {
-                font-family: var(--font-body);
-            }
-            button,
-            label {
-                line-height: 1.4;
-                letter-spacing: 0.01em;
-            }
-            button {
-                font-weight: 500;
-            }
-
-            nav {
-                position: sticky;
-                top: 0;
-                z-index: 100;
-                background: var(--nav-bg);
-                backdrop-filter: blur(12px);
-                -webkit-backdrop-filter: blur(12px);
-                border-bottom: 1px solid var(--border);
-                padding: 0 var(--space-10);
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                height: var(--nav-height);
-            }
-            .nav-logo {
-                font-size: var(--text-lg);
-                font-weight: 700;
-                color: var(--primary);
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-            }
-            .logo-icon {
-                width: 20px;
-                height: 20px;
-                color: var(--primary);
-            }
-            .nav-links {
-                display: flex;
-                gap: 1.8rem;
-                align-items: center;
-            }
-            .nav-links a {
-                color: var(--text2);
-                text-decoration: none;
-                font-size: var(--text-sm);
-                font-weight: 500;
-                transition: all 0.2s;
-                cursor: pointer;
-            }
-            .nav-links a:hover {
-                color: var(--text);
-            }
-
-            .btn {
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                gap: 0.4rem;
-                padding: var(--space-2) var(--space-6);
-                border-radius: var(--radius-md);
-                border: none;
-                cursor: pointer;
-                font-size: var(--text-sm);
-                font-family: var(--font-body);
-                font-weight: 500;
-                transition: all var(--transition-interactive);
-                text-decoration: none;
-                white-space: nowrap;
-            }
-            .btn-primary {
-                background: var(--primary);
-                color: #fff;
-            }
-            .btn-primary:hover {
-                background: var(--primary-hover);
-            }
-            .btn-danger {
-                background: var(--danger);
-                color: #fff;
-            }
-            .btn-danger:hover {
-                opacity: 0.9;
-            }
-            .btn-success {
-                background: var(--success);
-                color: #fff;
-            }
-            .btn-success:hover {
-                opacity: 0.9;
-            }
-            .btn-ghost {
-                background: transparent;
-                color: var(--text2);
-                border: 1px solid var(--border);
-            }
-            .btn-ghost:hover {
-                border-color: var(--primary);
-                color: var(--primary);
-            }
-            .btn-warning {
-                background: var(--warning);
-                color: var(--bg);
-            }
-            .btn-warning:hover {
-                opacity: 0.9;
-            }
-            .btn-sm {
-                padding: var(--space-2) var(--space-3);
-                font-size: var(--text-sm);
-                border-radius: var(--radius-sm);
-            }
-            .btn-xs {
-                padding: var(--space-1) var(--space-2);
-                font-size: var(--text-xs);
-                border-radius: var(--radius-sm);
-            }
-
-            .theme-toggle {
-                background: transparent;
-                border: 1px solid var(--border);
-                color: var(--text2);
-                border-radius: var(--radius-md);
-                padding: var(--space-2);
-                cursor: pointer;
-                transition: all 0.2s;
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-            }
-            .theme-toggle:hover {
-                border-color: var(--primary);
-                color: var(--primary);
-            }
-            .theme-toggle svg {
-                width: 18px;
-                height: 18px;
-            }
-
-            .page {
-                display: none;
-            }
-            .page.active {
-                display: block;
-            }
+            /* nav, .nav-logo, .nav-links, .nav-hamburger, .nav-mobile-menu → global.css */
+            /* btn family, theme-toggle, .page → global.css via BaseLayout */
 
             .hero {
                 min-height: calc(100vh - 64px);
@@ -1176,68 +994,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                 .theme-toggle .toggle-label {
                     display: none;
                 }
-                nav {
-                    padding: 0 var(--space-4);
-                }
-                .nav-logo {
-                    white-space: nowrap;
-                }
+                /* nav padding + .nav-logo white-space → global.css @media (max-width: 600px) */
             }
-            /* Mobile nav hamburger */
-            .nav-hamburger {
-                display: none;
-                background: transparent;
-                border: 1px solid var(--border);
-                color: var(--text2);
-                border-radius: var(--radius-md);
-                padding: var(--space-2);
-                cursor: pointer;
-                align-items: center;
-                justify-content: center;
-            }
-            .nav-hamburger svg {
-                width: 20px;
-                height: 20px;
-            }
-            .nav-mobile-menu {
-                display: none;
-                position: fixed;
-                top: var(--nav-height);
-                left: 0;
-                right: 0;
-                background: var(--bg2);
-                border-bottom: 1px solid var(--border);
-                padding: var(--space-4);
-                flex-direction: column;
-                gap: var(--space-2);
-                z-index: 90;
-                box-shadow: var(--shadow-md);
-            }
-            .nav-mobile-menu.open {
-                display: flex;
-            }
-            .nav-mobile-menu a {
-                color: var(--text);
-                text-decoration: none;
-                font-size: var(--text-base);
-                padding: var(--space-3) var(--space-2);
-                border-radius: var(--radius-md);
-                display: flex;
-                align-items: center;
-                gap: var(--space-3);
-                cursor: pointer;
-            }
-            .nav-mobile-menu a:hover {
-                background: var(--bg3);
-                color: var(--primary);
-            }
+            /* .nav-hamburger, .nav-mobile-menu → global.css */
             @media (max-width: 600px) {
-                .nav-links a {
-                    display: none;
-                }
-                .nav-hamburger {
-                    display: inline-flex;
-                }
                 .hero {
                     padding-bottom: 200px;
                 }
@@ -1347,19 +1107,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             }
         </style>
         <a href="#main-content" class="skip-link">Zum Inhalt springen</a>
-        <nav id="main-nav" role="navigation" aria-label="Hauptnavigation">
-            <span
-                class="nav-logo"
-                onclick="showPublicPage('home')"
-                style="cursor: pointer"
-                title="Zur Startseite"
-            >
-                <img
-                    src="/Meraki_RMS_CMS.png"
-                    alt="Meraki"
-                    style="height: 28px; width: auto; display: block"
-                />
-            </span>
+        <Header id="main-nav">
             <button
                 class="nav-hamburger"
                 id="nav-hamburger"
@@ -1401,7 +1149,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                     Login
                 </button>
             </div>
-        </nav>
+        </Header>
 
         <!-- Mobile navigation menu (shown below nav on < 600px) -->
         <div id="nav-mobile-menu" class="nav-mobile-menu" role="navigation" aria-label="Mobile Navigation">
@@ -1822,12 +1570,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             </div>
         </div>
 
-        <footer id="main-footer">
-            &copy; 2026 Meraki Lizenzserver &nbsp;|&nbsp;
+        <Footer>
             <a onclick="showPublicPage('legal')">Impressum</a>
             <a onclick="showPublicPage('legal')">Datenschutz</a>
             <a onclick="openAdmin()">Admin</a>
-        </footer>
+        </Footer>
 
         <div id="page-admin">
             <div id="admin-login" class="login-wrap">

@@ -15,21 +15,15 @@
  *     module and otherwise scoped).
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
 ---
 
 <BaseLayout title="Meraki – Login">
-    <nav>
-        <span
-            class="nav-logo"
-            onclick="window.location.href = '/'"
-            style="cursor: pointer"
-            title="Zur Startseite"
-            ><img src="/Meraki_RMS_CMS.png" alt="Meraki" style="height: 26px; width: auto; display: block" /></span
-        >
+    <Header>
         <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn" title="Theme wechseln">
             <i data-lucide="sun"></i>
         </button>
-    </nav>
+    </Header>
 
     <div class="center-wrap">
         <div class="auth-card">
