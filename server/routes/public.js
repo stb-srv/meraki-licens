@@ -426,6 +426,7 @@ router.post(
                 allowed_modules: allowedModules,
                 entitlements,
                 limits,
+                instanceId: device_id || null,
                 ...(graceUntil ? { grace_until: graceUntil.toISOString() } : {}),
                 ...(customer ? { account_email: customer.email, company: customer.company } : {}),
             };
@@ -441,6 +442,7 @@ router.post(
                     limits,
                     domain: domain || l.associated_domain,
                     status: licenseStatus,
+                    instance_id: device_id || null,
                     ...(graceUntil ? { grace_until: graceUntil.toISOString() } : {}),
                     issued_at: Math.floor(Date.now() / 1000),
                 },
@@ -663,19 +665,21 @@ router.post(
                   })
                 : { max_dishes: plan.menu_items, max_tables: plan.max_tables };
 
-            const token = jwt.sign(
+            const token = createSignedLicenseToken(
                 {
                     license_key,
-                    domain,
-                    device_id,
+                    domain: domain || l.associated_domain,
+                    device_id: device_id || null,
                     type: l.type,
                     plan_label: plan.label,
                     allowed_modules: allowedModules,
                     limits,
+                    status: offlineStatus,
                     offline: true,
+                    offline_grace_days: 7,
+                    issued_at: Math.floor(Date.now() / 1000),
                 },
-                HMAC_SECRET,
-                { expiresIn: `${hours}h` }
+                `${hours}h`
             );
 
             await addAuditLog('offline_token_issued', {
@@ -699,10 +703,22 @@ router.post(
         const { offline_token } = req.body;
         if (!offline_token) return res.status(400).json({ success: false });
         try {
-            const decoded = jwt.verify(offline_token, HMAC_SECRET);
+            const unverified = jwt.decode(offline_token, { complete: true });
+            const kid = unverified?.header?.kid ?? null;
+            const pubKey = getPublicKeyByKid(kid) || RSA_PUBLIC_KEY;
+            if (!pubKey)
+                return res
+                    .status(400)
+                    .json({ success: false, message: 'Kein Public Key verfügbar.' });
+            const decoded = jwt.verify(offline_token, pubKey, { algorithms: ['RS256'] });
+            if (!decoded.offline)
+                return res.status(401).json({ success: false, message: 'Kein Offline-Token.' });
             res.json({ success: true, ...decoded });
         } catch (e) {
-            res.status(401).json({ success: false, message: 'Invalid or expired offline token' });
+            res.status(401).json({
+                success: false,
+                message: 'Invalid or expired offline token: ' + e.message,
+            });
         }
     })
 );

@@ -78,11 +78,11 @@ Jeder Typ hat eigene Feature-Flags, Device-Limits und Laufzeiten.
 | Superadmin only    | JWT HS256  | `ADMIN_SECRET`    | `requireSuperadmin()`   |
 | Kunden-Portal      | JWT HS256  | `PORTAL_SECRET`   | `requirePortalAuth()`   |
 | Lizenz-Token       | JWT RS256  | `RSA_PRIVATE_KEY` | (CMS verifiziert lokal) |
-| Offline-Token      | HMAC HS256 | `HMAC_SECRET`     | Eigene Validierung      |
+| Offline-Token      | JWT RS256  | `RSA_PRIVATE_KEY` | Eigene Validierung via `getPublicKeyByKid()` |
 
 ### 3. Kryptografie-Strategie
 - **Online-Validierung:** Server signiert JWT mit RSA (RS256) → CMS verifiziert lokal via Public Key
-- **Offline-Token:** HMAC-signierter Token mit max. 168h Gültigkeit (`/offline-token`)
+- **Offline-Token:** RS256-signierter JWT (via `createSignedLicenseToken()`) mit max. 168h Gültigkeit (`/offline-token`). Verifizierung über denselben RSA Public Key wie Online-Tokens — CMS-kompatibel.
 - **Nonce-System:** Verhindert Token-Replay-Angriffe; abgelaufene Nonces werden via Cron bereinigt
 - **2FA:** TOTP (otplib) für Admin-Accounts mit QR-Code-Setup
 

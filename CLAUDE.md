@@ -65,7 +65,7 @@ Startup sequence:
 | Superadmin only | same | same | `requireAuth` + `requireSuperAdmin` |
 | Customer portal | JWT HS256 | `PORTAL_SECRET` | `requirePortalAuth` (in portal route) |
 | License token (CMS-side) | JWT RS256 | `RSA_PRIVATE_KEY` | Verified locally by CMS via public key |
-| Offline token | HMAC HS256 | `HMAC_SECRET` | Custom validation in `public.js` |
+| Offline token | JWT RS256 | `RSA_PRIVATE_KEY` | Verified via `getPublicKeyByKid()` in `public.js` |
 
 Admin sessions are tracked in the `admin_sessions` DB table (token hash, revocation).
 
