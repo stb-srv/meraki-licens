@@ -399,9 +399,13 @@ router.post(
                 : [[]];
             const customer = custRows[0] || null;
 
-            const allowedModules = l.allowed_modules
-                ? parseJsonField(l.allowed_modules, plan.modules)
-                : plan.modules;
+            // Enterprise bekommt immer alle Plan-Module – DB-Overrides werden ignoriert
+            const allowedModules =
+                l.type === 'ENTERPRISE'
+                    ? { ...plan.modules }
+                    : l.allowed_modules
+                      ? parseJsonField(l.allowed_modules, plan.modules)
+                      : plan.modules;
             const limits = l.limits
                 ? parseJsonField(l.limits, {
                       max_dishes: plan.menu_items,
@@ -545,9 +549,13 @@ router.post(
             await addAuditLog('refresh_ok', { license_key, domain, ip: clientIp });
 
             const plan = PLAN_DEFINITIONS[l.type] || PLAN_DEFINITIONS['FREE'];
-            const allowedModules = l.allowed_modules
-                ? parseJsonField(l.allowed_modules, plan.modules)
-                : plan.modules;
+            // Enterprise bekommt immer alle Plan-Module – DB-Overrides werden ignoriert
+            const allowedModules =
+                l.type === 'ENTERPRISE'
+                    ? { ...plan.modules }
+                    : l.allowed_modules
+                      ? parseJsonField(l.allowed_modules, plan.modules)
+                      : plan.modules;
             const limits = l.limits
                 ? parseJsonField(l.limits, {
                       max_dishes: plan.menu_items,
@@ -641,9 +649,13 @@ router.post(
 
             const plan = PLAN_DEFINITIONS[l.type] || PLAN_DEFINITIONS['FREE'];
             const hours = Math.min(duration_hours || 24, 168);
-            const allowedModules = l.allowed_modules
-                ? parseJsonField(l.allowed_modules, plan.modules)
-                : plan.modules;
+            // Enterprise bekommt immer alle Plan-Module – DB-Overrides werden ignoriert
+            const allowedModules =
+                l.type === 'ENTERPRISE'
+                    ? { ...plan.modules }
+                    : l.allowed_modules
+                      ? parseJsonField(l.allowed_modules, plan.modules)
+                      : plan.modules;
             const limits = l.limits
                 ? parseJsonField(l.limits, {
                       max_dishes: plan.menu_items,

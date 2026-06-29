@@ -28,11 +28,10 @@ describe('Invoice Admin API', () => {
 
     test('DELETE /api/admin/invoices/:id requires superadmin', async () => {
         jest.spyOn(db, 'query').mockImplementation((sql) => {
-            if (sql.includes('FROM admin_sessions'))
-                return Promise.resolve([[{ id: 'sess1' }], []]);
+            if (sql.includes('FROM admin_sessions')) return [[{ id: 'sess1' }]];
             if (sql.includes('FROM admins WHERE username'))
-                return Promise.resolve([[{ id: 1, username: 'testadmin', role: 'admin' }], []]);
-            return Promise.resolve([[], []]);
+                return [[{ id: 1, username: 'testadmin', role: 'admin' }]];
+            return [[]];
         });
 
         const res = await request(app)
@@ -46,13 +45,12 @@ describe('Invoice Admin API', () => {
 
     test('GET /api/admin/invoices returns list with auth', async () => {
         jest.spyOn(db, 'query').mockImplementation((sql) => {
-            if (sql.includes('FROM admin_sessions'))
-                return Promise.resolve([[{ id: 'sess1' }], []]);
+            if (sql.includes('FROM admin_sessions')) return [[{ id: 'sess1' }]];
             if (sql.includes('FROM admins WHERE username'))
-                return Promise.resolve([[{ id: 1, username: 'testadmin', role: 'admin' }], []]);
-            if (sql.includes('COUNT(*)')) return Promise.resolve([[{ total: 2 }], []]);
+                return [[{ id: 1, username: 'testadmin', role: 'admin' }]];
+            if (sql.includes('COUNT(*)')) return [[{ total: 2 }]];
             if (sql.includes('FROM invoices'))
-                return Promise.resolve([
+                return [
                     [
                         {
                             id: 'inv1',
@@ -67,9 +65,8 @@ describe('Invoice Admin API', () => {
                             amount_gross: 59.0,
                         },
                     ],
-                    [],
-                ]);
-            return Promise.resolve([[], []]);
+                ];
+            return [[]];
         });
 
         const res = await request(app)
@@ -89,12 +86,11 @@ describe('Invoice Admin API', () => {
 
     test('GET /api/admin/invoices/:id returns 404 for missing invoice', async () => {
         jest.spyOn(db, 'query').mockImplementation((sql) => {
-            if (sql.includes('FROM admin_sessions'))
-                return Promise.resolve([[{ id: 'sess1' }], []]);
+            if (sql.includes('FROM admin_sessions')) return [[{ id: 'sess1' }]];
             if (sql.includes('FROM admins WHERE username'))
-                return Promise.resolve([[{ id: 1, username: 'testadmin', role: 'admin' }], []]);
-            if (sql.includes('FROM invoices')) return Promise.resolve([[], []]);
-            return Promise.resolve([[], []]);
+                return [[{ id: 1, username: 'testadmin', role: 'admin' }]];
+            if (sql.includes('FROM invoices')) return [[]];
+            return [[]];
         });
 
         const res = await request(app)
@@ -108,11 +104,10 @@ describe('Invoice Admin API', () => {
 
     test('POST /api/admin/invoices validates required fields', async () => {
         jest.spyOn(db, 'query').mockImplementation((sql) => {
-            if (sql.includes('FROM admin_sessions'))
-                return Promise.resolve([[{ id: 'sess1' }], []]);
+            if (sql.includes('FROM admin_sessions')) return [[{ id: 'sess1' }]];
             if (sql.includes('FROM admins WHERE username'))
-                return Promise.resolve([[{ id: 1, username: 'testadmin', role: 'admin' }], []]);
-            return Promise.resolve([[], []]);
+                return [[{ id: 1, username: 'testadmin', role: 'admin' }]];
+            return [[]];
         });
 
         const res = await request(app)

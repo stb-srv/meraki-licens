@@ -1,6 +1,5 @@
 import db from '../server/db.js';
 import { jest } from '@jest/globals';
-import * as mailerModule from '../server/mailer/index.js';
 
 describe('runOverdueInvoiceCron dunning logic', () => {
     let runOverdueInvoiceCron;
@@ -12,7 +11,6 @@ describe('runOverdueInvoiceCron dunning logic', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
-        jest.spyOn(mailerModule, 'sendTemplateMail').mockResolvedValue(undefined);
     });
 
     afterEach(() => {
@@ -175,7 +173,6 @@ describe('runExpiryCron configurable intervals', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
-        jest.spyOn(mailerModule, 'sendTemplateMail').mockResolvedValue(undefined);
     });
 
     afterEach(() => {
